@@ -43,8 +43,8 @@
 #'            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
 #'    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
 #'            arXiv:1805.04010 \strong{[econ.EM]}.
-#'    \item There are currently no published references for G-StMAR model, but it's a straightforward generalization with
-#'            theoretical properties similar to GMAR and StMAR models.
+#'    \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
+#'            theoretical properties similar to the GMAR and StMAR models.
 #'  }
 
 isStationary_int <- function(p, M, params, restricted=FALSE) {
@@ -199,7 +199,7 @@ checkAndCorrectData <- function(data, p) {
   }
   if(is.matrix(data)) {
     if(ncol(data) > 1) {
-      stop("Only univariate time series are supported! For multivariate analysis try the package 'gmvarkit'")
+      stop("Only univariate time series are supported! For multivariate analysis, try the package 'gmvarkit'.")
     }
   }
   if(!is.ts(data)) {
@@ -239,6 +239,11 @@ parameterChecks <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), r
   if(model == "StMAR" | model == "G-StMAR") {
     if(any(dfs <= 2)) {
       stop("The degrees of freedom parameters have to be larger than 2")
+    } else if(any(dfs > 1e+6)) {
+      stop("We have set an upper bound of 1e+6 for the degrees of freedom parameters
+           in order gain better numerical stability. This is not, however, restrictive
+           since t distribution with dfs higher than million strongly resembles
+           the Gaussian distribution by its shape.")
     }
   }
 
@@ -256,7 +261,7 @@ parameterChecks <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), r
 
 #' @title Check the constraint matrices
 #'
-#' @description \code{checkConstraintMat} ckecks for some parts that the constraint matrices are correctly set.
+#' @description \code{checkConstraintMat} checks for some parts that the constraint matrices are correctly set.
 #' @inheritParams loglikelihood_int
 #' @return Doesn't return anything, but throws an informative error if finds out that something is wrong.
 
@@ -265,7 +270,7 @@ checkConstraintMat <- function(p, M, restricted=FALSE, constraints=NULL) {
     M <- sum(M) # For G-StMAR
     if(restricted == TRUE) { # The constraints is a matrix
       if(!is.matrix(constraints)) {
-        stop("The constraint matrix has to be a matrix")
+        stop("The constraint matrix has to be a matrix (not in a list)")
       } else if(nrow(as.matrix(constraints)) != p) {
         stop("The constraint matrix has wrong dimension")
       } else if(ncol(as.matrix(constraints)) > p) {
@@ -305,7 +310,7 @@ checkPM <- function(p, M, model=c("GMAR", "StMAR", "G-StMAR")) {
     if(length(M) != 2 | !all_pos_ints(M)) {
       stop("For G-StMAR model the argument M should be length 2 a positive integer vector")
     }
-  } else if(!all_pos_ints(M)) {
+  } else if(!all_pos_ints(M) | length(M) != 1) {
       stop("Argument M has to be positive integer")
   }
   if(!all_pos_ints(p)) {
@@ -422,7 +427,7 @@ check_params_length <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR"
 #' @inherit check_model return
 
 check_gsmar <- function(object) {
-  if(!any(class(object) == "gsmar")) stop("The argument 'gsmar' has to be object of class 'gsmar' created by fitGSMAR() or GSMAR()")
+  if(!any(class(object) == "gsmar")) stop("The argument 'gsmar' has to be object of class 'gsmar' created with fitGSMAR or GSMAR.")
 }
 
 
@@ -434,6 +439,38 @@ check_gsmar <- function(object) {
 #' @inherit check_gsmar return
 
 check_data <- function(object) {
-  if(is.null(object$data)) stop("The model has to contain data! Data can be added with the function add_data()")
+  if(is.null(object$data)) stop("The model has to contain data! Data can be added with the function add_data.")
 }
 
+
+
+#' @title Warn about large degrees of freedom paramater values
+#'
+#' @description \code{warn_dfs} warns if the model contains large degrees of freedom paramater values
+#'   possibly indicating unrealible numerical derivatives.
+#'
+#' @inheritParams check_gsmar
+#' @inheritParams loglikelihood_int
+#' @param warn_about warn about inaccurate derivatives or standard errors?
+#' @details Either provide a class 'gsmar' object or specify the model by hand.
+#' @return Doesn't return anything but throws a warning if any degrees of freedom parameters have value
+#'   larger than 1000.
+
+warn_dfs <- function(object, p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FALSE, constraints=NULL, warn_about=c("derivs", "errors")) {
+
+  if(!missing(object)) {
+    p <- object$model$p
+    M <- object$model$M
+    params <- object$params
+    model <- object$model$model
+    restricted <- object$model$restricted
+    constraints <- object$model$constraints
+  }
+  if(model %in% c("StMAR", "G-StMAR")) {
+    pars <- removeAllConstraints(p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints)
+    dfs <- pick_dfs(p=p, M=M, params=pars, model=model)
+    mystring <- ifelse(warn_about == "derivs", "derivatives", "standard errors")
+    if(any(dfs > 1000)) warning(paste("Numerically approximated", mystring, "may be biased because of numerical error caused by very degrees of freedom parameter values.",
+                                      "Consider switching to G-StMAR model by setting the corresponding regimes to GMAR type with the function 'stmar_to_gstmar'."))
+  }
+}

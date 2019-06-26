@@ -6,9 +6,9 @@
 \usage{
 fitGSMAR(data, p, M, model = c("GMAR", "StMAR", "G-StMAR"),
   restricted = FALSE, constraints = NULL, conditional = TRUE,
-  parametrization = c("intercept", "mean"), nCalls = round(10 + 9 *
-  log(sum(M))), nCores = min(nCalls, parallel::detectCores()), maxit = 100,
-  printRes = TRUE, runTests = FALSE, ...)
+  parametrization = c("intercept", "mean"), ncalls = round(10 + 9 *
+  log(sum(M))), ncores = min(ncalls, parallel::detectCores()),
+  maxit = 300, printRes = TRUE, runTests = FALSE, ...)
 }
 \arguments{
 \item{data}{a numeric vector class \code{'ts'} object containing the data. \code{NA} values are not supported.}
@@ -40,17 +40,17 @@ Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constra
 alway \code{p} for all regimes.
 Ignore or set to \code{NULL} if applying linear constraints is \strong{not} desired.}
 
-\item{conditional}{a logical argument specifying whether the conditional or exact log-likehood function should be used.}
+\item{conditional}{a logical argument specifying whether the conditional or exact log-likelihood function should be used.}
 
 \item{parametrization}{is the model parametrized with the "intercepts" \eqn{\phi_{m,0}} or
 "means" \eqn{\mu_m = \phi_{m,0}/(1-\sum\phi_{i,m})}?}
 
-\item{nCalls}{a positive integer specifying how many rounds of estimation should be done.
+\item{ncalls}{a positive integer specifying how many rounds of estimation should be conducted.
 The estimation results may vary from round to round because of multimodality of the log-likelihood function
 and randomness associated with the genetic algorithm.}
 
-\item{nCores}{a positive integer specifying the number of cores to be used in the estimation process.
-Default is that the number of available cores is detected with \code{parallel::detectCores()} and all of them are used.}
+\item{ncores}{a positive integer specifying the number of cores to be used in the estimation process.
+Default is that the number of available cores is detected with \code{parallel::detectCores} and all of them are used.}
 
 \item{maxit}{maximum number of iterations in the variable metric algorithm.}
 
@@ -58,13 +58,15 @@ Default is that the number of available cores is detected with \code{parallel::d
 
 \item{runTests}{should quantile residuals tests be performed after the estimation?}
 
-\item{...}{additional settings passed to the function \code{GAfit()} employing the genetic algorithm.}
+\item{...}{additional settings passed to the function \code{GAfit} employing the genetic algorithm.}
 }
 \value{
 Returns an object of class \code{'gsmar'} defining the estimated GMAR, StMAR or G-StMAR model. The returned object contains
-  empirical mixing weights, quantile residuals and quantile residual test results if the tests were performed. In addition, the returned
-  object contains the estimates and log-likelihood values from all the estimation rounds. The estimated parameter vector can be obtained
-  at \code{gsmar$params} (and the corresponding approximate standard errors at \code{gsmar$std_errors}) and it is...
+  empirical mixing weights, conditional means and variances, quantile residuals, and quantile residual test results if the tests were performed.
+  Note that the first p observations are taken as the initial values so mixing weights, conditional moments and qresiduals start from the p+1:th observation
+  (interpreted as t=1). In addition, the returned object contains the estimates and log-likelihood values from all the estimation rounds.
+  The estimated parameter vector can be obtained at \code{gsmar$params} (and the corresponding approximate standard errors at \code{gsmar$std_errors})
+  and it's...
  \describe{
    \item{For \strong{non-restricted} models:}{
      \describe{
@@ -76,7 +78,7 @@ Returns an object of class \code{'gsmar'} defining the estimated GMAR, StMAR or 
        \item{For \strong{G-StMAR} model:}{Size \eqn{(M(p+3)+M2-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=}(\strong{\eqn{\upsilon_{1}}},...,\strong{\eqn{\upsilon_{M}}},
          \eqn{\alpha_{1},...,\alpha_{M-1}, \nu_{M1+1},...,\nu_{M}}).}
        \item{With \strong{linear constraints}:}{Replace the vectors \strong{\eqn{\phi_{m}}} with vectors \strong{\eqn{\psi_{m}}} and provide a  list of constraint
-         matrices \strong{C} that satisfy \strong{\eqn{\phi_{m}}}\eqn{=}\strong{\eqn{R_{m}\psi_{m}}} for all \eqn{m=1,...,M}, where
+         matrices \strong{C} that satisfy \strong{\eqn{\phi_{m}}}\eqn{=}\strong{\eqn{C_{m}\psi_{m}}} for all \eqn{m=1,...,M}, where
          \strong{\eqn{\psi_{m}}}\eqn{=(\psi_{m,1},...,\psi_{m,q_{m}})}.}
      }
    }
@@ -89,7 +91,7 @@ Returns an object of class \code{'gsmar'} defining the estimated GMAR, StMAR or 
        \item{For \strong{G-StMAR} model:}{Size \eqn{(3M+M2+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
          \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1}, \nu_{M1+1},...,\nu_{M})}.}
        \item{With \strong{linear constraints}:}{Replace the vector \strong{\eqn{\phi}} with vector \strong{\eqn{\psi}} and provide a constraint matrix
-         \strong{\eqn{C}} that satisfies \strong{\eqn{\phi}}\eqn{=}\strong{\eqn{R\psi}}, where
+         \strong{\eqn{C}} that satisfies \strong{\eqn{\phi}}\eqn{=}\strong{\eqn{C\psi}}, where
          \strong{\eqn{\psi}}\eqn{=(\psi_{1},...,\psi_{q})}.}
      }
    }
@@ -102,30 +104,33 @@ Returns an object of class \code{'gsmar'} defining the estimated GMAR, StMAR or 
  the degrees of freedom parameters \eqn{\nu_{m}} have to be larger than \eqn{2}.
 }
 \description{
-\code{fitGSMAR} estimates GMAR, StMAR or G-StMAR model in two phases: in the first phase it uses genetic algorithm
-  to find starting values for gradient based variable metric algorithm (also known as quasi-Newton method), which it then uses
-  to finalize the estimation in the second phase. Parallel computing is used to perform multiple rounds of estimations in parallel.
+\code{fitGSMAR} estimates GMAR, StMAR or G-StMAR model in two phases: in the first phase, the genetic algorithm is employed
+  to find starting values for the gradient based variable metric algorithm (also known as quasi-Newton method). In the second phase, the
+  variable metric algorithm accurately converges to a nearby local maximum or saddle point. Parallel computing is used to perform multiple
+  rounds of estimations in parallel.
 }
 \details{
 Because of complexity and multimodality of the log-likelihood function, it's \strong{not guaranteed} that the estimation
- algorithms will end up in the global maximum point. It's expected that most of the estimation rounds will end up in some local maximum
- point instead, and therefore a number of estimation rounds is required for reliable results. Because of the nature of the models,
- the estimation may fail particularly in the cases where the number of mixture components is chosen too large.
+ algorithm will end up in the global maximum point. It's often expected that most of the estimation rounds will end up in
+ some local maximum point instead, and therefore a number of estimation rounds is required for reliable results. Because
+ of the nature of the models, the estimation may fail particularly in the cases where the number of mixture components is
+ chosen too large.
 
- If the iteration limit in the variable metric algorithm (\code{maxit}) is reached, one can continue estimation by iterating
- more with the function \code{iterate_more()}.
+ If the iteration limit in the variable metric algorithm (\code{maxit}) is reached, one can continue the estimation by iterating
+ more with the function \code{iterate_more}.
 
- The genetic algorithm is mostly based on the description by \emph{Dorsey and Mayer (1995)}.
- It uses (slightly modified) individually adaptive crossover and mutation rates described by \emph{Patnaik and Srinivas (1994)}
- and employs (50\%) fitness inheritance discussed by \emph{Smith, Dike and Stegmann (1995)}.
+ The genetic algorithm is mostly based on the description by \emph{Dorsey and Mayer (1995)}. It uses (slightly modified)
+ individually adaptive crossover and mutation rates described by \emph{Patnaik and Srinivas (1994)} and employs (50\%)
+ fitness inheritance discussed by \emph{Smith, Dike and Stegmann (1995)}. Large (in absolute value) but stationary
+ AR parameter values are generated with the algorithm proposed by Monahan (1984).
 
- The variable metric algorithm (or quasi-Newton method) used in the second phase is implemented with function
+ The variable metric algorithm (or quasi-Newton method, Nash (1990, algorithm 21)) used in the second phase is implemented with function the
  \code{optim} from the package \code{stats}.
 
- Some mixture components of StMAR model may sometimes get very large degrees of freedom parameter estimates. Such estimates may, for
- example, cause computing the quantile residual tests to fail. However, such mixture components are very much similar to the components
- of GMAR model. It's hence advisable to further estimate a G-StMAR model by allowing the mixture components with large degrees of freedom
- estimates to be GMAR type.
+ Some mixture components of the StMAR model may sometimes get very large estimates for degrees of freedom parameters. Such estimates may,
+ for example, cause computing the quantile residual tests to fail. However, such mixture components are very much similar to the components
+ of the GMAR model. It's hence advisable to further estimate a G-StMAR model by allowing the mixture components with large degrees of freedom
+ parameter estimates to be GMAR type.
 }
 \section{S3 methods}{
 
@@ -135,8 +140,8 @@ Because of complexity and multimodality of the log-likelihood function, it's \st
 
 \section{Suggested packages}{
 
- For faster evaluation of the quantile residuals of StMAR and G-StMAR models install the suggested package "gsl".
- Note that for large StMAR and G-StMAR models with large data the evaluations for the quantile residual tests may take
+ For faster evaluation of the quantile residuals of StMAR and G-StMAR models, install the suggested package "gsl".
+ Note that for large StMAR and G-StMAR models with large data the evaluations of the quantile residual tests may take
  significantly long time without the package "gsl".
 }
 
@@ -145,53 +150,52 @@ Because of complexity and multimodality of the log-likelihood function, it's \st
 # These are long running examples and use parallel computing
 
 # GMAR model
-fit12 <- fitGSMAR(VIX, 1, 2, runTests=TRUE)
+fit12 <- fitGSMAR(data=logVIX, p=1, M=2, model="GMAR")
 fit12
 summary(fit12)
 plot(fit12)
 
 # Restricted GMAR model
-fit12r <- fitGSMAR(VIX, 1, 2, restricted=TRUE,
- parametrization="mean", nCalls=10)
+fit12r <- fitGSMAR(logVIX, 1, 2, model="GMAR", restricted=TRUE,
+ parametrization="mean", ncalls=10)
 fit12r
 summary(fit12r)
 
 # Non-mixture version of StMAR model
-fit11t <- fitGSMAR(VIX, 1, 1, model="StMAR", nCores=1, nCalls=1)
+fit11t <- fitGSMAR(logVIX, 1, 1, model="StMAR", ncores=1, ncalls=1)
 fit11t
 
-# StMAR model, 100 estimations rounds
-fit12t <- fitGSMAR(VIX, 1, 2, model="StMAR", nCalls=100)
+# StMAR model
+fit12t <- fitGSMAR(logVIX, 1, 2, model="StMAR")
 fit12t
 
-# Restricted StMAR model (implied by the StMAR(1,2) model)
-fit12tr <- fitGSMAR(VIX, 1, 2, model="StMAR", restricted=TRUE)
-fit12tr
-
-# G-StMAR model (implied by the StMAR(1,2) models), 100 estimation rounds
-fit12gs <- fitGSMAR(VIX, 1, c(1, 1), model="G-StMAR", nCalls=100)
+# G-StMAR model with one GMAR type and one StMAR type regime
+fit12gs <- fitGSMAR(logVIX, 1, M=c(1, 1), model="G-StMAR")
 fit12gs
 
-# Restricted G-StMAR model (implied by the previous StMAR and G-StMAR models)
-fit12gsr <- fitGSMAR(VIX, 1, c(1, 1), model="G-StMAR", restricted=TRUE)
+# Restricted G-StMAR model
+fit12gsr <- fitGSMAR(logVIX, 1, c(1, 1), model="G-StMAR", restricted=TRUE)
 fit12gsr
 
-# Fit GMAR model that is a mixture of AR(1) and such AR(3) model that the
+# The following three examples demonstrate how to apply linear constraints
+# to the AR parameters.
+
+# GMAR model that is a mixture of AR(1) and such AR(3) that the
 # second AR coeffiecient is constrained to zero.
 constraints <- list(matrix(c(1, 0, 0, 0, 0, 1), ncol=2), as.matrix(c(1, 0, 0)))
-fit32c <- fitGSMAR(VIX, 3, 2, constraints=constraints)
+fit32c <- fitGSMAR(logVIX, 3, 2, constraints=constraints)
 fit32c
 
-# Fit such constrained StMAR(3, 1) model that the second order AR coefficient
+# Such constrained StMAR(3, 1) model that the second order AR coefficient
 # is constrained to zero.
 constraints <- list(matrix(c(1, 0, 0, 0, 0, 1), ncol=2))
-fit31tc <- fitGSMAR(VIX, 3, 1, model="StMAR", constraints=constraints)
+fit31tc <- fitGSMAR(logVIX, 3, 1, model="StMAR", constraints=constraints)
 fit31tc
 
-# Fit such StMAR(3,2) model that the AR coefficients are restricted to be
+# Such StMAR(3, 2) model that the AR coefficients are restricted to be
 # the same for both regimes and that the second AR coefficients are
 # constrained to zero.
-fit32trc <- fitGSMAR(VIX, 3, 2, model="StMAR", restricted=TRUE,
+fit32trc <- fitGSMAR(logVIX, 3, 2, model="StMAR", restricted=TRUE,
                      constraints=matrix(c(1, 0, 0, 0, 0, 1), ncol=2))
 fit32trc
 }
@@ -205,16 +209,20 @@ fit32trc
          \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
          arXiv:1805.04010 \strong{[econ.EM]}.
+   \item Monahan J.F. 1984. A Note on Enforcing Stationarity in Autoregressive-Moving Average Models.
+         \emph{Biometrica} \strong{71}, 403-404.
+   \item Nash J. 1990. Compact Numerical Methods for Computers. Linear algebra and Function Minimization.
+         \emph{Adam Hilger}.
    \item Patnaik L.M. and Srinivas M. 1994. Adaptive Probabilities of Crossover and Mutation in Genetic Algorithms.
          \emph{Transactions on Systems, Man and Cybernetics} \strong{24}, 656-667.
    \item Smith R.E., Dike B.A., Stegmann S.A. 1995. Fitness inheritance in genetic algorithms.
          \emph{Proceedings of the 1995 ACM Symposium on Applied Computing}, 345-350.
-   \item There are currently no published references for G-StMAR model, but it's a straightforward generalization with
-         theoretical properties similar to GMAR and StMAR models.
+   \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
+         theoretical properties similar to the GMAR and StMAR models.
  }
 }
 \seealso{
-\code{\link{GSMAR}}, \code{\link{iterate_more}}, \code{\link{add_data}}, \code{\link{swap_parametrization}},
- \code{\link{get_gradient}}, \code{\link{simulateGSMAR}}, \code{\link{predict.gsmar}}, \code{\link{diagnosticPlot}},
- , \code{\link{quantileResidualTests}}
+\code{\link{GSMAR}}, \code{\link{iterate_more}}, , \code{\link{stmar_to_gstmar}}, \code{\link{add_data}},
+ \code{\link{swap_parametrization}}, \code{\link{get_gradient}}, \code{\link{simulateGSMAR}}, \code{\link{predict.gsmar}},
+  \code{\link{diagnosticPlot}}, \code{\link{quantileResidualTests}}, \code{\link{condMoments}}, \code{\link{uncondMoments}}
 }

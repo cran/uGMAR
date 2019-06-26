@@ -4,11 +4,12 @@
 \alias{loglikelihood_int}
 \title{Compute the log-likelihood of GMAR, StMAR or G-StMAR model}
 \usage{
-loglikelihood_int(data, p, M, params, model = c("GMAR", "StMAR", "G-StMAR"),
-  restricted = FALSE, constraints = NULL, conditional = TRUE,
-  parametrization = c("intercept", "mean"), boundaries = TRUE,
-  checks = TRUE, to_return = c("loglik", "mw", "mw_tplus1", "loglik_and_mw",
-  "terms"), minval)
+loglikelihood_int(data, p, M, params, model = c("GMAR", "StMAR",
+  "G-StMAR"), restricted = FALSE, constraints = NULL,
+  conditional = TRUE, parametrization = c("intercept", "mean"),
+  boundaries = TRUE, checks = TRUE, to_return = c("loglik", "mw",
+  "mw_tplus1", "loglik_and_mw", "terms", "regime_cmeans", "regime_cvars",
+  "total_cmeans", "total_cvars"), minval)
 }
 \arguments{
 \item{data}{a numeric vector class \code{'ts'} object containing the data. \code{NA} values are not supported.}
@@ -77,7 +78,7 @@ Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constra
 alway \code{p} for all regimes.
 Ignore or set to \code{NULL} if applying linear constraints is \strong{not} desired.}
 
-\item{conditional}{a logical argument specifying whether the conditional or exact log-likehood function should be used.}
+\item{conditional}{a logical argument specifying whether the conditional or exact log-likelihood function should be used.}
 
 \item{parametrization}{is the model parametrized with the "intercepts" \eqn{\phi_{m,0}} or
 "means" \eqn{\mu_m = \phi_{m,0}/(1-\sum\phi_{i,m})}?}
@@ -96,21 +97,28 @@ Argument \code{minval} will be used only if \code{boundaries==TRUE}.}
 such as stationary checks etc are made. The default is \code{TRUE}.}
 
 \item{to_return}{should the returned object be the log-likelihood value, mixing weights, mixing weights including
-value for \eqn{alpha_{m,T+1}}, a list containing log-likelihood value and mixing weights or the terms \eqn{l_{t}: t=1,..,T}
-in the log-likelihood function (see \emph{KMS 2015, eq.(13)})?
+value for \eqn{alpha_{m,T+1}}, a list containing log-likelihood value and mixing weights, the terms \eqn{l_{t}: t=1,..,T}
+in the log-likelihood function (see \emph{KMS 2015, eq.(13)}), regimewise conditional means, regimewise conditional variances,
+total conditional means or total conditional variances?
 Default is the log-likelihood value (\code{"loglik"}).}
 
 \item{minval}{this will be returned when the parameter vector is outside the parameter space.}
 }
 \value{
-\describe{
+Note that the first p observations are taken as the initial values so
+ mixing weights and conditional moments start from the p+1:th observation (interpreted as t=1).
+ \describe{
   \item{By default:}{log-likelihood value of the specified model,}
   \item{If \code{to_return=="mw"}:}{a size ((n_obs-p)xM) matrix containing the mixing weights: for m:th component in m:th column.}
   \item{If \code{to_return=="mw_tplus1"}:}{a size ((n_obs-p+1)xM) matrix containing the mixing weights: for m:th component in m:th column.
-    The last row is for \eqn{\alpha_{m,T+1}}}.
-  \item{If \code{to_return=="terms"}:}{a size ((n_obs-p)x1) numeric vector containing the terms \eqn{l_{t}}.}
+    The last row is for \eqn{\alpha_{m,T+1}}.}
   \item{if \code{to_return=="loglik_and_mw"}:}{a list of two elements. The first element contains the log-likelihood value and the
     second element contains the mixing weights.}
+  \item{If \code{to_return=="terms"}:}{a size ((n_obs-p)x1) numeric vector containing the terms \eqn{l_{t}}.}
+  \item{if \code{to_return=="regime_cmeans"}:}{a size ((n_obs-p)xM) matrix containing the regime specific conditional means.}
+  \item{if \code{to_return=="regime_cvars"}:}{a size ((n_obs-p)xM) matrix containing the regime specific conditional variances.}
+  \item{if \code{to_return=="total_cmeans"}:}{a size ((n_obs-p)x1) vector containing the total conditional means.}
+  \item{if \code{to_return=="total_cvars"}:}{a size ((n_obs-p)x1) vector containing the total conditional variances.}
  }
 }
 \description{
@@ -122,11 +130,9 @@ Default is the log-likelihood value (\code{"loglik"}).}
            in the theory of stationary time series. \emph{Journal of Applied Probability} \strong{11}, 63-71.
    \item Kalliovirta L., Meitz M. and Saikkonen P. 2015. Gaussian Mixture Autoregressive model for univariate time series.
            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
-   \item Lutkepohl H. 2005. New Introduction to Multiple Time Series Analysis.
-           \emph{Springer}.
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
            arXiv:1805.04010 \strong{[econ.EM]}.
-   \item There are currently no published references for G-StMAR model, but it's a straightforward generalization with
-           theoretical properties similar to GMAR and StMAR models.
+   \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
+           theoretical properties similar to the GMAR and StMAR models.
  }
 }

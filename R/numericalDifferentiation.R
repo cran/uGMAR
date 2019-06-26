@@ -3,14 +3,15 @@
 #' @description \code{calc_gradient} or \code{calc_hessian} calculates the gradient or Hessian matrix
 #'  of the given function at the given point using central difference numerical approximation.
 #'  \code{get_gradient} or \code{get_hessian} calculates the gradient or Hessian matrix of the
-#'  log-likelihood function at the parameter estimates of class \code{'gsmar'} object.
+#'  log-likelihood function at the parameter values of class \code{'gsmar'} object. \code{get_soc}
+#'  returns eigenvalues of the Hessian matrix.
 #'
 #' @inheritParams simulateGSMAR
 #' @param x a numeric vector specifying the point where the gradient or Hessian should be calculated.
 #' @param fn a function that takes in argument \code{x} as the \strong{first} argument.
-#' @param h difference used to approximate the derivates.
+#' @param h difference used to approximate the derivatives.
 #' @param ... other arguments passed to \code{fn}
-#' @details Especially the functions \code{get_gradient()} or \code{get_hessian()} can be used to check whether
+#' @details Especially the functions \code{get_gradient} or \code{get_hessian} can be used to check whether
 #'  the found estimates denote a (local) maximum point, a saddle point or something else.
 #' @return Gradient functions return numerical approximation of the gradient, and Hessian functions return
 #'  numerical approximation of the Hessian.
@@ -27,11 +28,12 @@
 #'  calc_gradient(x=c(1, 2), fn=foo, a=0.3, b=0.1)
 #'
 #'  # GMAR model:
-#'  params12 <- c(1.12321, 0.90557, 0.29288,
-#'   4.53131, 0.70309, 3.21154, 0.83888)
-#'  gmar12 <- GSMAR(VIX, 1, 2, params12)
+#'  params12 <- c(0.18281409, 0.92657275, 0.00214552,
+#'   0.85725129, 0.68210294, 0.01900299, 0.88342018)
+#'  gmar12 <- GSMAR(logVIX, 1, 2, params12)
 #'  get_gradient(gmar12)
 #'  get_hessian(gmar12)
+#'  get_soc(gmar12)
 #' @export
 
 calc_gradient <- function(x, fn, h=6e-06, ...) {
@@ -61,10 +63,12 @@ calc_hessian <- function(x, fn, h=6e-06, ...) {
 }
 
 
+
 #' @rdname calc_gradient
 #' @export
 get_gradient <- function(gsmar, h=6e-06) {
   check_gsmar(gsmar)
+  warn_dfs(gsmar, warn_about="derivs")
   foo <- function(x) {
     loglikelihood(data=gsmar$data, p=gsmar$model$p, M=gsmar$model$M, params=x, model=gsmar$model$model,
                   restricted=gsmar$model$restricted, constraints=gsmar$model$constraints,
@@ -78,6 +82,7 @@ get_gradient <- function(gsmar, h=6e-06) {
 #' @export
 get_hessian <- function(gsmar, h=6e-06) {
   check_gsmar(gsmar)
+  warn_dfs(gsmar, warn_about="derivs")
   foo <- function(x) {
     loglikelihood(data=gsmar$data, p=gsmar$model$p, M=gsmar$model$M, params=x, model=gsmar$model$model,
                   restricted=gsmar$model$restricted, constraints=gsmar$model$constraints,
@@ -87,3 +92,8 @@ get_hessian <- function(gsmar, h=6e-06) {
   calc_hessian(x=gsmar$params, fn=foo, h=h)
 }
 
+#' @rdname calc_gradient
+#' @export
+get_soc <- function(gsmar, h=6e-06) {
+  eigen(get_hessian(gsmar, h))$value
+}

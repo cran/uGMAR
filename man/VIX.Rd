@@ -4,7 +4,7 @@
 \name{VIX}
 \alias{VIX}
 \title{CBOE Volatility Index: VIX}
-\format{A numeric vector containing 252 values.}
+\format{A numeric vector containing 252 observations.}
 \source{
 \url{https://fred.stlouisfed.org/series/VIXCLS}
 }

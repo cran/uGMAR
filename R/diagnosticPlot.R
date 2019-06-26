@@ -30,52 +30,42 @@
 #'   Install the suggested package "gsl" for faster evaluations in the cases of StMAR and G-StMAR models.
 #'   For large StMAR and G-StMAR models with large data the calculations to obtain the individual statistics
 #'   may take a significantly long time without the package "gsl".
-#' @seealso \code{\link{fitGSMAR}}, \code{\link{GSMAR}}, \code{\link{quantileResidualTests}}, \code{\link{predict.gsmar}}
+#' @seealso \code{\link{fitGSMAR}}, \code{\link{GSMAR}}, \code{\link{quantileResidualTests}}, \code{\link{quantileResidualPlot}}, \code{\link{simulateGSMAR}}
 #' @examples
 #' \donttest{
 #' # GMAR model
-#' params13 <- c(1.4, 0.88, 0.26, 2.46, 0.82, 0.74, 5.0, 0.68, 5.2, 0.72, 0.2)
-#' gmar13 <- GSMAR(data=VIX, p=1, M=3, params=params13, model="GMAR")
-#' diagnosticPlot(gmar13)
+#' fit12 <- fitGSMAR(data=logVIX, p=1, M=2, model="GMAR")
+#' diagnosticPlot(fit12)
 #'
 #' # Restricted GMAR model: plot also the individual statistics with
 #' # their approximate critical bounds using the given data
-#' params12r <- c(1.4, 1.8, 0.88, 0.29, 3.18, 0.84)
-#' gmar12r <- GSMAR(data=VIX, p=1, M=2, params=params12r, model="GMAR",
-#'  restricted=TRUE)
-#' diagnosticPlot(gmar12r, nlags=10, nsimu=1, plot_indstats=TRUE)
+#' fit12r <- fitGSMAR(logVIX, 1, 2, model="GMAR", restricted=TRUE)
+#' diagnosticPlot(fit12r, nlags=10, nsimu=1, plot_indstats=TRUE)
 #'
-#' # StMAR model
-#' params12t <- c(1.38, 0.88, 0.27, 3.8, 0.74, 3.15, 0.8, 100, 3.6)
-#' stmar12 <- GSMAR(data=VIX, p=1, M=2, params=params12t, model="StMAR")
-#' diagnosticPlot(stmar12)
+#' # Non-mixture version of StMAR model
+#' fit11t <- fitGSMAR(logVIX, 1, 1, model="StMAR", ncores=1, ncalls=1)
+#' diagnosticPlot(fit11t)
 #'
-#' # G-StMAR model (similar to the StMAR model above)
-#' params12gs <- c(1.38, 0.88, 0.27, 3.8, 0.74, 3.15, 0.8, 3.6)
-#' gstmar12 <- GSMAR(data=VIX, p=1, M=c(1, 1), params=params12gs,
-#'  model="G-StMAR")
-#' diagnosticPlot(gstmar12)
+#' # G-StMAR model
+#' fit12gs <- fitGSMAR(logVIX, 1, M=c(1, 1), model="G-StMAR")
+#' diagnosticPlot(fit12gs)
 #'
 #' # Restricted G-StMAR-model
-#' params13gsr <- c(1.3, 1, 1.4, 0.8, 0.4, 2, 0.2, 0.25, 0.15, 20)
-#' gstmar13r <- GSMAR(data=VIX, p=1, M=c(2, 1), params=params13gsr,
-#'  model="G-StMAR", restricted=TRUE)
-#' diagnosticPlot(gstmar13r)
+#' fit12gsr <- fitGSMAR(logVIX, 1, M=c(1, 1), model="G-StMAR",
+#'  restricted=TRUE)
+#' diagnosticPlot(fit12gsr)
 #'
 #' # GMAR model as a mixture of AR(2) and AR(1) models
 #' constraints <- list(diag(1, ncol=2, nrow=2), as.matrix(c(1, 0)))
-#' params22c <- c(1.2, 0.85, 0.04, 0.3, 3.3, 0.77, 2.8, 0.77)
-#' gmar22c <- GSMAR(data=VIX, p=2, M=2, params=params22c,
-#'  model="GMAR", constraints=constraints)
-#' diagnosticPlot(gmar22c)
+#' fit22c <- fitGSMAR(logVIX, 2, 2, constraints=constraints)
+#' diagnosticPlot(fit22c)
 #'
 #' # Such StMAR(3,2) that the AR coefficients are restricted to be
 #' # the same for both regimes and that the second AR coefficients are
 #' # constrained to zero.
-#' params32trc <- c(2.2, 1.8, 0.88, -0.03, 2.4, 0.27, 0.40, 3.9, 1000)
-#' stmar32rc <- GSMAR(data=VIX, p=3, M=2, params=params32trc, model="StMAR",
-#'  restricted=TRUE, constraints=matrix(c(1, 0, 0, 0, 0, 1), ncol=2))
-#' diagnosticPlot(stmar32rc)
+#' fit32rc <- fitGSMAR(logVIX, 3, 2, model="StMAR", restricted=TRUE,
+#'  constraints=matrix(c(1, 0, 0, 0, 0, 1), ncol=2))
+#' diagnosticPlot(fit32rc)
 #' }
 #' @export
 
@@ -83,17 +73,21 @@ diagnosticPlot <- function(gsmar, nlags=20, nsimu=2000, plot_indstats=FALSE) {
   if(!all_pos_ints(c(nlags, nsimu))) stop("The arguments nlags and nsimu have to be a strictly positive integers")
   check_gsmar(gsmar)
   check_data(gsmar)
-  data <- gsmar$data
-  p <- gsmar$model$p
-  M <- gsmar$model$M
-  params <- gsmar$params
-  model <- gsmar$model$model
-  restricted <- gsmar$model$restricted
-  constraints <- gsmar$model$constraints
-  parametrization <- gsmar$model$parametrization
   nsimu <- max(nsimu, length(data))
-  qresiduals <- quantileResiduals_int(data=data, p=p, M=M, params=params, model=model, restricted=restricted,
-                                      constraints=constraints, parametrization=parametrization)
+  data <- gsmar$data
+  n_obs <- ifelse(gsmar$model$conditional, length(data) - gsmar$model$p, length(data))
+  if(is.null(gsmar$quantile_residuals)) {
+    qresiduals <- quantileResiduals_int(data=data, p=gsmar$model$p, M=gsmar$model$M, params=gsmar$params,
+                                        model=gsmar$model$mode, restricted=gsmar$model$restricted,
+                                        constraints=gsmar$model$constraints, parametrization=gsmar$model$parametrization)
+  } else {
+    qresiduals <- gsmar$quantile_residuals
+  }
+  if(anyNA(qresiduals)) {
+    n_na <- sum(is.na(qresiduals))
+    qresiduals <- qresiduals[!is.na(qresiduals)]
+    warning(paste(n_na, "missing values removed from quantile residuals. Check the parameter estimates for possible problems (border of the prm space, large dfs, etc)?"))
+  }
   old_par <- par(no.readonly = TRUE) # Save old settings
   on.exit(par(old_par)) # Restore the settings before quitting
   if(plot_indstats == TRUE) {
@@ -119,19 +113,19 @@ diagnosticPlot <- function(gsmar, nlags=20, nsimu=2000, plot_indstats=FALSE) {
   ticks1 <- round(seq(-yaxt0, yaxt0, by=0.1), 1)
   ticks2 = seq(-yaxt0, yaxt0, by=0.05)
 
-  plot_qr_acf <- function(vals_to_plot) {
-    plot(0, 0, type="n", yaxt="n", xlim=c(0, nlags + 0.1), ylim=c(-yaxt0, yaxt0), xlab="", ylab="", main="Quantile residual acf")
+  plot_qr_acf <- function(vals_to_plot, main) {
+    plot(0, 0, type="n", yaxt="n", xlim=c(0, nlags + 0.1), ylim=c(-yaxt0, yaxt0), xlab="", ylab="", main=main)
     axis(2, at=ticks1, labels=ticks1)
     abline(h=ticks2, col=rgb(0.1, 0.1, 0.1, 0.2))
     abline(h=0)
     abline(v=seq(0, nlags, by=5), col=rgb(0.1, 0.1, 0.1, 0.2))
     segments(x0=1:nlags, y0=rep(0, nlags), x1=1:nlags, y1=vals_to_plot)
     points(1:nlags, vals_to_plot, pch=20, col="blue")
-    abline(h=c(-1.96*length(data)^{-1/2}, 1.96*length(data)^{-1/2}), col=rgb(0, 0, 1, 0.8), lty=2)
+    abline(h=c(-1.96*n_obs^{-1/2}, 1.96*n_obs^{-1/2}), col=rgb(0, 0, 1, 0.8), lty=2)
   }
 
-  plot_qr_acf(qr_acf)
-  plot_qr_acf(qrsquare_acf)
+  plot_qr_acf(qr_acf, main="Qres ACF")
+  plot_qr_acf(qrsquare_acf, main="Qres^2 ACF")
 
   if(plot_indstats == TRUE) {
     # Obtain tests statistics
@@ -142,7 +136,9 @@ diagnosticPlot <- function(gsmar, nlags=20, nsimu=2000, plot_indstats=FALSE) {
       inds_normalized <- res$indStat/res$stdError
       plot(0, 0, type="n", yaxt="n", xlim=c(0, nlags + 0.1), ylim=c(-3, 3), xlab="", ylab="",
            main=ifelse(which_ones == "ac_res", "Autocovariance statistics", "Cond. h.sked. statistics"))
+      abline(h=c(-3:3), col=rgb(0.1, 0.1, 0.1, 0.2))
       abline(h=0, lty=1)
+      abline(v=seq(0, nlags, by=5), col=rgb(0.1, 0.1, 0.1, 0.2))
       abline(h=1.96, col=rgb(0, 0, 1, 0.8), lty=2)
       abline(h=-1.96, col=rgb(0, 0, 1, 0.8), lty=2)
       segments(x0=1:nlags, y0=rep(0, nlags), x1=1:nlags, y1=inds_normalized)
@@ -153,4 +149,66 @@ diagnosticPlot <- function(gsmar, nlags=20, nsimu=2000, plot_indstats=FALSE) {
     plot_inds("ac_res")
     plot_inds("ch_res")
   }
+}
+
+
+#' @import stats
+#' @import graphics
+#' @importFrom grDevices rgb
+#'
+#' @title Ploy quantile residual time series and kernel density
+#'
+#' @description \code{quantileResidualsPlot} plots quantile residual time series and histogram.
+#'
+#' @inheritParams simulateGSMAR
+#' @return  Only plots to a graphical device and doesn't return anything.
+#' @inherit quantileResiduals
+#' @seealso \code{\link{diagnosticPlot}}, \code{\link{fitGSMAR}}, \code{\link{GSMAR}}, \code{\link{quantileResidualTests}}, \code{\link{simulateGSMAR}}
+#' @examples
+#' \donttest{
+#' # GMAR model
+#' fit12 <- fitGSMAR(data=logVIX, p=1, M=2, model="GMAR")
+#' quantileResidualPlot(fit12)
+#'
+#' # Non-mixture version of StMAR model
+#' fit11t <- fitGSMAR(logVIX, 1, 1, model="StMAR", ncores=1, ncalls=1)
+#' quantileResidualPlot(fit11t)
+#'
+#' # Restricted G-StMAR-model
+#' fit12gsr <- fitGSMAR(logVIX, 1, M=c(1, 1), model="G-StMAR",
+#'  restricted=TRUE)
+#' quantileResidualPlot(fit12gsr)
+#'
+#' # Such StMAR(3,2) that the AR coefficients are restricted to be
+#' # the same for both regimes and that the second AR coefficients are
+#' # constrained to zero.
+#' fit32rc <- fitGSMAR(logVIX, 3, 2, model="StMAR", restricted=TRUE,
+#'  constraints=matrix(c(1, 0, 0, 0, 0, 1), ncol=2))
+#' quantileResidualPlot(fit32rc)
+#' }
+#' @export
+
+quantileResidualPlot <- function(gsmar) {
+  check_gsmar(gsmar)
+  check_data(gsmar)
+  if(is.null(gsmar$quantile_residuals)) {
+    qresiduals <- quantileResiduals_int(data=gsmar$data, p=gsmar$model$p, M=gsmar$model$M, params=gsmar$params,
+                                        model=gsmar$model$mode, restricted=gsmar$model$restricted,
+                                        constraints=gsmar$model$constraints, parametrization=gsmar$model$parametrization)
+  } else {
+    qresiduals <- gsmar$quantile_residuals
+  }
+  if(anyNA(qresiduals)) {
+    n_na <- sum(is.na(qresiduals))
+    qresiduals <- qresiduals[!is.na(qresiduals)]
+    warning(paste(n_na, "missing values removed from quantile residuals. Check the parameter estimates for possible problems (border of the prm space, large dfs, etc)?"))
+  }
+  old_par <- par(no.readonly = TRUE) # Save old settings
+  on.exit(par(old_par)) # Restore the settings before quitting
+  par(mfrow=c(2, 1), mar=c(2.6, 2.6, 2.1, 1.6))
+  plot(qresiduals, type="l", ylab="", xlab="", main="Quantile residuals")
+  abline(h=c(-1.96, 0, 1.96), lty=2, col="red")
+  hs <- hist(qresiduals, breaks="Scott", probability=TRUE, col="skyblue", plot=TRUE)
+  xc <- seq(from=min(hs$breaks), to=max(hs$breaks), length.out=500)
+  lines(x=xc, y=dnorm(xc), lty=2, col="red")
 }

@@ -4,11 +4,12 @@
 \alias{GAfit}
 \title{Genetic algorithm for preliminary estimation of GMAR, StMAR or G-StMAR model}
 \usage{
-GAfit(data, p, M, model = c("GMAR", "StMAR", "G-StMAR"), restricted = FALSE,
-  constraints = NULL, parametrization = c("intercept", "mean"),
-  conditional = TRUE, ngen, popsize, smartMu, meanscale, sigmascale,
-  initpop = NULL, regime_force_scale = 1, red_criteria = c(0.05, 0.01),
-  to_return = c("alt_ind", "best_ind"), minval)
+GAfit(data, p, M, model = c("GMAR", "StMAR", "G-StMAR"),
+  restricted = FALSE, constraints = NULL,
+  parametrization = c("intercept", "mean"), conditional = TRUE, ngen,
+  popsize, smartMu, meanscale, sigmascale, initpop = NULL,
+  regime_force_scale = 1, red_criteria = c(0.05, 0.01),
+  to_return = c("alt_ind", "best_ind"), minval, ...)
 }
 \arguments{
 \item{data}{a numeric vector class \code{'ts'} object containing the data. \code{NA} values are not supported.}
@@ -43,7 +44,7 @@ Ignore or set to \code{NULL} if applying linear constraints is \strong{not} desi
 \item{parametrization}{is the model parametrized with the "intercepts" \eqn{\phi_{m,0}} or
 "means" \eqn{\mu_m = \phi_{m,0}/(1-\sum\phi_{i,m})}?}
 
-\item{conditional}{a logical argument specifying whether the conditional or exact log-likehood function should be used.}
+\item{conditional}{a logical argument specifying whether the conditional or exact log-likelihood function should be used.}
 
 \item{ngen}{a positive integer specifying the number of generations to be ran through in the genetic algorithm.
 Default is \code{min(400, max(round(0.1*length(data)), 200))}.}
@@ -78,7 +79,7 @@ Default is \code{var(stats::ar(data, order.max=10)$resid, na.rm=TRUE)}.}
       \item{For \strong{G-StMAR} model:}{Size \eqn{(M(p+3)+M2-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=}(\strong{\eqn{\upsilon_{1}}},...,\strong{\eqn{\upsilon_{M}}},
         \eqn{\alpha_{1},...,\alpha_{M-1}, \nu_{M1+1},...,\nu_{M}}).}
       \item{With \strong{linear constraints}:}{Replace the vectors \strong{\eqn{\phi_{m}}} with vectors \strong{\eqn{\psi_{m}}} and provide a  list of constraint
-        matrices \strong{R} that satisfy \strong{\eqn{\phi_{m}}}\eqn{=}\strong{\eqn{R_{m}\psi_{m}}} for all \eqn{m=1,...,M}, where
+        matrices \strong{C} that satisfy \strong{\eqn{\phi_{m}}}\eqn{=}\strong{\eqn{C_{m}\psi_{m}}} for all \eqn{m=1,...,M}, where
         \strong{\eqn{\psi_{m}}}\eqn{=(\psi_{m,1},...,\psi_{m,q_{m}})}.}
     }
   }
@@ -91,7 +92,7 @@ Default is \code{var(stats::ar(data, order.max=10)$resid, na.rm=TRUE)}.}
       \item{For \strong{G-StMAR} model:}{Size \eqn{(3M+M2+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
         \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1}, \nu_{M1+1},...,\nu_{M})}.}
       \item{With \strong{linear constraints}:}{Replace the vector \strong{\eqn{\phi}} with vector \strong{\eqn{\psi}} and provide a constraint matrix
-        \strong{\eqn{R}} that satisfies \strong{\eqn{\phi}}\eqn{=}\strong{\eqn{R\psi}}, where
+        \strong{\eqn{C}} that satisfies \strong{\eqn{\phi}}\eqn{=}\strong{\eqn{C\psi}}, where
         \strong{\eqn{\psi}}\eqn{=(\psi_{1},...,\psi_{q})}.}
     }
   }
@@ -118,8 +119,10 @@ One should be careful when adjusting this argument.}
 might have more wasted regimes?}
 
 \item{minval}{a real number defining the minimum value of the log-likelihood function that will be considered.
-Values smaller than this will be treated as they were \code{minval} and the corresponding inidividuals will never survive.
+Values smaller than this will be treated as they were \code{minval} and the corresponding individuals will never survive.
 The default is \code{-(10^(ceiling(log10(length(data))) + 1) - 1)}, and one should be very careful if adjusting this.}
+
+\item{...}{Not in use. Exists for a technical reason only.}
 }
 \value{
 Returns estimated parameter vector described in \code{initpop}.
@@ -130,7 +133,8 @@ Returns estimated parameter vector described in \code{initpop}.
 \details{
 The genetic algorithm is mostly based on the description by \emph{Dorsey and Mayer (1995)}.
    It uses (slightly modified) individually adaptive crossover and mutation rates described by \emph{Patnaik and Srinivas (1994)}
-   and employs (50\%) fitness inheritance discussed by \emph{Smith, Dike and Stegmann (1995)}.
+   and employs (50\%) fitness inheritance discussed by \emph{Smith, Dike and Stegmann (1995)}. Large (in absolute value) but stationary
+   AR parameter values are generated with the algorithm proposed by Monahan (1984).
 }
 \references{
 \itemize{
@@ -141,6 +145,8 @@ The genetic algorithm is mostly based on the description by \emph{Dorsey and May
          \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
          arXiv:1805.04010 \strong{[econ.EM]}.
+   \item Monahan J.F. 1984. A Note on Enforcing Stationarity in Autoregressive-Moving Average Models.
+         \emph{Biometrica} \strong{71}, 403-404.
    \item Patnaik L.M. and Srinivas M. 1994. Adaptive Probabilities of Crossover and Mutation in Genetic Algorithms.
          \emph{Transactions on Systems, Man and Cybernetics} \strong{24}, 656-667.
    \item Smith R.E., Dike B.A., Stegmann S.A. 1995. Fitness inheritance in genetic algorithms.

@@ -4,9 +4,9 @@
 \alias{change_parametrization}
 \title{Change parametrization of the parameter vector}
 \usage{
-change_parametrization(p, M, params, model = c("GMAR", "StMAR", "G-StMAR"),
-  restricted = FALSE, constraints = NULL, change_to = c("intercept",
-  "mean"))
+change_parametrization(p, M, params, model = c("GMAR", "StMAR",
+  "G-StMAR"), restricted = FALSE, constraints = NULL,
+  change_to = c("intercept", "mean"))
 }
 \arguments{
 \item{p}{a positive integer specifying the order of AR coefficients.}
@@ -96,7 +96,7 @@ Returns parameter vector described in \code{params}, but with parametrization ch
            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
            arXiv:1805.04010 \strong{[econ.EM]}.
-   \item There are currently no published references for G-StMAR model, but it's a straightforward generalization with
-           theoretical properties similar to GMAR and StMAR models.
+   \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
+           theoretical properties similar to the GMAR and StMAR models.
  }
 }

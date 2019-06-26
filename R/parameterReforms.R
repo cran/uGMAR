@@ -101,12 +101,12 @@ reformRestrictedPars <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR
 }
 
 
-#' @title Transform constrainted and restricted parameter vector into the regular form
+#' @title Transform constraited and restricted parameter vector into the regular form
 #'
-#' @description \code{removeAllConstraints} transforms constrainted and restricted parameter vector into the regular form.
+#' @description \code{removeAllConstraints} transforms constraited and restricted parameter vector into the regular form.
 #'
 #' @inheritParams loglikelihood_int
-#' @return Returns such parameter vector corresponding to the input vector that is the form describted in \code{params}
+#' @return Returns such parameter vector corresponding to the input vector that is the form described in \code{params}
 #' for non-restricted and non-constrained models.
 
 removeAllConstraints <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FALSE, constraints=NULL) {
