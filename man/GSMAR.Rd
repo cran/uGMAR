@@ -13,7 +13,7 @@
 GSMAR(data, p, M, params, model = c("GMAR", "StMAR", "G-StMAR"),
   restricted = FALSE, constraints = NULL, conditional = TRUE,
   parametrization = c("intercept", "mean"), calc_qresiduals,
-  calc_cond_moments, calc_std_errors = FALSE)
+  calc_cond_moments, calc_std_errors = FALSE, custom_h = NULL)
 
 \method{logLik}{gsmar}(object, ...)
 
@@ -103,6 +103,11 @@ Ignore or set to \code{NULL} if applying linear constraints is \strong{not} desi
 
 \item{calc_std_errors}{should approximate standard errors be calculated?}
 
+\item{custom_h}{A numeric vector of with same length as the parameter vector of the estimated model: i:th element
+of custom_h is the difference used in central difference approximation for differentials of the log-likelihood function
+for the i:th parameter. If \code{NULL} (default), then the difference used for differentiating overly large degrees of
+freedom parameters is adjusted to avoid numerical problems, and the difference is \code{6e-6} for the other parameters.}
+
 \item{object}{object of class \code{'gsmar'} created with \code{fitGSMAR} or \code{GSMAR}.}
 
 \item{...}{graphical parameters passed to \code{ts.plot}.}
@@ -116,7 +121,7 @@ standard errors, log-likelihood and information criteria values. Supported only 
 models with data.}
 }
 \value{
-Returns an object of class \code{'gsmar'} defining the specified GMAR, StMAR or G-StMAR model. If data is suplied, the returned object
+Returns an object of class \code{'gsmar'} defining the specified GMAR, StMAR or G-StMAR model. If data is supplied, the returned object
   contains (by default) empirical mixing weights, conditional means and variances and quantile residuals. Note that the first p observations are
   taken as the initial values so mixing weights, conditional moments and qresiduals start from the p+1:th observation (interpreted as t=1).
 }
@@ -168,7 +173,8 @@ gstmar12r <- GSMAR(data=logVIX, p=1, M=c(1, 1), params=params12gsr,
  model="G-StMAR", restricted=TRUE)
 gstmar12r
 
-# GMAR model as a mixture of AR(2) and AR(1) models
+# GMAR(p=2, M=2) model such that the second AR coefficient of the
+# second regime is constrained to zero.
 constraints <- list(diag(1, ncol=2, nrow=2), as.matrix(c(1, 0)))
 params22c <- c(0.61, 0.83, -0.06, 0.02, 0.21, 0.91, 0.01, 0.16)
 gmar22c <- GSMAR(logVIX, p=2, M=2, params=params22c,

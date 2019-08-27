@@ -6,7 +6,6 @@
 #'
 #' @inheritParams loglikelihood_int
 #' @param ngen a positive integer specifying the number of generations to be ran through in the genetic algorithm.
-#'  Default is \code{min(400, max(round(0.1*length(data)), 200))}.
 #' @param popsize a positive even integer specifying the population size in the genetic algorithm.
 #'  Default is \code{10*d} where \code{d} is the number of parameters.
 #' @param smartMu a positive integer specifying the generation after which the random mutations in the genetic algorithm are "smart".
@@ -57,11 +56,11 @@
 #'  the degrees of freedom parameters \eqn{\nu_{m}} have to be larger than \eqn{2}.
 #'  If not specified (or \code{FALSE} as is default), the initial population will be drawn randomly.
 #' @param regime_force_scale a non-negative real number specifying how much should natural selection favour individuals
-#'   with less redundant regimes (see \code{red_criteria}). Set to zero for no favouring or large number
-#'   for heavy favouring. Without any favouring the genetic algorithm gets more often stuck in an area of the parameter space where some
-#'   regimes are wasted, but with too much favouring the best genes might never mix into the population and the algorithm might
-#'   converge poorly. Default is \code{1} and it gives \eqn{2x} larger surviving probabilities for individuals with no wasted
-#'   regimes compared to individuals with one wasted regime. Number \code{2} would give \eqn{3x} larger probabilities etc.
+#'   with less regimes that have almost all mixing weights (practically) at zero (see \code{red_criteria}), i.e. less "redundant regimes".
+#'   Set to zero for no favouring or large number for heavy favouring. Without any favouring the genetic algorithm gets more often stuck
+#'   in an area of the parameter space where some regimes are wasted, but with too much favouring the best genes might never mix into the
+#'   population and the algorithm might converge poorly. Default is \code{1} and it gives \eqn{2x} larger surviving probabilities for
+#'   individuals with no wasted regimes compared to individuals with one wasted regime. Number \code{2} would give \eqn{3x} larger probabilities etc.
 #' @param red_criteria a length 2 numeric vector specifying the criteria that is used to determine whether a regime is redundant or not.
 #'   Any regime \code{m} which satisfies \code{sum(mixingWeights[,m] > red_criteria[1]) < red_criteria[2]*n_obs} will be considered "redundant".
 #'   One should be careful when adjusting this argument.
@@ -71,12 +70,18 @@
 #' @param minval a real number defining the minimum value of the log-likelihood function that will be considered.
 #'   Values smaller than this will be treated as they were \code{minval} and the corresponding individuals will never survive.
 #'   The default is \code{-(10^(ceiling(log10(length(data))) + 1) - 1)}, and one should be very careful if adjusting this.
-#' @param ... Not in use. Exists for a technical reason only.
+#' @param seed a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in the beginning of
+#'   the function call. If calling \code{GAfit} from \code{fitGSMAR}, use the argument \code{seeds} instead of passing the argument \code{seed}.
+#' @param ... Currently not in use. Exists for a technical reason only.
 #' @details
 #'    The genetic algorithm is mostly based on the description by \emph{Dorsey and Mayer (1995)}.
 #'    It uses (slightly modified) individually adaptive crossover and mutation rates described by \emph{Patnaik and Srinivas (1994)}
 #'    and employs (50\%) fitness inheritance discussed by \emph{Smith, Dike and Stegmann (1995)}. Large (in absolute value) but stationary
 #'    AR parameter values are generated with the algorithm proposed by Monahan (1984).
+#'
+#'    By "redundant" or "unidentified" regimes we mean regimes that have the time varying mixing weights basically at zero for all t.
+#'    The model would have about the same log-likelihood value without redundant regimes and there is no purpose to have redundant regime in
+#'    the model.
 #' @return Returns estimated parameter vector described in \code{initpop}.
 #' @references
 #'  \itemize{
@@ -99,15 +104,14 @@
 #' @export
 
 GAfit <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FALSE, constraints=NULL, parametrization=c("intercept", "mean"),
-                  conditional=TRUE, ngen, popsize, smartMu, meanscale, sigmascale, initpop=NULL, regime_force_scale=1,
-                  red_criteria=c(0.05, 0.01), to_return=c("alt_ind", "best_ind"), minval, ...) {
+                  conditional=TRUE, ngen=200, popsize, smartMu, meanscale, sigmascale, initpop=NULL, regime_force_scale=1,
+                  red_criteria=c(0.05, 0.01), to_return=c("alt_ind", "best_ind"), minval, seed=NULL, ...) {
+  set.seed(seed)
   model <- match.arg(model)
   check_model(model)
   checkPM(p=p, M=M, model=model)
   parametrization <- match.arg(parametrization)
-  stopifnot(parametrization %in% c("intercept", "mean"))
   to_return <- match.arg(to_return)
-  stopifnot(to_return %in% c("alt_ind", "best_ind"))
   data <- checkAndCorrectData(data, p)
   n_obs <- length(data)
   M_orig <- M
@@ -119,7 +123,7 @@ GAfit <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FA
   # Check constraint matrices
   if(!is.null(constraints)) {
     checkConstraintMat(p, M, restricted=restricted, constraints=constraints)
-    if(restricted == TRUE) {
+    if(restricted) {
       Cquals <- TRUE # States wether all matrices C are equal
     } else {
       if(length(unique(constraints)) == 1) {
@@ -135,7 +139,6 @@ GAfit <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FA
 
   # Default settings
   if(missing(popsize)) popsize <- 10*d
-  if(missing(ngen)) ngen <- min(400, max(round(0.1*length(data)), 200))
   if(missing(smartMu)) smartMu <-  min(100, round(0.5*ngen))
   if(missing(meanscale)) meanscale <- c(mean(data), sd(data))
   if(missing(sigmascale)) sigmascale <- var(stats::ar(data, order.max=10)$resid, na.rm=TRUE)
@@ -752,7 +755,7 @@ smartIndividual_int <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR"
     whichRandom <- numeric(0)
   }
 
-  if(restricted==FALSE) {
+  if(restricted == FALSE) {
     ind <- c()
     j <- 0
     for(i1 in 1:M) { # Run through components

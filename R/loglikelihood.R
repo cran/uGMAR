@@ -127,7 +127,7 @@ loglikelihood_int <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-St
   }
 
   # Reform parameters to the "standard form" and collect them
-  if(checks == TRUE) {
+  if(checks) {
     checkConstraintMat(p=p, M=M_orig, restricted=restricted, constraints=constraints)
   }
   params <- removeAllConstraints(p=p, M=M_orig, params=params, model=model, restricted=restricted, constraints=constraints)
@@ -137,7 +137,7 @@ loglikelihood_int <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-St
   sigmas <- pars[p + 2,]
 
   # Return minval if parameters are out of their boundaries.
-  if(boundaries == TRUE) {
+  if(boundaries) {
     if(any(pars[p + 2,] <= 0)) {
       return(minval)
     } else if(M >= 2 & sum(alphas[-M]) >= 1) {
@@ -148,11 +148,11 @@ loglikelihood_int <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-St
       return(minval)
     }
     if(model == "StMAR" | model == "G-StMAR") {
-      if(any(dfs <= 2 + 1e-8 | dfs > 1e+6)) return(minval)
+      if(any(dfs <= 2 + 1e-8 | dfs > 1e+5)) return(minval)
     }
   }
 
-  if(checks == TRUE) {
+  if(checks) {
     data <- checkAndCorrectData(data=data, p=p)
     parameterChecks(p=p, M=M_orig, params=params, model=model, restricted=FALSE, constraints=NULL)
   }
@@ -393,7 +393,6 @@ loglikelihood <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-StMAR"
   model <- match.arg(model)
   check_model(model)
   parametrization <- match.arg(parametrization)
-  stopifnot(parametrization %in% c("intercept", "mean"))
   checkPM(p=p, M=M, model=model)
   check_params_length(p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints)
   to_ret <- ifelse(returnTerms, "terms", "loglik")
@@ -476,7 +475,6 @@ mixingWeights <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-StMAR"
   model <- match.arg(model)
   check_model(model)
   parametrization <- match.arg(parametrization)
-  stopifnot(parametrization %in% c("intercept", "mean"))
   checkPM(p=p, M=M, model=model)
   check_params_length(p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints)
   mixingWeights_int(data=data, p=p, M=M, params=params, model=model, restricted=restricted,
@@ -532,7 +530,6 @@ condMoments <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-StMAR"),
   model <- match.arg(model)
   check_model(model)
   parametrization <- match.arg(parametrization)
-  stopifnot(parametrization %in% c("intercept", "mean"))
   checkPM(p=p, M=M, model=model)
   check_params_length(p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints)
   loglikelihood_int(data=data, p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints,

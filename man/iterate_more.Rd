@@ -4,12 +4,20 @@
 \alias{iterate_more}
 \title{Maximum likelihood estimation of GMAR, StMAR or G-StMAR model with preliminary estimates}
 \usage{
-iterate_more(gsmar, maxit = 100)
+iterate_more(gsmar, maxit = 100, custom_h = NULL,
+  calc_std_errors = TRUE)
 }
 \arguments{
 \item{gsmar}{object of class \code{'gsmar'} created with the function \code{fitGSMAR} or \code{GSMAR}.}
 
 \item{maxit}{maximum number of iterations in the variable metric algorithm.}
+
+\item{custom_h}{A numeric vector of with same length as the parameter vector of the estimated model: i:th element
+of custom_h is the difference used in central difference approximation for differentials of the log-likelihood function
+for the i:th parameter. If \code{NULL} (default), then the difference used for differentiating overly large degrees of
+freedom parameters is adjusted to avoid numerical problems, and the difference is \code{6e-6} for the other parameters.}
+
+\item{calc_std_errors}{should approximate standard errors be calculated?}
 }
 \value{
 Returns an object of class \code{'gsmar'} defining the estimated model. Can be used
@@ -29,7 +37,7 @@ The main purpose of \code{iterate_more} is to provide a simple and convenient to
 \donttest{
 # Estimate GMAR model with only 50 generations of genetic algorithm and
 # only 1 iteration in variable metric algorithm
-fit12 <- fitGSMAR(logVIX, 1, 2, maxit=1, ngen=50, ncalls=3)
+fit12 <- fitGSMAR(logVIX, 1, 2, maxit=1, ngen=50, ncalls=1, seeds=1)
 fit12
 
 # Iterate more since iteration limit was reached

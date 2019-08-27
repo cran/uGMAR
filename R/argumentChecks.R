@@ -239,10 +239,10 @@ parameterChecks <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), r
   if(model == "StMAR" | model == "G-StMAR") {
     if(any(dfs <= 2)) {
       stop("The degrees of freedom parameters have to be larger than 2")
-    } else if(any(dfs > 1e+6)) {
-      stop("We have set an upper bound of 1e+6 for the degrees of freedom parameters
-           in order gain better numerical stability. This is not, however, restrictive
-           since t distribution with dfs higher than million strongly resembles
+    } else if(any(dfs > 1e+5)) {
+      stop("We have set an upper bound of 1e+5 for the degrees of freedom parameters
+           in order to avoid numerical problems. This is not, however, restrictive
+           since t distribution with dfs higher than this strongly resembles
            the Gaussian distribution by its shape.")
     }
   }
@@ -444,7 +444,7 @@ check_data <- function(object) {
 
 
 
-#' @title Warn about large degrees of freedom paramater values
+#' @title Warn about large degrees of freedom parameter values
 #'
 #' @description \code{warn_dfs} warns if the model contains large degrees of freedom paramater values
 #'   possibly indicating unrealible numerical derivatives.
@@ -469,8 +469,6 @@ warn_dfs <- function(object, p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), 
   if(model %in% c("StMAR", "G-StMAR")) {
     pars <- removeAllConstraints(p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints)
     dfs <- pick_dfs(p=p, M=M, params=pars, model=model)
-    mystring <- ifelse(warn_about == "derivs", "derivatives", "standard errors")
-    if(any(dfs > 1000)) warning(paste("Numerically approximated", mystring, "may be biased because of numerical error caused by very degrees of freedom parameter values.",
-                                      "Consider switching to G-StMAR model by setting the corresponding regimes to GMAR type with the function 'stmar_to_gstmar'."))
+    if(any(dfs > 100)) warning("The model contains overly large degrees of freedom parameter values. Consider switching to G-StMAR model by setting the corresponding regimes to GMAR type with the function 'stmar_to_gstmar'.")
   }
 }

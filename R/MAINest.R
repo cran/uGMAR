@@ -10,9 +10,10 @@
 #' @param ncalls a positive integer specifying how many rounds of estimation should be conducted.
 #'  The estimation results may vary from round to round because of multimodality of the log-likelihood function
 #'  and randomness associated with the genetic algorithm.
-#' @param ncores a positive integer specifying the number of cores to be used in the estimation process.
-#'  Default is that the number of available cores is detected with \code{parallel::detectCores} and all of them are used.
+#' @param ncores the number of cores to be used in the estimation process.
 #' @param maxit maximum number of iterations in the variable metric algorithm.
+#' @param seeds a length \code{ncalls} vector containing the random number generator seed for each call to the genetic algorithm,
+#'   or \code{NULL} for not initializing the seed. Exists for creating reproducible results.
 #' @param printRes should the estimation results be printed?
 #' @param runTests should quantile residuals tests be performed after the estimation?
 #' @param ... additional settings passed to the function \code{GAfit} employing the genetic algorithm.
@@ -111,7 +112,7 @@
 #'  }
 #' @examples
 #' \donttest{
-#' # These are long running examples and use parallel computing
+#' # These are long running examples that use parallel computing
 #'
 #' # GMAR model
 #' fit12 <- fitGSMAR(data=logVIX, p=1, M=2, model="GMAR")
@@ -129,8 +130,9 @@
 #' fit11t <- fitGSMAR(logVIX, 1, 1, model="StMAR", ncores=1, ncalls=1)
 #' fit11t
 #'
-#' # StMAR model
-#' fit12t <- fitGSMAR(logVIX, 1, 2, model="StMAR")
+#' # StMAR model, seeds for reproducability
+#' fit12t <- fitGSMAR(logVIX, 1, 2, model="StMAR", ncalls=10,
+#'   seeds=1:10)
 #' fit12t
 #'
 #' # G-StMAR model with one GMAR type and one StMAR type regime
@@ -144,8 +146,9 @@
 #' # The following three examples demonstrate how to apply linear constraints
 #' # to the AR parameters.
 #'
-#' # GMAR model that is a mixture of AR(1) and such AR(3) that the
-#' # second AR coeffiecient is constrained to zero.
+#' # GMAR(p=3, M=2) model that the second and third AR coefficients are constrained
+#' # to zero in the first regime, and the second AR coefficient is constrained to
+#' # zero in the second regime.
 #' constraints <- list(matrix(c(1, 0, 0, 0, 0, 1), ncol=2), as.matrix(c(1, 0, 0)))
 #' fit32c <- fitGSMAR(logVIX, 3, 2, constraints=constraints)
 #' fit32c
@@ -166,13 +169,13 @@
 #' @export
 
 fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FALSE, constraints=NULL, conditional=TRUE,
-                     parametrization=c("intercept", "mean"), ncalls=round(10 + 9*log(sum(M))), ncores=min(ncalls, parallel::detectCores()),
-                     maxit=300, printRes=TRUE, runTests=FALSE, ...) {
+                     parametrization=c("intercept", "mean"), ncalls=round(10 + 9*log(sum(M))), ncores=min(2, ncalls, parallel::detectCores()),
+                     maxit=300, seeds=NULL, printRes=TRUE, runTests=FALSE, ...) {
   on.exit(closeAllConnections())
+  if(!is.null(seeds) && length(seeds) != ncalls) stop("The argument 'seeds' needs be NULL or a vector of length 'ncalls'")
   model <- match.arg(model)
   check_model(model)
   parametrization <- match.arg(parametrization)
-  stopifnot(parametrization %in% c("intercept", "mean"))
   if(!all_pos_ints(c(ncalls, ncores, maxit))) stop("Arguments ncalls, ncores and maxit have to be positive integers")
   checkPM(p, M, model=model)
   data <- checkAndCorrectData(data, p)
@@ -208,9 +211,9 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
   parallel::clusterEvalQ(cl, c(library(Brobdingnag), library(pbapply)))
 
   cat("Optimizing with the genetic algorithm...\n")
-  GAresults <- pbapply::pblapply(1:ncalls, function(x) GAfit(data=data, p=p, M=M, model=model, restricted=restricted,
+  GAresults <- pbapply::pblapply(1:ncalls, function(i1) GAfit(data=data, p=p, M=M, model=model, restricted=restricted,
                                                              constraints=constraints, conditional=conditional,
-                                                             parametrization=parametrization, ...), cl=cl)
+                                                             parametrization=parametrization, seed=seeds[i1], ...), cl=cl)
   parallel::stopCluster(cl=cl)
 
   loks <- vapply(1:ncalls, function(i1) loglikelihood_int(data=data, p=p, M=M, params=GAresults[[i1]], model=model,
@@ -218,7 +221,7 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
                                                           parametrization=parametrization, boundaries=TRUE, checks=FALSE,
                                                           minval=minval), numeric(1))
 
-  if(printRes == TRUE) {
+  if(printRes) {
     cat("Results from the genetic algorithm:\n")
     cat(paste("lowest value: ", round(min(loks), 3)), "\n")
     cat(paste("mean value:   ", round(mean(loks), 3)), "\n")
@@ -227,8 +230,9 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
 
   ### Optimization with the variable metric algorithm ###
 
-  # Logarithmize dfs to get them to the same range as other parameters: this allows
-  # the df-parameters to "explode" more sensitively to implicate GMAR-type components.
+  # Logarithmize dfs to get overly large dfs values to the same range as other parameters.
+  # This adjusts the difference 'h' larger for larger dfs parameters in non-log scale, and
+  # also allows the dfs estimates to 'explode' more sensitively.
   manipulateDFS <- function(M, params, model, FUN) {
     FUN <- match.fun(FUN)
     M2 <- ifelse(model == "StMAR", M, M[2])
@@ -250,8 +254,8 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
   }
 
   # Calculate gradient of the log-likelihood function using central finite difference
-  h <- 6e-6
   I <- diag(rep(1, d))
+  h <- 6e-6
   gr <- function(params) {
     vapply(1:d, function(i1) (f(params + I[i1,]*h) - f(params - I[i1,]*h))/(2*h), numeric(1))
   }
@@ -278,7 +282,7 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
     newtonEstimates <- lapply(1:ncalls, function(i1) manipulateDFS(M=M, params=newtonEstimates[[i1]], model=model, FUN=exp))
   }
 
-  if(printRes == TRUE) {
+  if(printRes) {
     cat("Results from the variable metric algorithm:\n")
     cat(paste("lowest value: ", round(min(loks), 3)), "\n")
     cat(paste("mean value:   ", round(mean(loks), 3)), "\n")
@@ -298,24 +302,16 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
   }
   if(bestfit$convergence == 1) message("Iteration limit was reached when estimating the best fitting individual!")
 
-
-  ### Tests, estimates, standard errors, IC ###
-  tmp_gsmar <- GSMAR(data, p, M, params=params, model=model, restricted=restricted, constraints=constraints,
-                     conditional=conditional, parametrization=parametrization, calc_std_errors=FALSE)
-
   # Quantile residual tests
-  if(runTests == TRUE) {
+  if(runTests) {
     cat("Performing quantile residual tests...\n")
+    tmp_gsmar <- GSMAR(data, p, M, params=params, model=model, restricted=restricted, constraints=constraints,
+                       conditional=conditional, parametrization=parametrization, calc_std_errors=FALSE)
     qr_tests <- quantileResidualTests(tmp_gsmar, lagsAC=c(1, 2, 5, 10), lagsCH=c(1, 2, 5, 10), nsimu=2000, printRes=printRes)
-    if(printRes == TRUE) cat("\n")
+    if(printRes) cat("\n")
   } else {
     qr_tests <- NULL
   }
-
-  # Information criteria
-  obs <- ifelse(conditional, length(data) - p, length(data))
-  loglik <- bestfit$value
-  IC <- get_IC(loglik=loglik, npars=d, obs=obs)
 
   ### Wrap up ###
   ret <- GSMAR(data=data, p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints,
@@ -338,6 +334,7 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
 #'
 #' @inheritParams simulateGSMAR
 #' @inheritParams fitGSMAR
+#' @inheritParams GSMAR
 #' @details The main purpose of \code{iterate_more} is to provide a simple and convenient tool to finalize
 #'   the estimation when the maximum number of iterations is reached when estimating a model with the
 #'   main estimation function \code{fitGSMAR}. It's just a simple wrapper around function \code{optim}
@@ -350,7 +347,7 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
 #' \donttest{
 #' # Estimate GMAR model with only 50 generations of genetic algorithm and
 #' # only 1 iteration in variable metric algorithm
-#' fit12 <- fitGSMAR(logVIX, 1, 2, maxit=1, ngen=50, ncalls=3)
+#' fit12 <- fitGSMAR(logVIX, 1, 2, maxit=1, ngen=50, ncalls=1, seeds=1)
 #' fit12
 #'
 #' # Iterate more since iteration limit was reached
@@ -359,9 +356,10 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
 #' }
 #' @export
 
-iterate_more <- function(gsmar, maxit=100) {
+iterate_more <- function(gsmar, maxit=100, custom_h=NULL, calc_std_errors=TRUE) {
   check_gsmar(gsmar)
   stopifnot(maxit %% 1 == 0 & maxit >= 1)
+  if(!is.null(custom_h)) stopifnot(length(custom_h) == length(gsmar$params))
   minval <- -(10^(ceiling(log10(length(gsmar$data))) + 1) - 1)
 
   fn <- function(params) {
@@ -371,7 +369,12 @@ iterate_more <- function(gsmar, maxit=100) {
                                boundaries=TRUE, checks=FALSE, to_return="loglik", minval=minval), error=function(e) minval)
   }
   gr <- function(params) {
-    calc_gradient(x=params, fn=fn)
+    if(is.null(custom_h)) {
+      varying_h <- get_varying_h(p=gsmar$model$p, M=gsmar$model$M, params=params, model=gsmar$model$model)
+    } else {
+      varying_h <- custom_h
+    }
+    calc_gradient(x=params, fn=fn, varying_h=varying_h)
   }
 
   res <- optim(par=gsmar$params, fn=fn, gr=gr, method=c("BFGS"), control=list(fnscale=-1, maxit=maxit))
@@ -380,5 +383,5 @@ iterate_more <- function(gsmar, maxit=100) {
   GSMAR(data=gsmar$data, p=gsmar$model$p, M=gsmar$model$M, params=res$par, model=gsmar$model$model,
         restricted=gsmar$model$restricted, constraints=gsmar$model$constraints,
         conditional=gsmar$model$conditional, parametrization=gsmar$model$parametrization,
-        calc_qresiduals=TRUE, calc_cond_moments=TRUE, calc_std_errors=TRUE)
+        calc_qresiduals=TRUE, calc_cond_moments=TRUE, calc_std_errors=calc_std_errors, custom_h=custom_h)
 }
