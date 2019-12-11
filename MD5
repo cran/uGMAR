@@ -1,6 +1,6 @@
-0db7fa8b0de973f4f333c095cb9290a1 *DESCRIPTION
+a5901ef45576cbedae9524d0720cb039 *DESCRIPTION
 5a502c2c4dfc6d0a65b5ff08452e0587 *NAMESPACE
-26c7729c304c774182c981d3833b6c99 *NEWS.md
+ef17eeb820c09fc24ff64205c246e2ac *NEWS.md
 0e4d907633eb26c76dce495dc2e38528 *R/GSMARconstructor.R
 e2f63408e6ea317a3ddcba2907249f9d *R/MAINest.R
 759c828c2d62037d841a7cfa7c63a660 *R/argumentChecks.R
@@ -28,7 +28,7 @@ df8b256fcb25ed50223621e27e60e92b *build/vignette.rds
 77863e7f08b516c13a51dcc4ba814124 *data/VIX.rda
 8289e1df11a0ad6c0bb0480d3a530183 *data/logVIX.rda
 a933c2b3f75b925cc2e2c50caa292b9d *inst/doc/intro-to-uGMAR.Rmd
-db62edfb4ceeee72420fa0253c8a025d *inst/doc/intro-to-uGMAR.html
+1f92f59ebb9aacd2fc14f27a877b8caa *inst/doc/intro-to-uGMAR.html
 d1c50e03d514921f30d7f63cf99cbb8f *man/GAfit.Rd
 17325f58d6250bbadc35fdd5fa1920b5 *man/GSMAR.Rd
 14f0b8cf34dc3046c5e74369343c5555 *man/IE.Rd
@@ -114,6 +114,6 @@ f8d7d712808089b745f3903a72faf977 *tests/testthat/test_pickAndChangeParams.R
 750255829ce5b13c7c84ff521c7f28be *tests/testthat/test_quantileResidualTests.R
 57ab2c5f2a3d15d84b549b0819908db6 *tests/testthat/test_quantileResiduals.R
 0ce9ae53afe90ca4988a88159f13c2f4 *tests/testthat/test_simulateGSMAR.R
-1264b94531103c815318a2c91baed7db *tests/testthat/test_standardErrors.R
+b6dd96f83ffbe4f4937d924ed5536e0e *tests/testthat/test_standardErrors.R
 8a3aca7a475302ee8cf30ffbb5807bc4 *tests/testthat/test_uncondMoments.R
 a933c2b3f75b925cc2e2c50caa292b9d *vignettes/intro-to-uGMAR.Rmd
