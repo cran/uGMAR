@@ -2,7 +2,7 @@
 % Please edit documentation in R/diagnosticPlot.R
 \name{quantileResidualPlot}
 \alias{quantileResidualPlot}
-\title{Ploy quantile residual time series and kernel density}
+\title{Plot quantile residual time series and histogram}
 \usage{
 quantileResidualPlot(gsmar)
 }
@@ -15,11 +15,6 @@ Only plots to a graphical device and doesn't return anything.
 \description{
 \code{quantileResidualsPlot} plots quantile residual time series and histogram.
 }
-\section{Suggested packages}{
-
-  Install the suggested package "gsl" for faster evaluation of the quantile residuals of StMAR and G-StMAR models.
-}
-
 \examples{
 \donttest{
 # GMAR model
@@ -58,5 +53,6 @@ quantileResidualPlot(fit32rc)
  }
 }
 \seealso{
-\code{\link{diagnosticPlot}}, \code{\link{fitGSMAR}}, \code{\link{GSMAR}}, \code{\link{quantileResidualTests}}, \code{\link{simulateGSMAR}}
+\code{\link{profile_logliks}}, \code{\link{diagnosticPlot}}, \code{\link{fitGSMAR}}, \code{\link{GSMAR}},
+ \code{\link{quantileResidualTests}}, \code{\link{simulateGSMAR}}
 }

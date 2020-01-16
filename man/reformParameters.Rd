@@ -8,12 +8,12 @@ reformParameters(p, M, params, model = c("GMAR", "StMAR", "G-StMAR"),
   restricted = FALSE)
 }
 \arguments{
-\item{p}{a positive integer specifying the order of AR coefficients.}
+\item{p}{a positive integer specifying the autoregressive order of the model.}
 
 \item{M}{\describe{
   \item{For \strong{GMAR} and \strong{StMAR} models:}{a positive integer specifying the number of mixture components.}
-  \item{For \strong{G-StMAR} model:}{a size (2x1) vector specifying the number of \emph{GMAR-type} components \code{M1} in the
-   first element and \emph{StMAR-type} components \code{M2} in the second. The total number of mixture components is \code{M=M1+M2}.}
+  \item{For \strong{G-StMAR} models:}{a size (2x1) integer vector specifying the number of \emph{GMAR type} components \code{M1} in the
+   first element and \emph{StMAR type} components \code{M2} in the second element. The total number of mixture components is \code{M=M1+M2}.}
 }}
 
 \item{params}{a real valued parameter vector specifying the model.
@@ -40,14 +40,14 @@ reformParameters(p, M, params, model = c("GMAR", "StMAR", "G-StMAR"),
     }
   }
 }
-Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight and \eqn{\nu} a degrees of
-freedom parameter. In the \strong{G-StMAR} model the first \code{M1} components are \emph{GMAR-type} and the rest \code{M2} components
-are \emph{StMAR-type}.
-Note that in the case \strong{M=1} the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model
+Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight, and \eqn{\nu} a degrees of
+freedom parameter. In the \strong{G-StMAR} model, the first \code{M1} components are \emph{GMAR type} and the rest \code{M2} components
+are \emph{StMAR type}.
+Note that in the case \strong{M=1}, the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model,
 the degrees of freedom parameters \eqn{\nu_{m}} have to be larger than \eqn{2}.}
 
-\item{model}{is "GMAR", "StMAR" or "G-StMAR" model considered? In G-StMAR model the first \code{M1} components
-are \emph{GMAR-type} and the rest \code{M2} components are \emph{StMAR-type}.}
+\item{model}{is "GMAR", "StMAR", or "G-StMAR" model considered? In the G-StMAR model, the first \code{M1} components
+are \emph{GMAR type} and the rest \code{M2} components are \emph{StMAR type}.}
 
 \item{restricted}{a logical argument stating whether the AR coefficients \eqn{\phi_{m,1},...,\phi_{m,p}} are restricted
 to be the same for all regimes.}
@@ -58,16 +58,16 @@ Returns a list with...
   \item{\code{$params}}{parameter vector in the standard form.}
   \item{\code{$pars}}{corresponding parameter matrix containing AR coefficients and
     component variances. First row for phi0 or means depending on the parametrization. Column for each component.}
-  \item{\code{$alphas}}{numeric vector containing mixing weights for all components (also for the last one).}
-  \item{\code{$dfs}}{numeric vector containing degrees of freedom parameters for all components.
+  \item{\code{$alphas}}{numeric vector containing mixing weight parameters for all of the components (also for the last one).}
+  \item{\code{$dfs}}{numeric vector containing degrees of freedom parameters for all of components.
     Returned only if \code{model == "StMAR"} or \code{model == "G-StMAR"}.}
  }
 }
 \description{
-\code{reformParameters} takes a parameter vector of any (non-constrained) GMAR, StMAR or G-StMAR model and returns a list with the
- parameter vector in the standard form, parameter matrix containing AR coefficients and component
- variances, mixing weights alphas and in case of StMAR or G-StMAR model also degrees of freedom parameters.
+\code{reformParameters} takes a parameter vector of any (non-constrained) GMAR, StMAR, or G-StMAR model
+ and returns a list with the parameter vector in the standard form, parameter matrix containing AR coefficients and
+ component variances, mixing weights alphas, and in case of StMAR or G-StMAR model also degrees of freedom parameters.
 }
 \details{
-This function does not support models parametrized with general linear constraints! Nor does it have any argument checks.
+This function does not support models imposing linear constraints. No argument checks in this function.
 }

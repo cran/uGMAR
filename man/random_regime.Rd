@@ -2,13 +2,13 @@
 % Please edit documentation in R/geneticAlgorithm.R
 \name{random_regime}
 \alias{random_regime}
-\title{Create random regime}
+\title{Create random regime parameters}
 \usage{
 random_regime(p, meanscale, sigmascale, restricted = FALSE,
   constraints = NULL, m, forcestat = FALSE)
 }
 \arguments{
-\item{p}{a positive integer specifying the order of AR coefficients.}
+\item{p}{a positive integer specifying the autoregressive order of the model.}
 
 \item{meanscale}{a real valued vector of length two specifying the mean (the first element) and standard deviation (the second element)
 of the normal distribution from which the \eqn{\mu_{m}} mean-parameters are generated in random mutations in the genetic algorithm.
@@ -16,8 +16,8 @@ Default is \code{c(mean(data), sd(data))}.
 Note that the genetic algorithm optimizes with mean-parametrization even when \code{parametrization=="intercept"}, but
 input (in \code{initpop}) and output (return value) parameter vectors may be intercept-parametrized.}
 
-\item{sigmascale}{a positive real number specifying the standard deviation of the (zero mean, positive only) normal distribution
-from which the component variance parameters are generated in the random mutations in the genetic algorithm.
+\item{sigmascale}{a positive real number specifying the standard deviation of the (zero mean, positive only by taking absolute value)
+normal distribution from which the component variance parameters are generated in the random mutations in the genetic algorithm.
 Default is \code{var(stats::ar(data, order.max=10)$resid, na.rm=TRUE)}.}
 
 \item{restricted}{a logical argument stating whether the AR coefficients \eqn{\phi_{m,1},...,\phi_{m,p}} are restricted
@@ -32,11 +32,12 @@ to be the same for all regimes.}
   \strong{\eqn{\phi}}\eqn{=}\strong{\eqn{C\psi}}, where \strong{\eqn{\phi}}\eqn{=(\phi_{1},...,\phi_{p})} and
   \strong{\eqn{\psi}}\eqn{=\psi_{1},...,\psi_{q}}.}
 }
-Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constraints, the nominal order of AR coefficients is
-alway \code{p} for all regimes.
+Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constraints, the nominal autoregressive order
+is always \code{p} for all regimes.
 Ignore or set to \code{NULL} if applying linear constraints is \strong{not} desired.}
 
-\item{m}{which regime?}
+\item{m}{which regime? This is required for models with constraints for which a list of possibly differing
+constraint matrices is provided.}
 
 \item{forcestat}{use the algorithm by Monahan (1984) to force stationarity on the AR parameters (slower)?
 Not supported for constrained models.}
@@ -50,10 +51,10 @@ Not supported for constrained models.}
 }
 }
 \description{
-\code{random_regime} generates random regime parameters
+\code{random_regime} generates random regime parameters.
 }
 \details{
-if \code{forcestat==TRUE} then the AR coefficients are relatively large, otherwise they are usually relatively small.
+If \code{forcestat==TRUE}, then the AR coefficients are relatively large, otherwise they are usually relatively small.
 }
 \references{
 \itemize{

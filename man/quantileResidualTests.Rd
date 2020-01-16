@@ -5,7 +5,7 @@
 \alias{plot.qrtest}
 \alias{print.qrtest}
 \alias{quantileResidualTests}
-\title{Quantile residual tests for GMAR, StMAR or G-StMAR model}
+\title{Quantile residual tests for GMAR, StMAR , and G-StMAR models}
 \usage{
 \method{plot}{qrtest}(x, ...)
 
@@ -20,52 +20,58 @@ quantileResidualTests(gsmar, lagsAC = c(1, 2, 5, 10), lagsCH = lagsAC,
 \item{...}{graphical parameters passed to \code{segments} in \code{plot.qrtest}.
 Currectly not used in \code{print.qrtest}}
 
-\item{digits}{number of decimals to print}
+\item{digits}{the number of digits to be print}
 
 \item{gsmar}{object of class \code{'gsmar'} created with the function \code{fitGSMAR} or \code{GSMAR}.}
 
 \item{lagsAC}{a numeric vector of positive integers specifying the lags for which autocorrelation is tested.}
 
-\item{lagsCH}{a numeric vector of positive integers specifying the lags for which conditional heteroscedasticity is tested.}
+\item{lagsCH}{a numeric vector of positive integers specifying the lags for which conditional heteroscedasticity
+is tested.}
 
 \item{nsimu}{a positive integer specifying to how many simulated observations the covariance matrix Omega
-(see Kalliovirta (2012)) should be based on. If smaller than data size, then omega will be based on the given data.}
+(see Kalliovirta (2012)) should be based on. If smaller than data size, then omega will be based on the
+given data and not on simulated data.}
 
-\item{printRes}{a logical argument defining whether results should be printed or not.}
+\item{printRes}{a logical argument defining whether the results should be printed or not.}
 }
 \value{
 Returns an object of class \code{'qrtest'} containing the test results in data frames. In the cases
   of autocorrelation and conditional heteroscedasticity tests, the returned object also contains the
-  associated individual statistics and their standard errors, discussed by \emph{Kalliovirta (2012)} at
+  associated individual statistics and their standard errors, discussed in \emph{Kalliovirta (2012)} at
   the pages 369-370.
 }
 \description{
-\code{quantileResidualTests} performs quantile residual tests for GMAR, StMAR or G-StMAR model,
- testing normality, autocorrelation and conditional heteroscedasticity.
+\code{quantileResidualTests} performs quantile residual tests for GMAR, StMAR,
+ and G-StMAR models, testing normality, autocorrelation, and conditional heteroscedasticity
+ of the quantile residuals.
 }
 \details{
-For details about the quantile residual tests see the cited article by \emph{Kalliovirta (2012)}.
+For a correctly specified GSMAR model employing the maximum likelihood estimator, the quantile residuals
+  are asymptotically independent with standard normal distribution. They can hence be used in a similar
+  manner to conventional Pearson's residuals. For more details about quantile residual based diagnostics,
+  and in particular, about the quantile residual tests, see the cited article by \emph{Kalliovirta (2012)}.
 }
 \section{Methods (by generic)}{
 \itemize{
-\item \code{plot}: plot p-values of the autocorrelation and conditional
+\item \code{plot}: Plot p-values of the autocorrelation and conditional
 heteroskedasticity tests.
 
-\item \code{print}: print method for class 'qrtest'
+\item \code{print}: Print method for class 'qrtest' objects
 }}
 
 \section{Suggested packages}{
 
   Install the suggested package "gsl" for faster evaluations in the cases of StMAR and G-StMAR models.
-  For large StMAR and G-StMAR models with large data the evaluations may take significantly long time without
-  the package "gsl".
+  For large StMAR and G-StMAR models with large data, the evaluations may take significantly long time
+  without the package "gsl".
 }
 
 \examples{
 \donttest{
 # GMAR model
 fit12 <- fitGSMAR(data=logVIX, p=1, M=2, model="GMAR")
-qrtest12 <- quantileResidualTests(fit12)
+qrtest12 <- quantileResidualTests(fit12, nsimu=1)
 plot(qrtest12)
 
 # Restricted GMAR model
@@ -104,6 +110,6 @@ quantileResidualTests(fit22c, lagsAC=c(1, 3), nsimu=1, printRes=FALSE)
  }
 }
 \seealso{
-\code{\link{fitGSMAR}}, \code{\link{GSMAR}}, \code{\link{diagnosticPlot}}, \code{\link{predict.gsmar}},
- \code{\link{getOmega}},
+\code{\link{profile_logliks}}, \code{\link{fitGSMAR}}, \code{\link{GSMAR}}, \code{\link{diagnosticPlot}},
+ \code{\link{predict.gsmar}}, \code{\link{getOmega}},
 }

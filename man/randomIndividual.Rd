@@ -3,7 +3,7 @@
 \name{randomIndividual}
 \alias{randomIndividual}
 \alias{smartIndividual}
-\title{Create random GMAR, StMAR or G-StMAR model compatible parameter vector}
+\title{Create random GMAR, StMAR, or G-StMAR model compatible parameter vector}
 \usage{
 randomIndividual(p, M, model = c("GMAR", "StMAR", "G-StMAR"),
   restricted = FALSE, constraints = NULL, meanscale, sigmascale,
@@ -14,16 +14,16 @@ smartIndividual(p, M, params, model = c("GMAR", "StMAR", "G-StMAR"),
   accuracy, whichRandom = numeric(0), forcestat = FALSE)
 }
 \arguments{
-\item{p}{a positive integer specifying the order of AR coefficients.}
+\item{p}{a positive integer specifying the autoregressive order of the model.}
 
 \item{M}{\describe{
   \item{For \strong{GMAR} and \strong{StMAR} models:}{a positive integer specifying the number of mixture components.}
-  \item{For \strong{G-StMAR} model:}{a size (2x1) vector specifying the number of \emph{GMAR-type} components \code{M1} in the
-   first element and \emph{StMAR-type} components \code{M2} in the second. The total number of mixture components is \code{M=M1+M2}.}
+  \item{For \strong{G-StMAR} models:}{a size (2x1) integer vector specifying the number of \emph{GMAR type} components \code{M1} in the
+   first element and \emph{StMAR type} components \code{M2} in the second element. The total number of mixture components is \code{M=M1+M2}.}
 }}
 
-\item{model}{is "GMAR", "StMAR" or "G-StMAR" model considered? In G-StMAR model the first \code{M1} components
-are \emph{GMAR-type} and the rest \code{M2} components are \emph{StMAR-type}.}
+\item{model}{is "GMAR", "StMAR", or "G-StMAR" model considered? In the G-StMAR model, the first \code{M1} components
+are \emph{GMAR type} and the rest \code{M2} components are \emph{StMAR type}.}
 
 \item{restricted}{a logical argument stating whether the AR coefficients \eqn{\phi_{m,1},...,\phi_{m,p}} are restricted
 to be the same for all regimes.}
@@ -37,15 +37,16 @@ to be the same for all regimes.}
   \strong{\eqn{\phi}}\eqn{=}\strong{\eqn{C\psi}}, where \strong{\eqn{\phi}}\eqn{=(\phi_{1},...,\phi_{p})} and
   \strong{\eqn{\psi}}\eqn{=\psi_{1},...,\psi_{q}}.}
 }
-Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constraints, the nominal order of AR coefficients is
-alway \code{p} for all regimes.
+Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constraints, the nominal autoregressive order
+is always \code{p} for all regimes.
 Ignore or set to \code{NULL} if applying linear constraints is \strong{not} desired.}
 
-\item{meanscale}{a real valued vector of length two specifying the mean (the first element) and standard deviation (the second element) of the normal distribution
-from which the \eqn{\phi_{m,0}} \strong{or} \eqn{\mu_{m}} (depending on the desired parametrization) parameters (for random regimes) should be generated.}
+\item{meanscale}{a real valued vector of length two specifying the mean (the first element) and standard deviation (the second element)
+of the normal distribution from which the \eqn{\phi_{m,0}} \strong{or} \eqn{\mu_{m}} (depending on the desired parametrization)
+parameters (for random regimes) should be generated.}
 
-\item{sigmascale}{a positive real number specifying the standard deviation of the (zero mean, positive only) normal distribution
-from which the component variance parameters (for random regimes) should be generated.}
+\item{sigmascale}{a positive real number specifying the standard deviation of the (zero mean, positive only by taking absolute value)
+normal distribution from which the component variance parameters (for random regimes) should be generated.}
 
 \item{forcestat}{use the algorithm by Monahan (1984) to force stationarity on the AR parameters (slower) for random regimes?
 Not supported for constrained models.}
@@ -80,30 +81,31 @@ Not supported for constrained models.}
     }
   }
 }
-Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight and \eqn{\nu} a degrees of
-freedom parameter. If \code{parametrization=="mean"} just replace each intercept term \eqn{\phi_{m,0}} with regimewise mean
-\eqn{\mu_m = \phi_{m,0}/(1-\sum\phi_{i,m})}. In the \strong{G-StMAR} model the first \code{M1} components are \emph{GMAR-type}
-and the rest \code{M2} components are \emph{StMAR-type}.
-Note that in the case \strong{M=1} the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model
+Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight, and \eqn{\nu} a degrees of
+freedom parameter. If \code{parametrization=="mean"}, just replace each intercept term \eqn{\phi_{m,0}} with regimewise mean
+\eqn{\mu_m = \phi_{m,0}/(1-\sum\phi_{i,m})}. In the \strong{G-StMAR} model, the first \code{M1} components are \emph{GMAR type}
+and the rest \code{M2} components are \emph{StMAR type}.
+Note that in the case \strong{M=1}, the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model,
 the degrees of freedom parameters \eqn{\nu_{m}} have to be larger than \eqn{2}.}
 
 \item{accuracy}{a real number larger than zero specifying how close to \code{params} the generated parameter vector should be.
-Standard deviation of the normal distribution from which new parameter values are drawed from will be corresponding parameter value divided by \code{accuracy}.}
+Standard deviation of the normal distribution from which new parameter values are drawn from will be corresponding parameter
+value divided by \code{accuracy}.}
 
-\item{whichRandom}{an (optional) numeric vector of max length \code{M} specifying which regimes should be random instead of "smart" when
-using \code{smartIndividual}. Does not affect on mixing weight parameters. Default in none.}
+\item{whichRandom}{a numeric vector of maximum length \code{M} specifying which regimes should be random instead of "smart" when
+using \code{smartIndividual}. Does not affect mixing weight parameters. Default in none.}
 }
 \value{
-Returns estimated parameter vector described in \code{initpop}.
+Returns estimated parameter vector with the form described in \code{initpop}.
 }
 \description{
-\code{randomIndividual} creates a random GMAR, StMAR, G-StMAR model compatible mean-parametrized parameter vector.
+\code{randomIndividual} creates a random GMAR, StMAR, or G-StMAR model compatible mean-parametrized parameter vector.
 
-\code{smartIndividual} creates a random GMAR, StMAR or G-StMAR model compatible parameter vector close to argument \code{params}.
+\code{smartIndividual} creates a random GMAR, StMAR, or G-StMAR model compatible parameter vector close to argument \code{params}.
   Sometimes returns exactly the given parameter vector.
 }
 \details{
-The functions can be used for example to create initial populations for the genetic algorithm. Mean-parametrization
+These functions can be used, for example, to create initial populations for the genetic algorithm. Mean-parametrization
   (instead of intercept terms \eqn{\phi_{m,0}}) is assumed.
 }
 \examples{

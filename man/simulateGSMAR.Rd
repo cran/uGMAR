@@ -2,14 +2,14 @@
 % Please edit documentation in R/simulateGSMAR.R
 \name{simulateGSMAR}
 \alias{simulateGSMAR}
-\title{Simulate values from GMAR, StMAR or G-StMAR process}
+\title{Simulate values from GMAR, StMAR, and G-StMAR processes}
 \usage{
 simulateGSMAR(gsmar, nsimu, initvalues, ntimes = 1, drop = TRUE)
 }
 \arguments{
 \item{gsmar}{object of class \code{'gsmar'} created with the function \code{fitGSMAR} or \code{GSMAR}.}
 
-\item{nsimu}{a positive integer specifying how many values will be simulated.}
+\item{nsimu}{a positive integer specifying how many values (ahead from \code{initvalues}) will be simulated.}
 
 \item{initvalues}{a numeric vector with length \code{>=p} specifying the initial values for the simulation. The \strong{last}
 element will be used as the initial value for the first lag, the second last element will be initial value for the second lag, etc.
@@ -22,24 +22,24 @@ i.e., \code{$sample} and \code{$component} will be vectors and \code{$mixing_wei
 }
 \value{
 If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample} and \code{$component} are vectors
- and is \code{$mixing_weights} is matrix. Otherwise, returns a list with...
+ and \code{$mixing_weights} is a (\code{nsimu}\eqn{xM}) matrix. Otherwise, returns a list with...
   \describe{
     \item{\code{$sample}}{a size (\code{nsimu}\eqn{x}\code{ntimes}) matrix containing the simulated values.}
-    \item{\code{$component}}{a size (\code{nsimu}\eqn{x}\code{ntimes}) matrix containing the information from which component each
-     value was generated from.}
+    \item{\code{$component}}{a size (\code{nsimu}\eqn{x}\code{ntimes}) matrix containing the information from which
+     mixture component each value was generated from.}
     \item{\code{$mixing_weights}}{a size (\code{nsimu}\eqn{xMx}\code{ntimes}) array containing the mixing weights corresponding to the
      sample: the dimension \code{[i, , ]} is the time index, the dimension \code{[, i, ]} indicates the regime, and the dimension
      \code{[, , i]} indicates the i:th set of simulations.}
   }
 }
 \description{
-\code{simulateGSMAR} simulates values from the specified GMAR, StMAR or G-StMAR process. Can be used for
- forecasting future values of the process.
+\code{simulateGSMAR} simulates values from the specified GMAR, StMAR, or G-StMAR process.
+ Can be utilized for forecasting future values of the process.
 }
 \details{
-The argument \code{ntimes} is intended for forecasting: a GSMAR process can be forecasted by simulating it's possible future values.
- One can easily perform a large number simulations and calculate the sample quantiles from the simulated values to obtain prediction
- intervals (see the forecasting example).
+The argument \code{ntimes} is intended for forecasting: a GSMAR process can be forecasted by simulating its
+ possible future values. One can perform a large number of sets of simulations and calculate the sample quantiles from
+ the simulated values to obtain prediction intervals. See the forecasting example below for a hand-on demonstration.
 }
 \examples{
  \donttest{
@@ -71,22 +71,14 @@ The argument \code{ntimes} is intended for forecasting: a GSMAR process can be f
  ts.plot(sim12gs$sample)
  ts.plot(sim12gs$component)
  ts.plot(sim12gs$mixing_weights, col=rainbow(3), lty=2)
-
- # Mixture version of Heterogenuous Autoregressive (HAR) model (without data)
- paramsHAR <- c(1, 0.1, 0.2, 0.3, 1, 1, 0.15, 0.25, 0.35, 1, 0.55)
- r1 = c(1, rep(0, 21)); r2 = c(rep(0.2, 5), rep(0, 17)); r3 = rep(1/22, 22)
- R0 = cbind(r1, r2, r3)
- mixhar <- GSMAR(p=22, M=2, params=paramsHAR, model="GMAR", constraints=list(R0, R0))
- simhar <- simulateGSMAR(mixhar, nsimu=1000)
- ts.plot(simhar$sample)
- ts.plot(simhar$component)
- ts.plot(simhar$mixing_weights, col=rainbow(3), lty=2)
 }
 }
 \references{
 \itemize{
    \item Galbraith, R., Galbraith, J. 1974. On the inverses of some patterned matrices arising
            in the theory of stationary time series. \emph{Journal of Applied Probability} \strong{11}, 63-71.
+   \item Kalliovirta L. (2012) Misspecification tests based on quantile residuals.
+           \emph{The Econometrics Journal}, \strong{15}, 358-393.
    \item Kalliovirta L., Meitz M. and Saikkonen P. 2015. Gaussian Mixture Autoregressive model for univariate time series.
            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.

@@ -9,12 +9,12 @@ stmarpars_to_gstmar(p, M, params, restricted = FALSE,
   constraints = NULL, maxdf = 100)
 }
 \arguments{
-\item{p}{a positive integer specifying the order of AR coefficients.}
+\item{p}{a positive integer specifying the autoregressive order of the model.}
 
 \item{M}{\describe{
   \item{For \strong{GMAR} and \strong{StMAR} models:}{a positive integer specifying the number of mixture components.}
-  \item{For \strong{G-StMAR} model:}{a size (2x1) vector specifying the number of \emph{GMAR-type} components \code{M1} in the
-   first element and \emph{StMAR-type} components \code{M2} in the second. The total number of mixture components is \code{M=M1+M2}.}
+  \item{For \strong{G-StMAR} models:}{a size (2x1) integer vector specifying the number of \emph{GMAR type} components \code{M1} in the
+   first element and \emph{StMAR type} components \code{M2} in the second element. The total number of mixture components is \code{M=M1+M2}.}
 }}
 
 \item{params}{a real valued parameter vector specifying the model.
@@ -47,11 +47,11 @@ stmarpars_to_gstmar(p, M, params, restricted = FALSE,
     }
   }
 }
-Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight and \eqn{\nu} a degrees of
-freedom parameter. If \code{parametrization=="mean"} just replace each intercept term \eqn{\phi_{m,0}} with regimewise mean
-\eqn{\mu_m = \phi_{m,0}/(1-\sum\phi_{i,m})}. In the \strong{G-StMAR} model the first \code{M1} components are \emph{GMAR-type}
-and the rest \code{M2} components are \emph{StMAR-type}.
-Note that in the case \strong{M=1} the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model
+Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight, and \eqn{\nu} a degrees of
+freedom parameter. If \code{parametrization=="mean"}, just replace each intercept term \eqn{\phi_{m,0}} with regimewise mean
+\eqn{\mu_m = \phi_{m,0}/(1-\sum\phi_{i,m})}. In the \strong{G-StMAR} model, the first \code{M1} components are \emph{GMAR type}
+and the rest \code{M2} components are \emph{StMAR type}.
+Note that in the case \strong{M=1}, the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model,
 the degrees of freedom parameters \eqn{\nu_{m}} have to be larger than \eqn{2}.}
 
 \item{restricted}{a logical argument stating whether the AR coefficients \eqn{\phi_{m,1},...,\phi_{m,p}} are restricted
@@ -66,23 +66,24 @@ to be the same for all regimes.}
   \strong{\eqn{\phi}}\eqn{=}\strong{\eqn{C\psi}}, where \strong{\eqn{\phi}}\eqn{=(\phi_{1},...,\phi_{p})} and
   \strong{\eqn{\psi}}\eqn{=\psi_{1},...,\psi_{q}}.}
 }
-Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constraints, the nominal order of AR coefficients is
-alway \code{p} for all regimes.
+Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constraints, the nominal autoregressive order
+is always \code{p} for all regimes.
 Ignore or set to \code{NULL} if applying linear constraints is \strong{not} desired.}
 
-\item{maxdf}{regimes with degrees of freedom parameter value large than this will be turned into
+\item{maxdf}{regimes with degrees of freedom parameter value larger than this will be turned into
 GMAR type.}
 }
 \value{
 Returns a list with three elements: \code{$params} contains the corresponding G-StMAR model
  parameter vector, \code{$reg_order} contains the permutation that was applied to the regimes
- (GMAR type components first, and decreasing ordering by mixign weight parameters), and
+ (GMAR type components first, and decreasing ordering by mixing weight parameters), and
  \code{$M} a vector of length two containing the number of GMAR type regimes in the first element
- and the number of StMAR type components in the second.
+ and the number of StMAR type regimes in the second.
 }
 \description{
 \code{stmarpars_to_gstmar} transforms a StMAR model parameter vector to a corresponding
- G-StMAR model parameter vector with large dfs parameters reduced by turning the related regimes GMAR type.
+ G-StMAR model parameter vector with large dfs parameters reduced by swicthing the related regimes
+ to be GMAR type.
 }
 \examples{
  params12 <- c(2, 0.9, 0.1, 0.8, 0.5, 0.5, 0.4, 12, 300)

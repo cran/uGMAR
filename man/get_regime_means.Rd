@@ -10,11 +10,11 @@ get_regime_means(gsmar)
 \item{gsmar}{object of class \code{'gsmar'} created with the function \code{fitGSMAR} or \code{GSMAR}.}
 }
 \value{
-Returns a length \code{M} vector containing regime mean \eqn{\mu_{m}} in the m:th column, \eqn{m=1,..,M}.
+Returns a length \code{M} vector containing the regime mean \eqn{\mu_{m}} in the m:th element.
 }
 \description{
-\code{get_regime_means} calculates regime means \eqn{\mu_{m} =  \phi_{m,0}/(1-\sum\phi_{i,m})}
-  of the given GMAR, StMAR or G-StMAR model
+\code{get_regime_means} calculates the regime means \eqn{\mu_{m} = \phi_{m,0}/(1-\sum\phi_{i,m})}
+  for the given GMAR, StMAR, or G-StMAR model
 }
 \examples{
 # GMAR model
@@ -39,7 +39,7 @@ get_regime_means(gstmar12)
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
            arXiv:1805.04010 \strong{[econ.EM]}.
    \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
-           theoretical properties similar to the GMAR and StMAR models.
+         theoretical properties similar to the GMAR and StMAR models.
  }
 }
 \seealso{

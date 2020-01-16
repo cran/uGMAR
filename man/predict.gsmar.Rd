@@ -2,7 +2,7 @@
 % Please edit documentation in R/predictMethod.R
 \name{predict.gsmar}
 \alias{predict.gsmar}
-\title{Forecast GMAR, StMAR or G-StMAR process}
+\title{Forecast GMAR, StMAR, or G-StMAR process}
 \usage{
 \method{predict}{gsmar}(object, ..., n_ahead, nsimu = 10000,
   pi = c(0.95, 0.8), pred_type = c("median", "mean", "cond_mean"),
@@ -18,13 +18,13 @@
 
 \item{nsimu}{a positive integer specifying to how many simulations the forecast should be based on.}
 
-\item{pi}{a numeric vector specifying the confidence levels of the prediction intervals.}
+\item{pi}{a numeric vector specifying confidence levels for the prediction intervals.}
 
-\item{pred_type}{should the prediction be based on sample "mean" or "median"? Or should it
-be one-step-ahead forecast based on conditional mean (\code{"cond_mean"})? prediction intervals
-won't be calculated if conditional mean is used.}
+\item{pred_type}{should the prediction be based on sample "median" or "mean"? Or should it
+be one-step-ahead forecast based on the exact conditional mean (\code{"cond_mean"})? prediction
+intervals won't be calculated if the exact conditional mean is used.}
 
-\item{pi_type}{should the prediction intervals be "two-sided", "upper" or "lower"?}
+\item{pi_type}{should the prediction intervals be "two-sided", "upper", or "lower"?}
 
 \item{nt}{a positive integer specifying the number of observations to be plotted
 along with the prediction. Default is \code{round(length(data)*0.2)}.}
@@ -32,20 +32,22 @@ along with the prediction. Default is \code{round(length(data)*0.2)}.}
 \item{plotRes}{a logical argument defining whether the forecast should be plotted or not.}
 }
 \value{
-Returns a data frame containing the empirical point prediction and prediction intervals accordingly to \code{pi}.
-  Or if \code{pred_type=="cond_mean"} returns the optimal prediction as (1x1) numeric vector.
+Returns a data frame containing the empirical point prediction and prediction intervals.
+ Or if \code{pred_type=="cond_mean"} returns the optimal prediction as (1x1) numeric vector.
 }
 \description{
-\code{predict.gsmar} forecasts the specified GMAR, StMAR or G-StMAR process by using the given data to simulate
- its possible future values. For one-step forecasts using the exact formula of conditional mean is supported.
+\code{predict.gsmar} forecasts the specified GMAR, StMAR, or G-StMAR process by using the given
+ data to simulate its possible future values. For one-step forecasts using the exact formula for conditional
+ mean is supported.
 }
 \details{
-\code{predict.gsmar} uses the last \code{p} values of the data to simulate \code{nsimu} possible
- future values for each step. The point prediction is then obtained by calculating the sample median (or mean)
- of each step and the prediction intervals are obtained from the empirical fractiles.
+\code{predict.gsmar} uses the last \code{p} values of the data to simulate \code{nsimu}
+ possible future values for each step-ahead. The point prediction is then obtained by calculating
+ the sample median or mean for each step and the prediction intervals are obtained from the
+ empirical fractiles.
 
- We encourage directly using the function \code{simulateGSMAR} for quantile based forecasting. With \code{simulateGSMAR}
- it's easy to forecast the mixing weights too.
+ We encourage directly using the function \code{simulateGSMAR} for quantile based forecasting.
+ With \code{simulateGSMAR} it's easy to forecast the mixing weights too.
 }
 \examples{
 \donttest{
@@ -82,6 +84,8 @@ predict(fit32rc, n_ahead=3, pi_type="lower")
 \itemize{
    \item Galbraith, R., Galbraith, J. 1974. On the inverses of some patterned matrices arising
            in the theory of stationary time series. \emph{Journal of Applied Probability} \strong{11}, 63-71.
+   \item Kalliovirta L. (2012) Misspecification tests based on quantile residuals.
+           \emph{The Econometrics Journal}, \strong{15}, 358-393.
    \item Kalliovirta L., Meitz M. and Saikkonen P. 2015. Gaussian Mixture Autoregressive model for univariate time series.
            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.

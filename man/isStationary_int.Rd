@@ -3,7 +3,7 @@
 \name{isStationary_int}
 \alias{isStationary_int}
 \alias{isIdentifiable}
-\title{Check the stationary and identification conditions of specified GMAR, StMAR or G-StMAR model.}
+\title{Check the stationarity and identification conditions of specified GMAR, StMAR, or G-StMAR model.}
 \usage{
 isStationary_int(p, M, params, restricted = FALSE)
 
@@ -11,12 +11,12 @@ isIdentifiable(p, M, params, model = c("GMAR", "StMAR", "G-StMAR"),
   restricted = FALSE, constraints = NULL)
 }
 \arguments{
-\item{p}{a positive integer specifying the order of AR coefficients.}
+\item{p}{a positive integer specifying the autoregressive order of the model.}
 
 \item{M}{\describe{
   \item{For \strong{GMAR} and \strong{StMAR} models:}{a positive integer specifying the number of mixture components.}
-  \item{For \strong{G-StMAR} model:}{a size (2x1) vector specifying the number of \emph{GMAR-type} components \code{M1} in the
-   first element and \emph{StMAR-type} components \code{M2} in the second. The total number of mixture components is \code{M=M1+M2}.}
+  \item{For \strong{G-StMAR} models:}{a size (2x1) integer vector specifying the number of \emph{GMAR type} components \code{M1} in the
+   first element and \emph{StMAR type} components \code{M2} in the second element. The total number of mixture components is \code{M=M1+M2}.}
 }}
 
 \item{params}{a real valued parameter vector specifying the model.
@@ -43,17 +43,17 @@ isIdentifiable(p, M, params, model = c("GMAR", "StMAR", "G-StMAR"),
     }
   }
 }
-Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight and \eqn{\nu} a degrees of
-freedom parameter. In the \strong{G-StMAR} model the first \code{M1} components are \emph{GMAR-type} and the rest \code{M2} components
-are \emph{StMAR-type}.
-Note that in the case \strong{M=1} the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model
+Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight, and \eqn{\nu} a degrees of
+freedom parameter. In the \strong{G-StMAR} model, the first \code{M1} components are \emph{GMAR type} and the rest \code{M2} components
+are \emph{StMAR type}.
+Note that in the case \strong{M=1}, the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model,
 the degrees of freedom parameters \eqn{\nu_{m}} have to be larger than \eqn{2}.}
 
 \item{restricted}{a logical argument stating whether the AR coefficients \eqn{\phi_{m,1},...,\phi_{m,p}} are restricted
 to be the same for all regimes.}
 
-\item{model}{is "GMAR", "StMAR" or "G-StMAR" model considered? In G-StMAR model the first \code{M1} components
-are \emph{GMAR-type} and the rest \code{M2} components are \emph{StMAR-type}.}
+\item{model}{is "GMAR", "StMAR", or "G-StMAR" model considered? In the G-StMAR model, the first \code{M1} components
+are \emph{GMAR type} and the rest \code{M2} components are \emph{StMAR type}.}
 
 \item{constraints}{specifies linear constraints applied to the autoregressive parameters.
 \describe{
@@ -64,19 +64,26 @@ are \emph{GMAR-type} and the rest \code{M2} components are \emph{StMAR-type}.}
   \strong{\eqn{\phi}}\eqn{=}\strong{\eqn{C\psi}}, where \strong{\eqn{\phi}}\eqn{=(\phi_{1},...,\phi_{p})} and
   \strong{\eqn{\psi}}\eqn{=\psi_{1},...,\psi_{q}}.}
 }
-Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constraints, the nominal order of AR coefficients is
-alway \code{p} for all regimes.
+Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constraints, the nominal autoregressive order
+is always \code{p} for all regimes.
 Ignore or set to \code{NULL} if applying linear constraints is \strong{not} desired.}
 }
 \value{
 Returns \code{TRUE} or \code{FALSE} accordingly.
 }
 \description{
-\code{isStationary_int} checks the stationary condition and \code{isIdentifiable} checks the identification conditions
- of the specified GMAR, StMAR or G-StMAR model.
+\code{isStationary_int} checks the stationarity condition and \code{isIdentifiable} checks the identification condition
+ of the specified GMAR, StMAR, or G-StMAR model.
 }
 \details{
-These functions don't support models parametrized with general linear constraints.
+\code{isStationary_int} does not support models imposing linear constraints. In order to use it for a model imposing linear
+ constraints, one needs to expand the constraints first to obtain a nonconstrained parameters vector.
+
+ Note that \code{isStationary_int} returns \code{FALSE} for stationary parameter vectors if they are extremely close to the boundary
+ of the stationarity region.
+
+ \code{isIdentifiable} checks that the regimes are sorted according to the mixing weight parameters and that there are no dublicate
+ regimes.
 }
 \section{Warning}{
 
@@ -90,6 +97,6 @@ These functions don't support models parametrized with general linear constraint
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
            arXiv:1805.04010 \strong{[econ.EM]}.
    \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
-           theoretical properties similar to the GMAR and StMAR models.
+         theoretical properties similar to the GMAR and StMAR models.
  }
 }

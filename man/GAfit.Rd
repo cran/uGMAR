@@ -2,28 +2,28 @@
 % Please edit documentation in R/geneticAlgorithm.R
 \name{GAfit}
 \alias{GAfit}
-\title{Genetic algorithm for preliminary estimation of GMAR, StMAR or G-StMAR model}
+\title{Genetic algorithm for preliminary estimation of GMAR, StMAR, or G-StMAR model}
 \usage{
 GAfit(data, p, M, model = c("GMAR", "StMAR", "G-StMAR"),
   restricted = FALSE, constraints = NULL,
   parametrization = c("intercept", "mean"), conditional = TRUE,
   ngen = 200, popsize, smartMu, meanscale, sigmascale, initpop = NULL,
   regime_force_scale = 1, red_criteria = c(0.05, 0.01),
-  to_return = c("alt_ind", "best_ind"), minval, seed = NULL, ...)
+  to_return = c("alt_ind", "best_ind"), minval, seed = NULL)
 }
 \arguments{
-\item{data}{a numeric vector class \code{'ts'} object containing the data. \code{NA} values are not supported.}
+\item{data}{a numeric vector or class \code{'ts'} object containing the data. \code{NA} values are not supported.}
 
-\item{p}{a positive integer specifying the order of AR coefficients.}
+\item{p}{a positive integer specifying the autoregressive order of the model.}
 
 \item{M}{\describe{
   \item{For \strong{GMAR} and \strong{StMAR} models:}{a positive integer specifying the number of mixture components.}
-  \item{For \strong{G-StMAR} model:}{a size (2x1) vector specifying the number of \emph{GMAR-type} components \code{M1} in the
-   first element and \emph{StMAR-type} components \code{M2} in the second. The total number of mixture components is \code{M=M1+M2}.}
+  \item{For \strong{G-StMAR} models:}{a size (2x1) integer vector specifying the number of \emph{GMAR type} components \code{M1} in the
+   first element and \emph{StMAR type} components \code{M2} in the second element. The total number of mixture components is \code{M=M1+M2}.}
 }}
 
-\item{model}{is "GMAR", "StMAR" or "G-StMAR" model considered? In G-StMAR model the first \code{M1} components
-are \emph{GMAR-type} and the rest \code{M2} components are \emph{StMAR-type}.}
+\item{model}{is "GMAR", "StMAR", or "G-StMAR" model considered? In the G-StMAR model, the first \code{M1} components
+are \emph{GMAR type} and the rest \code{M2} components are \emph{StMAR type}.}
 
 \item{restricted}{a logical argument stating whether the AR coefficients \eqn{\phi_{m,1},...,\phi_{m,p}} are restricted
 to be the same for all regimes.}
@@ -37,8 +37,8 @@ to be the same for all regimes.}
   \strong{\eqn{\phi}}\eqn{=}\strong{\eqn{C\psi}}, where \strong{\eqn{\phi}}\eqn{=(\phi_{1},...,\phi_{p})} and
   \strong{\eqn{\psi}}\eqn{=\psi_{1},...,\psi_{q}}.}
 }
-Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constraints, the nominal order of AR coefficients is
-alway \code{p} for all regimes.
+Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constraints, the nominal autoregressive order
+is always \code{p} for all regimes.
 Ignore or set to \code{NULL} if applying linear constraints is \strong{not} desired.}
 
 \item{parametrization}{is the model parametrized with the "intercepts" \eqn{\phi_{m,0}} or
@@ -53,7 +53,7 @@ Default is \code{10*d} where \code{d} is the number of parameters.}
 
 \item{smartMu}{a positive integer specifying the generation after which the random mutations in the genetic algorithm are "smart".
 This means that mutating individuals will mostly mutate fairly close (or partially close) to the best fitting individual so far.
- Default is \code{min(100, round(0.5*ngen))}.}
+Default is \code{min(100, round(0.5*ngen))}.}
 
 \item{meanscale}{a real valued vector of length two specifying the mean (the first element) and standard deviation (the second element)
 of the normal distribution from which the \eqn{\mu_{m}} mean-parameters are generated in random mutations in the genetic algorithm.
@@ -61,8 +61,8 @@ Default is \code{c(mean(data), sd(data))}.
 Note that the genetic algorithm optimizes with mean-parametrization even when \code{parametrization=="intercept"}, but
 input (in \code{initpop}) and output (return value) parameter vectors may be intercept-parametrized.}
 
-\item{sigmascale}{a positive real number specifying the standard deviation of the (zero mean, positive only) normal distribution
-from which the component variance parameters are generated in the random mutations in the genetic algorithm.
+\item{sigmascale}{a positive real number specifying the standard deviation of the (zero mean, positive only by taking absolute value)
+normal distribution from which the component variance parameters are generated in the random mutations in the genetic algorithm.
 Default is \code{var(stats::ar(data, order.max=10)$resid, na.rm=TRUE)}.}
 
 \item{initpop}{a list of parameter vectors from which the initial population of the genetic algorithm will be generated from.
@@ -96,26 +96,26 @@ Default is \code{var(stats::ar(data, order.max=10)$resid, na.rm=TRUE)}.}
     }
   }
 }
-Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight and \eqn{v} a degrees of
+Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight, and \eqn{v} a degrees of
 freedom parameter.
-Note that in the case \strong{M=1} the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model
+Note that in the case \strong{M=1}, the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model,
 the degrees of freedom parameters \eqn{\nu_{m}} have to be larger than \eqn{2}.
 If not specified (or \code{FALSE} as is default), the initial population will be drawn randomly.}
 
 \item{regime_force_scale}{a non-negative real number specifying how much should natural selection favour individuals
-with less regimes that have almost all mixing weights (practically) at zero (see \code{red_criteria}), i.e. less "redundant regimes".
+with less regimes that have almost all mixing weights (practically) at zero (see \code{red_criteria}), i.e., with
+less "redundant regimes".
 Set to zero for no favouring or large number for heavy favouring. Without any favouring the genetic algorithm gets more often stuck
 in an area of the parameter space where some regimes are wasted, but with too much favouring the best genes might never mix into the
-population and the algorithm might converge poorly. Default is \code{1} and it gives \eqn{2x} larger surviving probabilities for
+population and the algorithm might converge poorly. Default is \code{1} and it gives \eqn{2x} larger surviving probability weights for
 individuals with no wasted regimes compared to individuals with one wasted regime. Number \code{2} would give \eqn{3x} larger probabilities etc.}
 
 \item{red_criteria}{a length 2 numeric vector specifying the criteria that is used to determine whether a regime is redundant or not.
 Any regime \code{m} which satisfies \code{sum(mixingWeights[,m] > red_criteria[1]) < red_criteria[2]*n_obs} will be considered "redundant".
-One should be careful when adjusting this argument.}
+One should be careful when adjusting this argument (set \code{c(0, 0)} to fully disable the 'redundant regime' features from the algorithm).}
 
-\item{to_return}{should the genetic algorithm return the best fitting individual which has as much "non-redundant" regimes as possible
-(\code{"alt_ind"}) or the individual which has the highest log-likelihood in general (\code{"best_ind"}), but
-might have more wasted regimes?}
+\item{to_return}{should the genetic algorithm return the best fitting individual which has the least "redundant" regimes (\code{"alt_ind"})
+or the individual which has the highest log-likelihood in general (\code{"best_ind"}) but might have more wasted regimes?}
 
 \item{minval}{a real number defining the minimum value of the log-likelihood function that will be considered.
 Values smaller than this will be treated as they were \code{minval} and the corresponding individuals will never survive.
@@ -123,24 +123,23 @@ The default is \code{-(10^(ceiling(log10(length(data))) + 1) - 1)}, and one shou
 
 \item{seed}{a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in the beginning of
 the function call. If calling \code{GAfit} from \code{fitGSMAR}, use the argument \code{seeds} instead of passing the argument \code{seed}.}
-
-\item{...}{Currently not in use. Exists for a technical reason only.}
 }
 \value{
-Returns estimated parameter vector described in \code{initpop}.
+Returns estimated parameter vector with the form described in \code{initpop}.
 }
 \description{
-\code{GAfit} estimates specified GMAR, StMAR or G-StMAR model using genetic algorithm. It's designed to find starting values for gradient based methods.
+\code{GAfit} estimates specified GMAR, StMAR, or G-StMAR model using a genetic algorithm.
+ The employed genetic algorithm is designed to find starting values for gradient based methods.
 }
 \details{
-The genetic algorithm is mostly based on the description by \emph{Dorsey and Mayer (1995)}.
-   It uses (slightly modified) individually adaptive crossover and mutation rates described by \emph{Patnaik and Srinivas (1994)}
-   and employs (50\%) fitness inheritance discussed by \emph{Smith, Dike and Stegmann (1995)}. Large (in absolute value) but stationary
-   AR parameter values are generated with the algorithm proposed by Monahan (1984).
+The core of the genetic algorithm is mostly based on the description by \emph{Dorsey and Mayer (1995)}.
+   It utilizes a slightly modified version of the individually adaptive crossover and mutation rates described
+   by \emph{Patnaik and Srinivas (1994)} and employs (50\%) fitness inheritance discussed by \emph{Smith, Dike and Stegmann (1995)}.
+   Large (in absolute value) but stationary AR parameter values are generated with the algorithm proposed by Monahan (1984).
 
-   By "redundant" or "unidentified" regimes we mean regimes that have the time varying mixing weights basically at zero for all t.
-   The model would have about the same log-likelihood value without redundant regimes and there is no purpose to have redundant regime in
-   the model.
+   By "redundant" or "wasted" regimes we mean regimes that have the time varying mixing weights basically at zero for all t.
+   The model with redundant regimes would have approximately the same log-likelihood value without the redundant regimes
+   and there is no purpose to have redundant regimes in the model.
 }
 \references{
 \itemize{

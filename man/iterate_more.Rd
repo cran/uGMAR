@@ -2,7 +2,7 @@
 % Please edit documentation in R/MAINest.R
 \name{iterate_more}
 \alias{iterate_more}
-\title{Maximum likelihood estimation of GMAR, StMAR or G-StMAR model with preliminary estimates}
+\title{Maximum likelihood estimation of GMAR, StMAR, or G-StMAR model with preliminary estimates}
 \usage{
 iterate_more(gsmar, maxit = 100, custom_h = NULL,
   calc_std_errors = TRUE)
@@ -10,28 +10,28 @@ iterate_more(gsmar, maxit = 100, custom_h = NULL,
 \arguments{
 \item{gsmar}{object of class \code{'gsmar'} created with the function \code{fitGSMAR} or \code{GSMAR}.}
 
-\item{maxit}{maximum number of iterations in the variable metric algorithm.}
+\item{maxit}{the maximum number of iterations for the variable metric algorithm.}
 
-\item{custom_h}{A numeric vector of with same length as the parameter vector of the estimated model: i:th element
-of custom_h is the difference used in central difference approximation for differentials of the log-likelihood function
-for the i:th parameter. If \code{NULL} (default), then the difference used for differentiating overly large degrees of
-freedom parameters is adjusted to avoid numerical problems, and the difference is \code{6e-6} for the other parameters.}
+\item{custom_h}{A numeric vector with same the length as the parameter vector: i:th element of custom_h is the difference
+used in central difference approximation for partial differentials of the log-likelihood function for the i:th parameter.
+If \code{NULL} (default), then the difference used for differentiating overly large degrees of freedom parameters
+is adjusted to avoid numerical problems, and the difference is \code{6e-6} for the other parameters.}
 
 \item{calc_std_errors}{should approximate standard errors be calculated?}
 }
 \value{
-Returns an object of class \code{'gsmar'} defining the estimated model. Can be used
-  to work with other functions provided in \code{uGMAR}.
+Returns an object of class \code{'gsmar'} defining the estimated model.
 }
 \description{
-\code{iterate_more} uses variable metric algorithm to finalize maximum likelihood
- estimation of GMAR, StMAR or G-StMAR model (object of class \code{'gsmarar'}) which already has preliminary estimates.
+\code{iterate_more} uses a variable metric algorithm to finalize maximum likelihood
+ estimation of a GMAR, StMAR or G-StMAR model (object of class \code{'gsmar'}) which already has
+ preliminary estimates.
 }
 \details{
 The main purpose of \code{iterate_more} is to provide a simple and convenient tool to finalize
   the estimation when the maximum number of iterations is reached when estimating a model with the
-  main estimation function \code{fitGSMAR}. It's just a simple wrapper around function \code{optim}
-  from the package \code{stats} and \code{GSMAR} from the package \code{uGMAR}.
+  main estimation function \code{fitGSMAR}. \code{iterate_more} is essentially a wrapper for the functions
+  \code{optim} from the package \code{stats} and \code{GSMAR} from the package \code{uGMAR}.
 }
 \examples{
 \donttest{
@@ -52,9 +52,10 @@ fit12
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
            arXiv:1805.04010 \strong{[econ.EM]}.
    \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
-           theoretical properties similar to the GMAR and StMAR models.
+         theoretical properties similar to the GMAR and StMAR models.
  }
 }
 \seealso{
-\code{\link{fitGSMAR}}, \code{\link{GSMAR}}, \code{\link{stmar_to_gstmar}}, \code{\link{optim}}
+\code{\link{fitGSMAR}}, \code{\link{GSMAR}}, \code{\link{stmar_to_gstmar}},
+  \code{\link{profile_logliks}}, \code{\link{optim}}
 }

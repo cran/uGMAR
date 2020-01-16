@@ -7,20 +7,20 @@
 random_arcoefs(p, forcestat = FALSE, sd = 0.6/p)
 }
 \arguments{
-\item{p}{a positive integer specifying the order of AR coefficients.}
+\item{p}{a positive integer specifying the autoregressive order of the model.}
 
 \item{forcestat}{use the algorithm by Monahan (1984) to force stationarity on the AR parameters (slower)?}
 
-\item{sd}{if \code{forcestat==FALSE} then AR parameters are drawn from zero mean normal distribution with sd given by this parameter}
+\item{sd}{if \code{forcestat==FALSE}, then AR parameters are drawn from zero mean normal distribution with sd given by this parameter.}
 }
 \value{
 Returns \eqn{px1} vector containing random AR coefficients.
 }
 \description{
-\code{random_arcoefs} generates random AR coefficients
+\code{random_arcoefs} generates random AR coefficients.
 }
 \details{
-if \code{forcestat==TRUE} then the AR coefficients are relatively large, otherwise they are usually relatively small.
+If \code{forcestat==TRUE}, then the AR coefficients are relatively large, otherwise they are usually relatively small.
 }
 \references{
 \itemize{

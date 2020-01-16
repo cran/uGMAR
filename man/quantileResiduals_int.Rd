@@ -2,21 +2,21 @@
 % Please edit documentation in R/quantileResiduals.R
 \name{quantileResiduals_int}
 \alias{quantileResiduals_int}
-\title{Compute quantile residuals of GMAR, StMAR or G-StMAR model}
+\title{Compute quantile residuals of GMAR, StMAR, or G-StMAR model}
 \usage{
 quantileResiduals_int(data, p, M, params, model = c("GMAR", "StMAR",
   "G-StMAR"), restricted = FALSE, constraints = NULL,
   parametrization = c("intercept", "mean"))
 }
 \arguments{
-\item{data}{a numeric vector class \code{'ts'} object containing the data. \code{NA} values are not supported.}
+\item{data}{a numeric vector or class \code{'ts'} object containing the data. \code{NA} values are not supported.}
 
-\item{p}{a positive integer specifying the order of AR coefficients.}
+\item{p}{a positive integer specifying the autoregressive order of the model.}
 
 \item{M}{\describe{
   \item{For \strong{GMAR} and \strong{StMAR} models:}{a positive integer specifying the number of mixture components.}
-  \item{For \strong{G-StMAR} model:}{a size (2x1) vector specifying the number of \emph{GMAR-type} components \code{M1} in the
-   first element and \emph{StMAR-type} components \code{M2} in the second. The total number of mixture components is \code{M=M1+M2}.}
+  \item{For \strong{G-StMAR} models:}{a size (2x1) integer vector specifying the number of \emph{GMAR type} components \code{M1} in the
+   first element and \emph{StMAR type} components \code{M2} in the second element. The total number of mixture components is \code{M=M1+M2}.}
 }}
 
 \item{params}{a real valued parameter vector specifying the model.
@@ -49,15 +49,15 @@ quantileResiduals_int(data, p, M, params, model = c("GMAR", "StMAR",
     }
   }
 }
-Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight and \eqn{\nu} a degrees of
-freedom parameter. If \code{parametrization=="mean"} just replace each intercept term \eqn{\phi_{m,0}} with regimewise mean
-\eqn{\mu_m = \phi_{m,0}/(1-\sum\phi_{i,m})}. In the \strong{G-StMAR} model the first \code{M1} components are \emph{GMAR-type}
-and the rest \code{M2} components are \emph{StMAR-type}.
-Note that in the case \strong{M=1} the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model
+Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight, and \eqn{\nu} a degrees of
+freedom parameter. If \code{parametrization=="mean"}, just replace each intercept term \eqn{\phi_{m,0}} with regimewise mean
+\eqn{\mu_m = \phi_{m,0}/(1-\sum\phi_{i,m})}. In the \strong{G-StMAR} model, the first \code{M1} components are \emph{GMAR type}
+and the rest \code{M2} components are \emph{StMAR type}.
+Note that in the case \strong{M=1}, the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model,
 the degrees of freedom parameters \eqn{\nu_{m}} have to be larger than \eqn{2}.}
 
-\item{model}{is "GMAR", "StMAR" or "G-StMAR" model considered? In G-StMAR model the first \code{M1} components
-are \emph{GMAR-type} and the rest \code{M2} components are \emph{StMAR-type}.}
+\item{model}{is "GMAR", "StMAR", or "G-StMAR" model considered? In the G-StMAR model, the first \code{M1} components
+are \emph{GMAR type} and the rest \code{M2} components are \emph{StMAR type}.}
 
 \item{restricted}{a logical argument stating whether the AR coefficients \eqn{\phi_{m,1},...,\phi_{m,p}} are restricted
 to be the same for all regimes.}
@@ -71,23 +71,26 @@ to be the same for all regimes.}
   \strong{\eqn{\phi}}\eqn{=}\strong{\eqn{C\psi}}, where \strong{\eqn{\phi}}\eqn{=(\phi_{1},...,\phi_{p})} and
   \strong{\eqn{\psi}}\eqn{=\psi_{1},...,\psi_{q}}.}
 }
-Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constraints, the nominal order of AR coefficients is
-alway \code{p} for all regimes.
+Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constraints, the nominal autoregressive order
+is always \code{p} for all regimes.
 Ignore or set to \code{NULL} if applying linear constraints is \strong{not} desired.}
 
 \item{parametrization}{is the model parametrized with the "intercepts" \eqn{\phi_{m,0}} or
 "means" \eqn{\mu_m = \phi_{m,0}/(1-\sum\phi_{i,m})}?}
 }
 \value{
-Returns a \eqn{(Tx1)} numeric vector containing the quantile residuals associated with
- the specified GMAR, StMAR or G-StMAR model.
+Returns a \eqn{(Tx1)} numeric vector containing the quantile residuals of the specified GMAR, StMAR or G-StMAR model.
 }
 \description{
-\code{quantileResiduals_int} computes the quantile residuals of the specified GMAR, StMAR or G-StMAR model.
+\code{quantileResiduals_int} computes the quantile residuals of the specified GMAR, StMAR, or G-StMAR model.
+}
+\details{
+Numerical integration is employed if the quantile residuals cannot be obtained analytically with the
+ hypergeometric function using the package 'gsl'.
 }
 \section{Suggested packages}{
 
-  Install the suggested package "gsl" for faster evaluation of the quantile residuals of StMAR and G-StMAR models.
+  Install the suggested package "gsl" for faster evaluation of the quantile residuals for the StMAR and G-StMAR models.
 }
 
 \references{

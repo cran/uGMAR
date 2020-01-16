@@ -2,13 +2,13 @@
 % Please edit documentation in R/GSMARconstructor.R
 \name{add_data}
 \alias{add_data}
-\title{Add data to object of class 'gsmar' defining a GMAR, StMAR or G-StMAR model}
+\title{Add data to object of class 'gsmar' defining a GMAR, StMAR, or G-StMAR model}
 \usage{
 add_data(data, gsmar, calc_qresiduals = TRUE, calc_cond_moments = TRUE,
   calc_std_errors = FALSE, custom_h = NULL)
 }
 \arguments{
-\item{data}{a numeric vector class \code{'ts'} object containing the data. \code{NA} values are not supported.}
+\item{data}{a numeric vector or class \code{'ts'} object containing the data. \code{NA} values are not supported.}
 
 \item{gsmar}{object of class \code{'gsmar'} created with the function \code{fitGSMAR} or \code{GSMAR}.}
 
@@ -18,18 +18,18 @@ add_data(data, gsmar, calc_qresiduals = TRUE, calc_cond_moments = TRUE,
 
 \item{calc_std_errors}{should approximate standard errors be calculated?}
 
-\item{custom_h}{A numeric vector of with same length as the parameter vector of the estimated model: i:th element
-of custom_h is the difference used in central difference approximation for differentials of the log-likelihood function
-for the i:th parameter. If \code{NULL} (default), then the difference used for differentiating overly large degrees of
-freedom parameters is adjusted to avoid numerical problems, and the difference is \code{6e-6} for the other parameters.}
+\item{custom_h}{A numeric vector with same the length as the parameter vector: i:th element of custom_h is the difference
+used in central difference approximation for partial differentials of the log-likelihood function for the i:th parameter.
+If \code{NULL} (default), then the difference used for differentiating overly large degrees of freedom parameters
+is adjusted to avoid numerical problems, and the difference is \code{6e-6} for the other parameters.}
 }
 \value{
-Returns an object of class 'gsmar' defining the GMAR, StMAR or G-StMAR model with the data added to the model.
+Returns an object of class 'gsmar' defining the GMAR, StMAR, or G-StMAR model with the data added to the model.
   If the object already contained data, the data will be updated. Does not modify the 'gsmar' object given as argument!
 }
 \description{
-\code{add_data} adds or updates data to object of class '\code{gsmar}' that defines a GMAR, StMAR or G-StMAR
- model. Also calculates mixing weights, conditional moments and quantile residuals accordingly.
+\code{add_data} adds or updates data to object of class '\code{gsmar}' that defines a GMAR, StMAR,
+ or G-StMAR model. Also calculates empirical mixing weights, conditional moments, and quantile residuals accordingly.
 }
 \examples{
 # GMAR model without data
@@ -48,7 +48,7 @@ gmar12
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
            arXiv:1805.04010 \strong{[econ.EM]}.
    \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
-           theoretical properties similar to the GMAR and StMAR models.
+         theoretical properties similar to the GMAR and StMAR models.
  }
 }
 \seealso{

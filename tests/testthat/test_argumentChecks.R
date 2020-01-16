@@ -2,14 +2,10 @@ library(uGMAR)
 context("argument checks")
 
 test_that("checkAndCorrectData gives correct answer", {
-  # expect_true(is.matrix(checkAndCorrectData(ts(VIX, start=c(2000, 2), frequency=12), 1)))
-  # expect_true(is.matrix(checkAndCorrectData(as.vector(VIX), 4)))
-  # expect_true(ncol(checkAndCorrectData(as.vector(VIX), 2))==1 & nrow(checkAndCorrectData(as.vector(VIX), 2))==length(as.vector(VIX)))
-  # expect_true(ncol(checkAndCorrectData(t(VIX), 2))==1)
-  checkAndCorrectData(as.matrix(VIX), 1)
-  expect_error(checkAndCorrectData(VIX[1:3], 4))
-  expect_error(checkAndCorrectData(c(VIX, NA, 1), 1))
-  expect_error(checkAndCorrectData(cbind(VIX, VIX), 3))
+  checkAndCorrectData(as.matrix(VIX), p=1)
+  expect_error(checkAndCorrectData(VIX[1:3], p=4))
+  expect_error(checkAndCorrectData(c(VIX, NA, 1), p=1))
+  expect_error(checkAndCorrectData(cbind(VIX, VIX), p=3))
 })
 
 params11 = c(1, 0.1, 1, 2)
@@ -27,7 +23,6 @@ test_that("parameterChecks throws errors correctly", {
   expect_error(parameterChecks(1, 2, params12, pars=matrix(params12[1:6], ncol=2), alphas=c(0.7, 0.3), model="StMAR"))
   expect_error(parameterChecks(2, 2, params22, pars=matrix(params22[1:8], ncol=2), alphas=c(0.6, 0.4)))
   expect_error(parameterChecks(2, 2, params22, pars=matrix(params22[1:8], ncol=2), alphas=c(0.6, 0.4), model="StMAR"))
-#  expect_error(parameterChecks(1, 2, params12_2, pars=matrix(params12_2[1:6], ncol=2), alphas=c(0.6, 0.4))) # identification
   expect_error(parameterChecks(2, c(1,1), params22gs, pars=matrix(params22gs, ncol=2), alphas=c(0.3, 0.7), model="G-StMAR"))
   expect_error(parameterChecks(1, c(1,2), params13gs, pars=matrix(params13gs[1:9], ncol=3), alphas=c(0.2, 0.5, 0.3), model="G-StMAR"))
 })

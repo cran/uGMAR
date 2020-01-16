@@ -2,35 +2,37 @@
 #' @import graphics
 #' @importFrom grDevices rgb
 #'
-#' @title Quantile residual based diagnostic plots for GMAR, StMAR and G-StMAR models
+#' @title Quantile residual based diagnostic plots for GMAR, StMAR, and G-StMAR models
 #'
-#' @description \code{diagnosticPlot} plots quantile residual time series, normal QQ-plot, autocorrelation function
+#' @description \code{diagnosticPlot} plots quantile residual time series, normal QQ-plot, autocorrelation function,
 #'  and squared quantile residual autocorrelation function. There is an option to also plot the individual statistics
 #'  associated with the quantile residual tests (for autocorrelation and conditional heteroskedasticity) divided by
-#'  their approximate standard errors with their approximate 95\% critical bounds.
+#'  their approximate standard errors with their approximate 95\% critical bounds (see Kalliovirta 2012, Section 3).
 #'
 #' @inheritParams simulateGSMAR
 #' @param nlags a positive integer specifying how many lags should be calculated for the autocorrelation and
 #'  conditional heteroscedasticity statistics.
 #' @param nsimu a positive integer specifying to how many simulated values from the process the covariance
 #'  matrix "Omega" (used to compute the tests) should be based on. Larger number of simulations may result
-#'  more reliable tests. If smaller than data size, then it will be based on the given data.
-#'  Ignored if \code{plot_indstats==FALSE}.
+#'  more reliable tests but takes longer to compute. If smaller than data size, then "Omega" will be based
+#'  on the given data. Ignored if \code{plot_indstats==FALSE}.
 #' @param plot_indstats set \code{TRUE} if the individual statistics discussed in Kalliovirta (2012) should be
 #'  plotted with their approximate 95\% critical bounds (this may take some time).
-#' @details Sometimes the individual statistics are not plotted because it's not (numerically) possible for
-#'  to calculate all the necessary estimates required. This may suggest that the model is misspecified.
+#' @details Sometimes the individual statistics are not plotted because it was not (numerically) possible
+#'  to calculate all the required statistics. This may suggest that the model is misspecified.
 #'
 #'  The dashed lines plotted with autocorrelation functions (for quantile residuals and their squares) are
-#'  plus-minus \eqn{1.96*T^{-1/2}}.
-#' @return \code{diagnosticPlot} only plots to a graphical device and doesn't return anything. Use the
+#'  plus-minus \eqn{1.96*T^{-1/2}} where \eqn{T} is the sample size (minus the \eqn{p} initial values for
+#'  conditional models).
+#' @return \code{diagnosticPlot} only plots to a graphical device and does not return anything. Use the
 #'  function \code{quantileResidualTests} in order to obtain the individual statistics.
 #' @inherit quantileResidualTests references
 #' @section Suggested packages:
 #'   Install the suggested package "gsl" for faster evaluations in the cases of StMAR and G-StMAR models.
 #'   For large StMAR and G-StMAR models with large data the calculations to obtain the individual statistics
 #'   may take a significantly long time without the package "gsl".
-#' @seealso \code{\link{fitGSMAR}}, \code{\link{GSMAR}}, \code{\link{quantileResidualTests}}, \code{\link{quantileResidualPlot}}, \code{\link{simulateGSMAR}}
+#' @seealso \code{\link{profile_logliks}}, \code{\link{get_foc}}, \code{\link{fitGSMAR}}, \code{\link{GSMAR}}, \code{\link{quantileResidualTests}},
+#'  \code{\link{quantileResidualPlot}}, \code{\link{simulateGSMAR}}
 #' @examples
 #' \donttest{
 #' # GMAR model
@@ -70,12 +72,13 @@
 #' @export
 
 diagnosticPlot <- function(gsmar, nlags=20, nsimu=2000, plot_indstats=FALSE) {
-  if(!all_pos_ints(c(nlags, nsimu))) stop("The arguments nlags and nsimu have to be a strictly positive integers")
+  if(!all_pos_ints(c(nlags, nsimu))) stop("The arguments 'nlags' and 'nsimu' have to be a strictly positive integers")
   check_gsmar(gsmar)
   check_data(gsmar)
   nsimu <- max(nsimu, length(data))
   data <- gsmar$data
   n_obs <- ifelse(gsmar$model$conditional, length(data) - gsmar$model$p, length(data))
+
   if(is.null(gsmar$quantile_residuals)) {
     qresiduals <- quantileResiduals_int(data=data, p=gsmar$model$p, M=gsmar$model$M, params=gsmar$params,
                                         model=gsmar$model$mode, restricted=gsmar$model$restricted,
@@ -156,14 +159,15 @@ diagnosticPlot <- function(gsmar, nlags=20, nsimu=2000, plot_indstats=FALSE) {
 #' @import graphics
 #' @importFrom grDevices rgb
 #'
-#' @title Ploy quantile residual time series and kernel density
+#' @title Plot quantile residual time series and histogram
 #'
 #' @description \code{quantileResidualsPlot} plots quantile residual time series and histogram.
 #'
 #' @inheritParams simulateGSMAR
 #' @return  Only plots to a graphical device and doesn't return anything.
-#' @inherit quantileResiduals
-#' @seealso \code{\link{diagnosticPlot}}, \code{\link{fitGSMAR}}, \code{\link{GSMAR}}, \code{\link{quantileResidualTests}}, \code{\link{simulateGSMAR}}
+#' @inherit quantileResiduals references
+#' @seealso  \code{\link{profile_logliks}}, \code{\link{diagnosticPlot}}, \code{\link{fitGSMAR}}, \code{\link{GSMAR}},
+#'  \code{\link{quantileResidualTests}}, \code{\link{simulateGSMAR}}
 #' @examples
 #' \donttest{
 #' # GMAR model
@@ -211,4 +215,171 @@ quantileResidualPlot <- function(gsmar) {
   hs <- hist(qresiduals, breaks="Scott", probability=TRUE, col="skyblue", plot=TRUE, ylim=c(0, 0.5))
   xc <- seq(from=min(hs$breaks), to=max(hs$breaks), length.out=500)
   lines(x=xc, y=dnorm(xc), lty=2, col="red")
+}
+
+
+#' @import stats
+#' @import graphics
+#' @importFrom grDevices rgb
+#'
+#' @title Plot profile log-likehoods around the estimates
+#'
+#' @description \code{profile_logliks} plots profile log-likelihoods around the estimates.
+#'
+#' @inheritParams simulateGSMAR
+#' @param scale a numeric scalar specifying the interval plotted for each estimate: the estimate plus-minus \code{abs(scale*estimate)}.
+#' @param nrows how rows should be in the plot-matrix? The default is M.
+#' @param ncols how many columns should be in the plot-matrix? The default is \code{ceiling(nparams/nrows)}.
+#'   Note that \code{nrows*ncols} should not be smaller than the number of parameters.
+#' @param precission at how many points should each profile log-likelihood be evaluated at?
+#' @details The red vertical line points the estimate.
+#'
+#'   Be aware that the profile log-likelihood function is subject to a numerical error due to limited float-point
+#'   precission when considering extremely large parameter values, say, overly large degrees freedom estimates (see the
+#'   related example below).
+#' @return  Only plots to a graphical device and doesn't return anything.
+#' @inherit loglikelihood references
+#' @seealso  \code{\link{quantileResidualPlot}}, \code{\link{diagnosticPlot}}, \code{\link{fitGSMAR}}, \code{\link{GSMAR}},
+#'  \code{\link{quantileResidualTests}}, \code{\link{simulateGSMAR}}
+#' @examples
+#' \donttest{
+#' # GMAR model
+#' fit12 <- fitGSMAR(data=logVIX, p=1, M=2, model="GMAR")
+#' profile_logliks(fit12)
+#'
+#' # Non-mixture version of StMAR model
+#' fit11t <- fitGSMAR(logVIX, 1, 1, model="StMAR", ncores=1, ncalls=1)
+#' profile_logliks(fit11t)
+#'
+#' # Restricted G-StMAR-model
+#' fit12gsr <- fitGSMAR(logVIX, 1, M=c(1, 1), model="G-StMAR",
+#'  restricted=TRUE)
+#' profile_logliks(fit12gsr)
+#'
+#' # Extremely large degrees of freedom numerical error demonstration
+#' fit12t <- fitGSMAR(logVIX, 1, 2, model="StMAR", ncores=1,
+#'  ncalls=1, seeds=1)
+#' profile_logliks(fit12t, scale=0.00001)
+#' # See the last figure? Surface of the profile log-likelihood function
+#' # should be flat around that large degrees of freedom!
+#' }
+#' @export
+
+profile_logliks <- function(gsmar, scale=0.02, nrows, ncols, precission=200) {
+  check_gsmar(gsmar)
+  check_data(gsmar)
+  p <- gsmar$model$p
+  M_orig <- gsmar$model$M
+  M <- sum(M_orig)
+  params <- gsmar$params
+  npars <- length(params)
+  constraints <- gsmar$model$constraints
+  restricted <- gsmar$model$restricted
+  if(missing(nrows)) nrows <- M
+  if(missing(ncols)) ncols <- ceiling(npars/nrows)
+  stopifnot(all_pos_ints(c(nrows, ncols)) && nrows*ncols >= npars)
+
+  old_par <- par(no.readonly = TRUE) # Save old settings
+  on.exit(par(old_par)) # Restore the settings before quitting
+  par(mar=c(2.1, 2.1, 1.6, 1.1), mfrow=c(nrows, ncols))
+
+  # In order to get the labels right, we first determine which indeces in params
+  # correspond to which parameters: different procedure for restricted model.
+  if(restricted == FALSE) {
+    if(!is.null(constraints)) {
+      all_q <- vapply(1:length(constraints), function(m) ncol(constraints[[m]]), numeric(1)) # q = number of estimated AR parameters in a regime
+    } else {
+      all_q <- rep(p, M) # Consider non-constrained models as special cases of constrainted models
+    }
+    cum_q <- c(0, cumsum(all_q + 2)) # Indeces in parameter vector after which the regime changes (before alphas)
+  } else { # restricted == TRUE
+    cum_q <- rep(0, times=M + 1) # For techinal reasons so that "first arguments" below are always false
+    q <- ifelse(is.null(constraints), p, ncol(constraints)) # Constraints is a singe matrix
+  }
+
+  for(i1 in seq_len(npars)) { # Go though the parameters
+
+    pars <- params
+    range <- abs(scale*pars[i1])
+    vals <- seq(from=pars[i1] - range, to=pars[i1] + range, length.out=precission) # Loglik to be evaluated at these values of the parameter considered
+    logliks <- vapply(vals, function(val) {
+      new_pars <- pars
+      new_pars[i1] <- val # Change the single parameter value
+      loglikelihood_int(data=gsmar$data, p=p, M=M_orig, params=new_pars, model=gsmar$model$model, restricted=restricted,
+                        constraints=constraints, conditional=gsmar$model$conditional, parametrization=gsmar$model$parametrization,
+                        boundaries=TRUE, checks=FALSE, minval=NA)
+    }, numeric(1))
+
+    # In order to get the labels right, we first determine which parameter is in question.
+    # For readability of the code, we do the cases of restricted and unrestricted models
+    # complitely separately at the expense of some dublicate code.
+    if(restricted == FALSE) {
+      if(i1 <= max(cum_q)) { # phi and sigma^2 parameters first
+        m <- sum(i1 > cum_q) # Which regime are we considering
+        if(i1 == cum_q[m + 1]) { # sigma^2
+          main <- substitute(sigma[foo]^2, list(foo=m))
+        } else if(i1 <= max(cum_q)) { # phi_{m,0},...,phi_{m,p}
+          if(i1 == cum_q[m] + 1) { # phi_{m,0}
+            mylist <- list(foo=paste0(m, ",", 0))
+          } else {  # phi_{m,1},...,phi_{m,p}
+              p0 <- i1 - cum_q[m] - 1 # p0 = 1,...,p; minus 1 from phi_0
+            if(is.null(constraints)) {
+              mylist  <- list(foo=paste0(m, ",", p0))
+            } else { # The AR parameters are not generally the same as phi-parameters with linear constraints
+              mylist  <- list(phi="AR", foo=paste0(m, ",", p0))
+            }
+          }
+          main <- substitute(phi[foo], mylist) # Substitute the character strings from mylist
+        }
+      } else { # alphas and degrees of freedom if any
+        if(M == 1) {
+          # No alphas, so if we are here there must be dfs parameters
+          m <- 1
+          main <- substitute(nu[foo], list(foo=m))
+        } else {
+          if(i1 <= max(cum_q) + M - 1) { # The alphas first
+            m <- i1 - max(cum_q)
+            main <- substitute(alpha[foo], list(foo=m))
+          } else { # Finally, degrees of freedom
+            m <- i1 - max(cum_q) - (M - 1)
+            main <- substitute(nu[foo], list(foo=m))
+          }
+        }
+      }
+    } else { ## restricted == TRUE, taken care separately
+        if(i1 <= M + q) { # phi_{m,0},...,phi_{m,p}
+          if(i1 <= M) { # phi_{m,0}
+            m <- i1
+            mylist <- list(foo=paste0(m, ",", 0))
+          } else { # phi_{m,1},...,phi_{m,p}
+            m <- "m"
+            p0 <- i1 - M
+            if(is.null(constraints)) {
+              mylist  <- list(foo=paste0(m, ",", p0))
+            } else { # The AR parameters are not generally the same as phi-parameters with linear constraints
+              mylist  <- list(phi="AR", foo=paste0(m, ",", p0))
+            }
+          }
+          main <- substitute(phi[foo], mylist) # Substitute the character strings from mylist
+        } else if(i1 <= 2*M + q) { # sigma^2
+          m <- i1 - M - q
+          main <- substitute(sigma[foo]^2, list(foo=m))
+        } else { # alphas and degrees of freedom
+          if(M == 1) { # No alphas if this is true
+            m <- 1
+            main <- substitute(nu[foo]^2, list(foo=m))
+          } else {
+            if(i1 <= 3*M + q - 1) { # The alphas first
+              m <- i1 - 2*M - q
+              main <- substitute(alpha[foo], list(foo=m))
+            } else { # Finally, degrees of freedom
+              m <- i1 - (3*M + q - 1)
+              main <- substitute(nu[foo], list(foo=m))
+            }
+          }
+        }
+    }
+    plot(x=vals, y=logliks, type="l", main=main)
+    abline(v=pars[i1], col="red") # Points the estimate
+  }
 }

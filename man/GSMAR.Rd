@@ -8,7 +8,7 @@
 \alias{summary.gsmar}
 \alias{plot.gsmar}
 \alias{print.gsmar}
-\title{Create object of class 'gsmar' defining a GMAR, StMAR or G-StMAR model}
+\title{Create object of class 'gsmar' defining a GMAR, StMAR, or G-StMAR model}
 \usage{
 GSMAR(data, p, M, params, model = c("GMAR", "StMAR", "G-StMAR"),
   restricted = FALSE, constraints = NULL, conditional = TRUE,
@@ -26,14 +26,14 @@ GSMAR(data, p, M, params, model = c("GMAR", "StMAR", "G-StMAR"),
 \method{print}{gsmar}(x, ..., digits = 2, summary_print = FALSE)
 }
 \arguments{
-\item{data}{a numeric vector class \code{'ts'} object containing the data. \code{NA} values are not supported.}
+\item{data}{a numeric vector or class \code{'ts'} object containing the data. \code{NA} values are not supported.}
 
-\item{p}{a positive integer specifying the order of AR coefficients.}
+\item{p}{a positive integer specifying the autoregressive order of the model.}
 
 \item{M}{\describe{
   \item{For \strong{GMAR} and \strong{StMAR} models:}{a positive integer specifying the number of mixture components.}
-  \item{For \strong{G-StMAR} model:}{a size (2x1) vector specifying the number of \emph{GMAR-type} components \code{M1} in the
-   first element and \emph{StMAR-type} components \code{M2} in the second. The total number of mixture components is \code{M=M1+M2}.}
+  \item{For \strong{G-StMAR} models:}{a size (2x1) integer vector specifying the number of \emph{GMAR type} components \code{M1} in the
+   first element and \emph{StMAR type} components \code{M2} in the second element. The total number of mixture components is \code{M=M1+M2}.}
 }}
 
 \item{params}{a real valued parameter vector specifying the model.
@@ -66,15 +66,15 @@ GSMAR(data, p, M, params, model = c("GMAR", "StMAR", "G-StMAR"),
     }
   }
 }
-Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight and \eqn{\nu} a degrees of
-freedom parameter. If \code{parametrization=="mean"} just replace each intercept term \eqn{\phi_{m,0}} with regimewise mean
-\eqn{\mu_m = \phi_{m,0}/(1-\sum\phi_{i,m})}. In the \strong{G-StMAR} model the first \code{M1} components are \emph{GMAR-type}
-and the rest \code{M2} components are \emph{StMAR-type}.
-Note that in the case \strong{M=1} the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model
+Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight, and \eqn{\nu} a degrees of
+freedom parameter. If \code{parametrization=="mean"}, just replace each intercept term \eqn{\phi_{m,0}} with regimewise mean
+\eqn{\mu_m = \phi_{m,0}/(1-\sum\phi_{i,m})}. In the \strong{G-StMAR} model, the first \code{M1} components are \emph{GMAR type}
+and the rest \code{M2} components are \emph{StMAR type}.
+Note that in the case \strong{M=1}, the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model,
 the degrees of freedom parameters \eqn{\nu_{m}} have to be larger than \eqn{2}.}
 
-\item{model}{is "GMAR", "StMAR" or "G-StMAR" model considered? In G-StMAR model the first \code{M1} components
-are \emph{GMAR-type} and the rest \code{M2} components are \emph{StMAR-type}.}
+\item{model}{is "GMAR", "StMAR", or "G-StMAR" model considered? In the G-StMAR model, the first \code{M1} components
+are \emph{GMAR type} and the rest \code{M2} components are \emph{StMAR type}.}
 
 \item{restricted}{a logical argument stating whether the AR coefficients \eqn{\phi_{m,1},...,\phi_{m,p}} are restricted
 to be the same for all regimes.}
@@ -88,8 +88,8 @@ to be the same for all regimes.}
   \strong{\eqn{\phi}}\eqn{=}\strong{\eqn{C\psi}}, where \strong{\eqn{\phi}}\eqn{=(\phi_{1},...,\phi_{p})} and
   \strong{\eqn{\psi}}\eqn{=\psi_{1},...,\psi_{q}}.}
 }
-Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constraints, the nominal order of AR coefficients is
-alway \code{p} for all regimes.
+Symbol \eqn{\phi} denotes an AR coefficient. Note that regardless of any constraints, the nominal autoregressive order
+is always \code{p} for all regimes.
 Ignore or set to \code{NULL} if applying linear constraints is \strong{not} desired.}
 
 \item{conditional}{a logical argument specifying whether the conditional or exact log-likelihood function should be used.}
@@ -103,10 +103,10 @@ Ignore or set to \code{NULL} if applying linear constraints is \strong{not} desi
 
 \item{calc_std_errors}{should approximate standard errors be calculated?}
 
-\item{custom_h}{A numeric vector of with same length as the parameter vector of the estimated model: i:th element
-of custom_h is the difference used in central difference approximation for differentials of the log-likelihood function
-for the i:th parameter. If \code{NULL} (default), then the difference used for differentiating overly large degrees of
-freedom parameters is adjusted to avoid numerical problems, and the difference is \code{6e-6} for the other parameters.}
+\item{custom_h}{A numeric vector with same the length as the parameter vector: i:th element of custom_h is the difference
+used in central difference approximation for partial differentials of the log-likelihood function for the i:th parameter.
+If \code{NULL} (default), then the difference used for differentiating overly large degrees of freedom parameters
+is adjusted to avoid numerical problems, and the difference is \code{6e-6} for the other parameters.}
 
 \item{object}{object of class \code{'gsmar'} created with \code{fitGSMAR} or \code{GSMAR}.}
 
@@ -117,30 +117,33 @@ freedom parameters is adjusted to avoid numerical problems, and the difference i
 \item{x}{object of class \code{'gsmar'} created with \code{fitGSMAR} or \code{GSMAR}.}
 
 \item{summary_print}{if set to \code{TRUE} then the print will include approximate
-standard errors, log-likelihood and information criteria values. Supported only for
-models with data.}
+standard errors for the estimates, log-likelihood, information criteria values,
+modulus of the roots of the characteristic AR polynomias for each regime, and
+several unconditional moments.
+Supported for models that include data only.}
 }
 \value{
-Returns an object of class \code{'gsmar'} defining the specified GMAR, StMAR or G-StMAR model. If data is supplied, the returned object
-  contains (by default) empirical mixing weights, conditional means and variances and quantile residuals. Note that the first p observations are
-  taken as the initial values so mixing weights, conditional moments and qresiduals start from the p+1:th observation (interpreted as t=1).
+Returns an object of class \code{'gsmar'} defining the specified GMAR, StMAR, or G-StMAR model. If data is supplied,
+ the returned object contains (by default) empirical mixing weights, some conditional and unconditional moments, and quantile
+ residuals. Note that the first p observations are taken as the initial values so the mixing weights, conditional moments, and
+ quantile residuals start from the p+1:th observation (interpreted as t=1).
 }
 \description{
-\code{GSMAR} creates an S3 object of class \code{'gsmar'} that defines a GMAR, StMAR or G-StMAR model.
+\code{GSMAR} creates an S3 object of class \code{'gsmar'} that defines a GMAR, StMAR, or G-StMAR model.
 }
 \details{
-Models can be built without data, e.q., in order to simulate from the process, but some elements such as quantile
+Models can be built without data, e.q., in order to simulate from the process, but some things such as quantile
  residuals and conditional moments can't be calculated without data.
 }
 \section{Methods (by generic)}{
 \itemize{
 \item \code{logLik}: Log-likelihood method
 
-\item \code{residuals}: residuals method to extract multivariate quantile residuals
+\item \code{residuals}: residuals method to extract quantile residuals
 
 \item \code{summary}: summary method, standard errors in brackets
 
-\item \code{plot}: plot method for class 'gsmar'
+\item \code{plot}: Plot method for class 'gsmar'
 
 \item \code{print}: print method
 }}
@@ -188,13 +191,6 @@ params32trc <- c(0.35, 0.33, 0.88, -0.02, 0.01, 0.01, 0.36, 4.53, 1000)
 stmar32rc <- GSMAR(logVIX, p=3, M=2, params=params32trc, model="StMAR",
  restricted=TRUE, constraints=matrix(c(1, 0, 0, 0, 0, 1), ncol=2))
 stmar32rc
-
-# Mixture version of Heterogenuous autoregressive (HAR) model (without data)
-paramsHAR <- c(1, 0.1, 0.2, 0.3, 1, 2, 0.15, 0.25, 0.35, 2, 0.55)
-r1 = c(1, rep(0, 21)); r2 = c(rep(0.2, 5), rep(0, 17)); r3 = rep(1/22, 22)
-R0 = cbind(r1, r2, r3)
-mixhar <- GSMAR(p=22, M=2, params=paramsHAR, model="GMAR", constraints=list(R0, R0))
-mixhar
 }
 \references{
 \itemize{
@@ -203,7 +199,7 @@ mixhar
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
            arXiv:1805.04010 \strong{[econ.EM]}.
    \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
-           theoretical properties similar to the GMAR and StMAR models.
+         theoretical properties similar to the GMAR and StMAR models.
  }
 }
 \seealso{
