@@ -4,12 +4,23 @@
 \alias{fitGSMAR}
 \title{Estimate Gaussian or Student's t Mixture Autoregressive model}
 \usage{
-fitGSMAR(data, p, M, model = c("GMAR", "StMAR", "G-StMAR"),
-  restricted = FALSE, constraints = NULL, conditional = TRUE,
-  parametrization = c("intercept", "mean"), ncalls = round(10 + 9 *
-  log(sum(M))), ncores = min(2, ncalls, parallel::detectCores()),
-  maxit = 300, seeds = NULL, printRes = TRUE, runTests = FALSE,
-  ...)
+fitGSMAR(
+  data,
+  p,
+  M,
+  model = c("GMAR", "StMAR", "G-StMAR"),
+  restricted = FALSE,
+  constraints = NULL,
+  conditional = TRUE,
+  parametrization = c("intercept", "mean"),
+  ncalls = round(10 + 9 * log(sum(M))),
+  ncores = min(2, ncalls, parallel::detectCores()),
+  maxit = 300,
+  seeds = NULL,
+  printRes = TRUE,
+  runTests = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{a numeric vector or class \code{'ts'} object containing the data. \code{NA} values are not supported.}
@@ -225,8 +236,7 @@ fit32trc
          \emph{Transactions on Systems, Man and Cybernetics} \strong{24}, 656-667.
    \item Smith R.E., Dike B.A., Stegmann S.A. 1995. Fitness inheritance in genetic algorithms.
          \emph{Proceedings of the 1995 ACM Symposium on Applied Computing}, 345-350.
-   \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
-         theoretical properties similar to the GMAR and StMAR models.
+   \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
  }
 }
 \seealso{

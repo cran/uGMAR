@@ -4,8 +4,7 @@
 \alias{diagnosticPlot}
 \title{Quantile residual based diagnostic plots for GMAR, StMAR, and G-StMAR models}
 \usage{
-diagnosticPlot(gsmar, nlags = 20, nsimu = 2000,
-  plot_indstats = FALSE)
+diagnosticPlot(gsmar, nlags = 20, nsimu = 1, plot_indstats = FALSE)
 }
 \arguments{
 \item{gsmar}{object of class \code{'gsmar'} created with the function \code{fitGSMAR} or \code{GSMAR}.}
@@ -93,8 +92,7 @@ diagnosticPlot(fit32rc)
            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
            arXiv:1805.04010 \strong{[econ.EM]}.
-   \item There are currently no published references for G-StMAR model, but it's a straight forward generalization with
-           theoretical properties similar to GMAR and StMAR models.
+   \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
  }
 }
 \seealso{

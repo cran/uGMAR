@@ -4,11 +4,17 @@
 \alias{condMoments}
 \title{Calculate conditional moments of GMAR, StMAR, or G-StMAR model}
 \usage{
-condMoments(data, p, M, params, model = c("GMAR", "StMAR", "G-StMAR"),
-  restricted = FALSE, constraints = NULL,
+condMoments(
+  data,
+  p,
+  M,
+  params,
+  model = c("GMAR", "StMAR", "G-StMAR"),
+  restricted = FALSE,
+  constraints = NULL,
   parametrization = c("intercept", "mean"),
-  to_return = c("regime_cmeans", "regime_cvars", "total_cmeans",
-  "total_cvars"))
+  to_return = c("regime_cmeans", "regime_cvars", "total_cmeans", "total_cvars")
+)
 }
 \arguments{
 \item{data}{a numeric vector or class \code{'ts'} object containing the data. \code{NA} values are not supported.}
@@ -129,14 +135,14 @@ tcv12gs <- condMoments(logVIX, 1, c(1,1), params12gs, model="G-StMAR",
            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
            arXiv:1805.04010 \strong{[econ.EM]}.
-   \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
-           theoretical properties similar to the GMAR and StMAR models.
+   \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
  }
 }
 \seealso{
-Other moment functions: \code{\link{get_regime_autocovs}},
-  \code{\link{get_regime_means}},
-  \code{\link{get_regime_vars}},
-  \code{\link{uncondMoments}}
+Other moment functions: 
+\code{\link{get_regime_autocovs}()},
+\code{\link{get_regime_means}()},
+\code{\link{get_regime_vars}()},
+\code{\link{uncondMoments}()}
 }
 \concept{moment functions}

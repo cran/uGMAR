@@ -11,8 +11,13 @@
 
 \method{print}{qrtest}(x, ..., digits = 3)
 
-quantileResidualTests(gsmar, lagsAC = c(1, 2, 5, 10), lagsCH = lagsAC,
-  nsimu = 2000, printRes = TRUE)
+quantileResidualTests(
+  gsmar,
+  lagsAC = c(1, 2, 5, 10),
+  lagsCH = lagsAC,
+  nsimu = 1,
+  printRes = TRUE
+)
 }
 \arguments{
 \item{x}{object of class \code{'qrtest'} created with the function \code{quantileResidualTests}.}
@@ -31,7 +36,8 @@ is tested.}
 
 \item{nsimu}{a positive integer specifying to how many simulated observations the covariance matrix Omega
 (see Kalliovirta (2012)) should be based on. If smaller than data size, then omega will be based on the
-given data and not on simulated data.}
+given data and not on simulated data. Having the covariance matrix omega based on a large simulated sample
+might improve the tests size properties.}
 
 \item{printRes}{a logical argument defining whether the results should be printed or not.}
 }
@@ -105,8 +111,7 @@ quantileResidualTests(fit22c, lagsAC=c(1, 3), nsimu=1, printRes=FALSE)
            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
            arXiv:1805.04010 \strong{[econ.EM]}.
-   \item There are currently no published references for G-StMAR model, but it's a straight forward generalization with
-           theoretical properties similar to GMAR and StMAR models.
+   \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
  }
 }
 \seealso{

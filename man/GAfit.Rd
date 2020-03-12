@@ -4,12 +4,27 @@
 \alias{GAfit}
 \title{Genetic algorithm for preliminary estimation of GMAR, StMAR, or G-StMAR model}
 \usage{
-GAfit(data, p, M, model = c("GMAR", "StMAR", "G-StMAR"),
-  restricted = FALSE, constraints = NULL,
-  parametrization = c("intercept", "mean"), conditional = TRUE,
-  ngen = 200, popsize, smartMu, meanscale, sigmascale, initpop = NULL,
-  regime_force_scale = 1, red_criteria = c(0.05, 0.01),
-  to_return = c("alt_ind", "best_ind"), minval, seed = NULL)
+GAfit(
+  data,
+  p,
+  M,
+  model = c("GMAR", "StMAR", "G-StMAR"),
+  restricted = FALSE,
+  constraints = NULL,
+  parametrization = c("intercept", "mean"),
+  conditional = TRUE,
+  ngen = 200,
+  popsize,
+  smartMu = min(100, ceiling(0.5 * ngen)),
+  meanscale,
+  sigmascale,
+  initpop = NULL,
+  regime_force_scale = 1,
+  red_criteria = c(0.05, 0.01),
+  to_return = c("alt_ind", "best_ind"),
+  minval,
+  seed = NULL
+)
 }
 \arguments{
 \item{data}{a numeric vector or class \code{'ts'} object containing the data. \code{NA} values are not supported.}
@@ -52,8 +67,7 @@ Ignore or set to \code{NULL} if applying linear constraints is \strong{not} desi
 Default is \code{10*d} where \code{d} is the number of parameters.}
 
 \item{smartMu}{a positive integer specifying the generation after which the random mutations in the genetic algorithm are "smart".
-This means that mutating individuals will mostly mutate fairly close (or partially close) to the best fitting individual so far.
-Default is \code{min(100, round(0.5*ngen))}.}
+This means that mutating individuals will mostly mutate fairly close (or partially close) to the best fitting individual so far.}
 
 \item{meanscale}{a real valued vector of length two specifying the mean (the first element) and standard deviation (the second element)
 of the normal distribution from which the \eqn{\mu_{m}} mean-parameters are generated in random mutations in the genetic algorithm.
@@ -156,7 +170,6 @@ The core of the genetic algorithm is mostly based on the description by \emph{Do
          \emph{Transactions on Systems, Man and Cybernetics} \strong{24}, 656-667.
    \item Smith R.E., Dike B.A., Stegmann S.A. 1995. Fitness inheritance in genetic algorithms.
          \emph{Proceedings of the 1995 ACM Symposium on Applied Computing}, 345-350.
-   \item There are currently no published references for G-StMAR model, but it's a straightforward generalization with
-         theoretical properties similar to GMAR and StMAR models.
+   \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
  }
 }

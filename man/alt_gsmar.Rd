@@ -4,13 +4,24 @@
 \alias{alt_gsmar}
 \title{Construct a GSMAR model based on results from an arbitrary estimation round of \code{fitGSMAR}}
 \usage{
-alt_gsmar(gsmar, which_round = 1, calc_qresiduals = TRUE,
-  calc_cond_moments = TRUE, calc_std_errors = TRUE, custom_h = NULL)
+alt_gsmar(
+  gsmar,
+  which_round = 1,
+  which_largest,
+  calc_qresiduals = TRUE,
+  calc_cond_moments = TRUE,
+  calc_std_errors = TRUE,
+  custom_h = NULL
+)
 }
 \arguments{
 \item{gsmar}{object of class \code{'gsmar'} created with the function \code{fitGSMAR} or \code{GSMAR}.}
 
 \item{which_round}{based on which estimation round should the model be constructed? An integer value in 1,...,\code{ncalls}.}
+
+\item{which_largest}{based on estination round with which largest log-likelihood should the model be constructed?
+An integer value in 1,...,\code{ncalls}. For example, \code{which_largest=2} would take the second largest log-likelihood
+and construct the model based on the corresponding estimates. If used, then \code{which_round} is ignored.}
 
 \item{calc_qresiduals}{should quantile residuals be calculated? Default is \code{TRUE} iff the model contains data.}
 
@@ -51,8 +62,7 @@ It's sometimes useful to examine other estimates than the one with the highest l
            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
            arXiv:1805.04010 \strong{[econ.EM]}.
-   \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
-         theoretical properties similar to the GMAR and StMAR models.
+   \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
  }
 }
 \seealso{

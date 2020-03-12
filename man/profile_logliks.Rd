@@ -11,7 +11,7 @@ profile_logliks(gsmar, scale = 0.02, nrows, ncols, precission = 200)
 
 \item{scale}{a numeric scalar specifying the interval plotted for each estimate: the estimate plus-minus \code{abs(scale*estimate)}.}
 
-\item{nrows}{how rows should be in the plot-matrix? The default is M.}
+\item{nrows}{how many rows should be in the plot-matrix? The default is \code{max(ceiling(log2(nparams) - 1), 1)}.}
 
 \item{ncols}{how many columns should be in the plot-matrix? The default is \code{ceiling(nparams/nrows)}.
 Note that \code{nrows*ncols} should not be smaller than the number of parameters.}
@@ -64,8 +64,7 @@ profile_logliks(fit12t, scale=0.00001)
            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
            arXiv:1805.04010 \strong{[econ.EM]}.
-   \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
-           theoretical properties similar to the GMAR and StMAR models.
+   \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
  }
 }
 \seealso{

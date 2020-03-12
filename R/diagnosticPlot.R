@@ -71,7 +71,7 @@
 #' }
 #' @export
 
-diagnosticPlot <- function(gsmar, nlags=20, nsimu=2000, plot_indstats=FALSE) {
+diagnosticPlot <- function(gsmar, nlags=20, nsimu=1, plot_indstats=FALSE) {
   if(!all_pos_ints(c(nlags, nsimu))) stop("The arguments 'nlags' and 'nsimu' have to be a strictly positive integers")
   check_gsmar(gsmar)
   check_data(gsmar)
@@ -91,7 +91,7 @@ diagnosticPlot <- function(gsmar, nlags=20, nsimu=2000, plot_indstats=FALSE) {
     qresiduals <- qresiduals[!is.na(qresiduals)]
     warning(paste(n_na, "missing values removed from quantile residuals. Check the parameter estimates for possible problems (border of the prm space, large dfs, etc)?"))
   }
-  old_par <- par(no.readonly = TRUE) # Save old settings
+  old_par <- par(no.readonly=TRUE) # Save old settings
   on.exit(par(old_par)) # Restore the settings before quitting
   if(plot_indstats) {
     par(mfrow=c(3, 2), mar=c(2.1, 2.1, 2.1, 0.8))
@@ -228,7 +228,7 @@ quantileResidualPlot <- function(gsmar) {
 #'
 #' @inheritParams simulateGSMAR
 #' @param scale a numeric scalar specifying the interval plotted for each estimate: the estimate plus-minus \code{abs(scale*estimate)}.
-#' @param nrows how rows should be in the plot-matrix? The default is M.
+#' @param nrows how many rows should be in the plot-matrix? The default is \code{max(ceiling(log2(nparams) - 1), 1)}.
 #' @param ncols how many columns should be in the plot-matrix? The default is \code{ceiling(nparams/nrows)}.
 #'   Note that \code{nrows*ncols} should not be smaller than the number of parameters.
 #' @param precission at how many points should each profile log-likelihood be evaluated at?
@@ -275,7 +275,8 @@ profile_logliks <- function(gsmar, scale=0.02, nrows, ncols, precission=200) {
   npars <- length(params)
   constraints <- gsmar$model$constraints
   restricted <- gsmar$model$restricted
-  if(missing(nrows)) nrows <- M
+  parametrization <- gsmar$model$parametrization
+  if(missing(nrows)) nrows <- max(ceiling(log2(npars) - 1), 1)
   if(missing(ncols)) ncols <- ceiling(npars/nrows)
   stopifnot(all_pos_ints(c(nrows, ncols)) && nrows*ncols >= npars)
 
@@ -298,7 +299,6 @@ profile_logliks <- function(gsmar, scale=0.02, nrows, ncols, precission=200) {
   }
 
   for(i1 in seq_len(npars)) { # Go though the parameters
-
     pars <- params
     range <- abs(scale*pars[i1])
     vals <- seq(from=pars[i1] - range, to=pars[i1] + range, length.out=precission) # Loglik to be evaluated at these values of the parameter considered
@@ -306,9 +306,11 @@ profile_logliks <- function(gsmar, scale=0.02, nrows, ncols, precission=200) {
       new_pars <- pars
       new_pars[i1] <- val # Change the single parameter value
       loglikelihood_int(data=gsmar$data, p=p, M=M_orig, params=new_pars, model=gsmar$model$model, restricted=restricted,
-                        constraints=constraints, conditional=gsmar$model$conditional, parametrization=gsmar$model$parametrization,
+                        constraints=constraints, conditional=gsmar$model$conditional, parametrization=parametrization,
                         boundaries=TRUE, checks=FALSE, minval=NA)
     }, numeric(1))
+
+    if(sum(is.na(logliks)) == precission) stop("Profile log-likelihood function is too peaky - increase precission (also estimates might be peculiar)")
 
     # In order to get the labels right, we first determine which parameter is in question.
     # For readability of the code, we do the cases of restricted and unrestricted models
@@ -321,15 +323,20 @@ profile_logliks <- function(gsmar, scale=0.02, nrows, ncols, precission=200) {
         } else if(i1 <= max(cum_q)) { # phi_{m,0},...,phi_{m,p}
           if(i1 == cum_q[m] + 1) { # phi_{m,0}
             mylist <- list(foo=paste0(m, ",", 0))
-          } else {  # phi_{m,1},...,phi_{m,p}
-              p0 <- i1 - cum_q[m] - 1 # p0 = 1,...,p; minus 1 from phi_0
-            if(is.null(constraints)) {
-              mylist  <- list(foo=paste0(m, ",", p0))
-            } else { # The AR parameters are not generally the same as phi-parameters with linear constraints
-              mylist  <- list(phi="AR", foo=paste0(m, ",", p0))
+            if(parametrization == "intercept") {
+              main <- substitute(phi[foo], mylist)
+            } else { # Different label for mean parametrization
+              main <- substitute(mu[foo], mylist)
             }
+          } else {  # phi_{m,1},...,phi_{m,p}
+            p0 <- i1 - cum_q[m] - 1 # p0 = 1,...,p; minus 1 from phi_0
+            mylist  <- list(foo=paste0(m, ",", p0))
+            if(!is.null(constraints)) {
+              # The AR parameters are not generally the same as phi-parameters with linear constraints
+              mylist$phi <- "AR"
+            }
+            main <- substitute(phi[foo], mylist)
           }
-          main <- substitute(phi[foo], mylist) # Substitute the character strings from mylist
         }
       } else { # alphas and degrees of freedom if any
         if(M == 1) {
@@ -346,11 +353,16 @@ profile_logliks <- function(gsmar, scale=0.02, nrows, ncols, precission=200) {
           }
         }
       }
-    } else { ## restricted == TRUE, taken care separately
+    } else { ## restricted == TRUE, taken care separately for readability of the code
         if(i1 <= M + q) { # phi_{m,0},...,phi_{m,p}
           if(i1 <= M) { # phi_{m,0}
             m <- i1
             mylist <- list(foo=paste0(m, ",", 0))
+            if(parametrization == "intercept") {
+              main <- substitute(phi[foo], mylist)
+            } else { # Different label for mean parametrization
+              main <- substitute(mu[foo], mylist)
+            }
           } else { # phi_{m,1},...,phi_{m,p}
             m <- "m"
             p0 <- i1 - M
@@ -359,8 +371,8 @@ profile_logliks <- function(gsmar, scale=0.02, nrows, ncols, precission=200) {
             } else { # The AR parameters are not generally the same as phi-parameters with linear constraints
               mylist  <- list(phi="AR", foo=paste0(m, ",", p0))
             }
+            main <- substitute(phi[foo], mylist)
           }
-          main <- substitute(phi[foo], mylist) # Substitute the character strings from mylist
         } else if(i1 <= 2*M + q) { # sigma^2
           m <- i1 - M - q
           main <- substitute(sigma[foo]^2, list(foo=m))

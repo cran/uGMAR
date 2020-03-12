@@ -4,8 +4,7 @@
 \alias{iterate_more}
 \title{Maximum likelihood estimation of GMAR, StMAR, or G-StMAR model with preliminary estimates}
 \usage{
-iterate_more(gsmar, maxit = 100, custom_h = NULL,
-  calc_std_errors = TRUE)
+iterate_more(gsmar, maxit = 100, custom_h = NULL, calc_std_errors = TRUE)
 }
 \arguments{
 \item{gsmar}{object of class \code{'gsmar'} created with the function \code{fitGSMAR} or \code{GSMAR}.}
@@ -51,8 +50,7 @@ fit12
            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
            arXiv:1805.04010 \strong{[econ.EM]}.
-   \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
-         theoretical properties similar to the GMAR and StMAR models.
+   \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
  }
 }
 \seealso{

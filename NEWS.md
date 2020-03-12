@@ -12,6 +12,7 @@
 
 # uGMAR 3.2.0
 
+* Added reference for the G-StMAR model.
 * In the predict method arguments "ci" and "ci_type" were changed to "pi" and "pi_type" to signify "prediction interval"" as it's more correct expression than "confidence interval". Also the default prediction method is now median, and not mean.
 * Changed the default number of CPU cores employed by the estimation function fitGSMAR to be at most two due to CRAN policy.
 * Added the argument "seeds" to fitGSMAR allowing one to set the random number generator seed for each call to the genetic algorithm.
@@ -28,7 +29,7 @@
 
 * Fixed 'additional issue' in CRAN checks
 
-# uGMAT 3.2.2
+# uGMAR 3.2.2
 
 * New function: 'profile_logliks' for plotting profile log-likelihood functions.
 * Disabled camelCase compatibility for arguments 'ncalls' and 'ncores' in fitGMAR.
@@ -37,5 +38,16 @@
 * Tidier code for some parts.
 * Improved comments and documentation.
 * Bug fix: the function 'add_data' did not identify the model type correctly. 
-* Bug fix: simulateGSMAR simulated some initial values from slighly wrong the distribution; did not have affect on forecasts.
+* Bug fix: simulateGSMAR simulated some initial values from slighly wrong distribution; did not have affect on forecasts.
 * Minor update on the summary print for the models
+
+# uGMAR 3.2.3
+
+* Updated the plot method for class 'gsmar' objects: now includes a density plot by default (can be removed).
+* Updated the predict method for class 'gsmar' objects: now includes predictions for the mixing weights (can be removed from the plot).
+* Fixed 'profile_logliks' to show correct headlines with mean parametrization + improved the default method for choosing the number of rows and colums in the plot-matrix.
+* Now standard errors are printed correctly for models imposing all kinds of constraints. In the earlier versions, constrained AR parameter standard errors were printed incorrectly if the constraints involved multiplications or summations. 
+* Removed redundant reinitialization of a PSOCK cluster in the function 'fitGSMAR'. 
+* In the function quantileResidualTests the default argument for 'nsimu' is now 1 so that the tests are based on the given data only (and not on simulation).
+* Removed inflation expectation data.
+* Added interest rate spead (10-Year minus 1-Year treasury) data.

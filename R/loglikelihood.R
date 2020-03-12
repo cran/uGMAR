@@ -109,8 +109,7 @@
 #'            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
 #'    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
 #'            arXiv:1805.04010 \strong{[econ.EM]}.
-#'    \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
-#'            theoretical properties similar to the GMAR and StMAR models.
+#'    \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
 #'  }
 
 loglikelihood_int <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FALSE, constraints=NULL,
@@ -178,7 +177,7 @@ loglikelihood_int <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-St
   # Observed data: y_(-p+1),...,y_0,y_1,...,y_(n_obs-p). First row denotes vector y_0, i:th row vector y_[i-1] and last row denotes the vector y_T.
   Y <- vapply(1:p, function(i1) data[(p - i1 + 1):(n_obs - i1 + 1)], numeric(n_obs - p + 1))
 
-  # Calculate inverse Gamma_m (see the covariance matrix Gamma_p in MDP 2018, p.3 - we calculate this for all mixture components using
+  # Calculate inverse Gamma_m (see the covariance matrix Gamma_p in MPS 2018, p.3 - we calculate this for all mixture components using
   # the inverse formula in Galbraith and Galbraith 1974). Also, calculate the matrix products in multivariate normal and t-distribution
   # densities.
   matProd <- matrix(nrow=n_obs - p + 1, ncol=M)
@@ -228,7 +227,7 @@ loglikelihood_int <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-St
   }
   if(!is.matrix(logmv_values0)) logmv_values0 <- as.matrix(logmv_values0)
 
-  l_0 <- 0 # "The first term" of the exact log-likelihood function (KMS 2015, eq.(12) and MPS, eq.(14))
+  l_0 <- 0 # "The first term" of the exact log-likelihood function (KMS 2015, eq.(12) and MPS 2018, eq.(14))
   if(M == 1) { # No need to do calculations is only one regime.
     alpha_mt <- as.matrix(rep(1, nrow(logmv_values0)))
     if(conditional == FALSE && (to_return == "loglik" | to_return == "loglik_and_mw")) {
@@ -294,7 +293,7 @@ loglikelihood_int <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-St
     if(to_return == "qresiduals") { # Calculate the integrals for the quantile residuals
       resM2 <- matrix(ncol=M2, nrow=n_obs - p)
 
-      # Function for numerical integration of the pdf.
+      # Function for numerical integration of the pdf
       my_integral <- function(i1, i2) { # Takes in the regime index i1 and the observation index i2 for the upper bound
         f_mt <- function(y_t) { # The conditional density function to be integrated numerically
           alpha_mt[i2, M1 + i1]*exp(lgamma(0.5*(1 + dfs[i1] + p)) - lgamma(0.5*(dfs[i1] + p)))/sqrt(sigma_mt[i2, i1]*base::pi*(dfs[i1] + p - 2))*
@@ -308,31 +307,29 @@ loglikelihood_int <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-St
                  })
       }
 
-      if(requireNamespace("gsl", quietly = TRUE)) { # If 'gsl' available, calculate with hypergeometric function what can be calculated
-        for(i1 in 1:M2) { # Go through StMAR type regimes
+      is_gsl <- requireNamespace("gsl", quietly = TRUE) # If 'gsl' available, calculate with hypergeometric function what can be calculated
+      for(i1 in 1:M2) { # Go through StMAR type regimes
+        if(is_gsl) {
           whichDef <- which(abs(mu_mt[, M1 + i1] - Y2) < sqrt(sigma_mt[,i1]*(dfs[i1] + p - 2))) # Which ones can be calculated with hypergeometric function
           whichNotDef <- (1:length(Y2))[-whichDef]
-
-          if(length(whichDef) > 0) { # Calculate the CDF values at y_t using hypergeometric function whenever it's defined
-            Y0 <- Y2[whichDef]
-            alpha_mt0 <- alpha_mt[whichDef, M1 + i1]
-            mu_mt0 <- mu_mt[whichDef, M1 + i1]
-            sigma_mt0 <- sigma_mt[whichDef, i1]
-            a0 <- exp(lgamma(0.5*(1 + dfs[i1] + p)) - lgamma(0.5*(dfs[i1] + p)))/sqrt(sigma_mt0*base::pi*(dfs[i1] + p - 2))
-            resM2[whichDef, i1] <- alpha_mt0*(0.5 - a0*(mu_mt0 - Y0)*gsl::hyperg_2F1(0.5, 0.5*(1 + dfs[i1] + p), 1.5,
-                                                                                     -((mu_mt0 - Y0)^2)/(sigma_mt0*(dfs[i1] + p - 2)),
-                                                                                     give=FALSE, strict=TRUE))
-          }
-          # Calculate the CDF values at y_t that can't be calculated with the hypergeometric function
-          if(length(whichNotDef) > 0) {
-            for(i2 in whichNotDef) {
-              resM2[i2, i1] <- my_integral(i1, i2)
-            }
-          }
+        } else {
+          whichDef <- integer(0)
+          whichNotDef <- 1:length(Y2)
         }
-      } else { # Numerically integrate everything if package "gsl" is not available - slow but works "always".
-        for(i1 in 1:M2) { # Go through the StMAR type regimes
-          for(i2 in 1:length(Y2)) { # GO through the observations, exluding the initial values
+
+        if(length(whichDef) > 0) { # Calculate the CDF values at y_t using hypergeometric function whenever it's defined
+          Y0 <- Y2[whichDef]
+          alpha_mt0 <- alpha_mt[whichDef, M1 + i1]
+          mu_mt0 <- mu_mt[whichDef, M1 + i1]
+          sigma_mt0 <- sigma_mt[whichDef, i1]
+          a0 <- exp(lgamma(0.5*(1 + dfs[i1] + p)) - lgamma(0.5*(dfs[i1] + p)))/sqrt(sigma_mt0*base::pi*(dfs[i1] + p - 2))
+          resM2[whichDef, i1] <- alpha_mt0*(0.5 - a0*(mu_mt0 - Y0)*gsl::hyperg_2F1(0.5, 0.5*(1 + dfs[i1] + p), 1.5,
+                                                                                   -((mu_mt0 - Y0)^2)/(sigma_mt0*(dfs[i1] + p - 2)),
+                                                                                   give=FALSE, strict=TRUE))
+        }
+        # Calculate the CDF values at y_t that can't be calculated with the hypergeometric function (from the package 'gsl')
+        if(length(whichNotDef) > 0) {
+          for(i2 in whichNotDef) {
             resM2[i2, i1] <- my_integral(i1, i2)
           }
         }

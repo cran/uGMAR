@@ -4,8 +4,14 @@
 \alias{stmar_to_gstmar}
 \title{Estimate a G-StMAR model based on a StMAR model with large degrees of freedom parameters}
 \usage{
-stmar_to_gstmar(gsmar, maxdf = 100, estimate, calc_std_errors,
-  maxit = 100, custom_h = NULL)
+stmar_to_gstmar(
+  gsmar,
+  maxdf = 100,
+  estimate,
+  calc_std_errors,
+  maxit = 100,
+  custom_h = NULL
+)
 }
 \arguments{
 \item{gsmar}{object of class \code{'gsmar'} created with the function \code{fitGSMAR} or \code{GSMAR}.}
@@ -58,8 +64,7 @@ If a StMAR model contains large estimates for the degrees of freedom parameters,
            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
            arXiv:1805.04010 \strong{[econ.EM]}.
-   \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
-         theoretical properties similar to the GMAR and StMAR models.
+   \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
  }
 }
 \seealso{

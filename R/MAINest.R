@@ -109,8 +109,7 @@
 #'          \emph{Transactions on Systems, Man and Cybernetics} \strong{24}, 656-667.
 #'    \item Smith R.E., Dike B.A., Stegmann S.A. 1995. Fitness inheritance in genetic algorithms.
 #'          \emph{Proceedings of the 1995 ACM Symposium on Applied Computing}, 345-350.
-#'    \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
-#'          theoretical properties similar to the GMAR and StMAR models.
+#'    \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
 #'  }
 #' @examples
 #' \donttest{
@@ -189,6 +188,10 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
   minval <- ifelse(is.null(dot_params$minval), get_minval(data), dot_params$minval)
   red_criteria <- ifelse(rep(is.null(dot_params$red_criteria), 2), c(0.05, 0.01), dot_params$red_criteria)
 
+  if(ncores > parallel::detectCores()) {
+    ncores <- parallel::detectCores()
+    message("ncores was set to be larger than the number of detected: using ncores = parallel::detectCores()")
+  }
   if(ncalls < ncores) {
     ncores <- ncalls
     message("ncores was set to be larger than the number of estimation rounds: using ncores = ncalls")
@@ -206,7 +209,6 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
   GAresults <- pbapply::pblapply(1:ncalls, function(i1) GAfit(data=data, p=p, M=M, model=model, restricted=restricted,
                                                              constraints=constraints, conditional=conditional,
                                                              parametrization=parametrization, seed=seeds[i1], ...), cl=cl)
-  parallel::stopCluster(cl=cl)
 
   loks <- vapply(1:ncalls, function(i1) loglikelihood_int(data=data, p=p, M=M, params=GAresults[[i1]], model=model,
                                                           restricted=restricted, constraints=constraints, conditional=conditional,
@@ -228,8 +230,7 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
 
   # Logarithmize dfs to get overly large dfs values to the same range as other parameters.
   # This adjusts the difference 'h' larger for larger dfs parameters in non-log scale to
-  # avoid numerical problems associated with overly large degrees of freedom values, and
-  # it also allows the dfs estimates to 'explode' more sensitively.
+  # avoid numerical problems associated with overly large degrees of freedom values.
   manipulateDFS <- function(M, params, model, FUN) {
     FUN <- match.fun(FUN)
     M2 <- ifelse(model == "StMAR", M, M[2])
@@ -257,11 +258,8 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
     vapply(1:d, function(i1) (f(params + I[i1,]*h) - f(params - I[i1,]*h))/(2*h), numeric(1))
   }
 
-  cl <- parallel::makeCluster(ncores)
-  parallel::clusterExport(cl, ls(environment(fitGSMAR)), envir = environment(fitGSMAR)) # assign all variables from package:uGMAR
-  parallel::clusterEvalQ(cl, c(library(Brobdingnag), library(pbapply)))
   cat("Optimizing with the variable metric algorithm...\n")
-  NEWTONresults <- pbapply::pblapply(1:ncalls, function(i1) optim(par=GAresults[[i1]], fn=f, gr=gr, method=c("BFGS"),
+  NEWTONresults <- pbapply::pblapply(1:ncalls, function(i1) optim(par=GAresults[[i1]], fn=f, gr=gr, method="BFGS",
                                                                   control=list(fnscale=-1, maxit=maxit)), cl=cl)
   parallel::stopCluster(cl=cl)
 

@@ -4,12 +4,22 @@
 \alias{loglikelihood_int}
 \title{Compute the log-likelihood of GMAR, StMAR, or G-StMAR model}
 \usage{
-loglikelihood_int(data, p, M, params, model = c("GMAR", "StMAR",
-  "G-StMAR"), restricted = FALSE, constraints = NULL,
-  conditional = TRUE, parametrization = c("intercept", "mean"),
-  boundaries = TRUE, checks = TRUE, to_return = c("loglik", "mw",
-  "mw_tplus1", "loglik_and_mw", "terms", "regime_cmeans", "regime_cvars",
-  "total_cmeans", "total_cvars", "qresiduals"), minval)
+loglikelihood_int(
+  data,
+  p,
+  M,
+  params,
+  model = c("GMAR", "StMAR", "G-StMAR"),
+  restricted = FALSE,
+  constraints = NULL,
+  conditional = TRUE,
+  parametrization = c("intercept", "mean"),
+  boundaries = TRUE,
+  checks = TRUE,
+  to_return = c("loglik", "mw", "mw_tplus1", "loglik_and_mw", "terms", "regime_cmeans",
+    "regime_cvars", "total_cmeans", "total_cvars", "qresiduals"),
+  minval
+)
 }
 \arguments{
 \item{data}{a numeric vector or class \code{'ts'} object containing the data. \code{NA} values are not supported.}
@@ -134,7 +144,6 @@ Note that the first p observations are taken as the initial values so the mixing
            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
            arXiv:1805.04010 \strong{[econ.EM]}.
-   \item There are currently no published references for the G-StMAR model, but it's a straightforward generalization with
-           theoretical properties similar to the GMAR and StMAR models.
+   \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
  }
 }
