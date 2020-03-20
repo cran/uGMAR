@@ -29,9 +29,9 @@
 #' @return Returns a class \code{'gsmarpred'} object containing, among the specifications,...
 #'  \describe{
 #'    \item{$pred}{Point forecasts}
-#'    \item{$pred_int}{Prediction intervals}
+#'    \item{$pred_ints}{Prediction intervals}
 #'    \item{$mix_pred}{Point forecasts for mixing weights}
-#'    \item{mix_pred_int}{Individual prediction intervals for mixing weights, as \code{[, , m]}, m=1,..,M.}
+#'    \item{mix_pred_ints}{Individual prediction intervals for mixing weights, as \code{[, , m]}, m=1,..,M.}
 #'  }
 #' @inherit simulateGSMAR references
 #' @seealso \code{\link{simulateGSMAR}}, \code{\link{condMoments}}, \code{\link{fitGSMAR}}, \code{\link{GSMAR}},

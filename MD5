@@ -1,6 +1,6 @@
-bd886033aa0ab4e28c95dfb286abb630 *DESCRIPTION
+5fcafca5be5cf822a4ca0b509b338c60 *DESCRIPTION
 a7d6c0fb5a60a27e71cca033eb9391d6 *NAMESPACE
-97f8b7fcbd10a0b11891e091743ba8d4 *NEWS.md
+a1cc5170f95f6b813061cf040ef93ce0 *NEWS.md
 71cbe6cef9f27db6e005fa12a188b003 *R/GSMARconstructor.R
 ec69e11f9e2a3294d561c5eca2be10db *R/MAINest.R
 ab0b83ab7e08fb196fe493635b5f9445 *R/argumentChecks.R
@@ -13,8 +13,8 @@ fbc9241af4e2549712e207d8afb773d4 *R/loglikelihood.R
 7b6242a4c9ce659e2c98828e64f23a8e *R/numericalDifferentiation.R
 9ed338c4158c4f88cff7012c2fd871ec *R/parameterReforms.R
 5c9589a4189adf705f71cb16afb9388e *R/pickAndChangeParams.R
-572ee32c047ec0dc1686fff4219497c2 *R/plotMethods.R
-a337dea9567be47fa2ad13b4e33a7083 *R/predictMethod.R
+703fb23588e244bd4f80dbeb5e83e975 *R/plotMethods.R
+80e6dda4fb15a87de5c3af5e0126b05d *R/predictMethod.R
 ed288b07ce7d326a95c5f99c98ac9cbf *R/printMethods.R
 ffd067dc1488457c2eee326098d597f2 *R/quantileResidualTests.R
 0a7c632bfc42eded5566ec4690f17c4d *R/quantileResiduals.R
@@ -28,7 +28,7 @@ d29b8ef4a03b746827c6bb042afee430 *data/T10Y1Y.rda
 77863e7f08b516c13a51dcc4ba814124 *data/VIX.rda
 8289e1df11a0ad6c0bb0480d3a530183 *data/logVIX.rda
 f9c9c6792f76b9b801e1a200ad3ddf3d *inst/doc/intro-to-uGMAR.Rmd
-4444f9a39d6d5a064771ddd54976be59 *inst/doc/intro-to-uGMAR.html
+7bedc1f16608d58d4073a855ff3c0ce2 *inst/doc/intro-to-uGMAR.html
 fb1551b42dd3d31e43fba08d1dc78c98 *man/GAfit.Rd
 556e48a9227994cbd2a8e682118fdaec *man/GSMAR.Rd
 5389c53674147a32692f4cb124258f6e *man/T10Y1Y.Rd
@@ -76,7 +76,7 @@ da25f0a3468271d405cbf2d3793faa3a *man/pick_alphas.Rd
 55feb6ffd4f173b198b2ccd63404721e *man/pick_pars.Rd
 a15c182c39ac4b4b7d4f513f8af54252 *man/pick_phi0.Rd
 5950ac64553cbd73400f9c4b5fd80868 *man/plot.gsmarpred.Rd
-58f46e9beba36d949aa0bdc84873b3d1 *man/predict.gsmar.Rd
+59f8c9c74c38bc1f3f444ab68e973c46 *man/predict.gsmar.Rd
 e8648f651151a6c55d6fbdd1beacff68 *man/print.gsmarpred.Rd
 936e1ac54923f3e67e7985300a38c8a5 *man/print.gsmarsum.Rd
 87fff19283182c2309acd89a0902d3d5 *man/profile_logliks.Rd
