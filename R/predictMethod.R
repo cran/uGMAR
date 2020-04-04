@@ -38,31 +38,31 @@
 #'  \code{\link{quantileResidualTests}}, \code{\link{diagnosticPlot}}
 #' @examples
 #' \donttest{
-#' # GMAR model
-#' fit12 <- fitGSMAR(data=logVIX, p=1, M=2, model="GMAR")
-#' pred12 <- predict(fit12, n_ahead=10, pi=c(0.95, 0.8))
-#' pred12
+#' # StMAR model
+#' fit42 <- fitGSMAR(data=T10Y1Y, p=4, M=2, model="StMAR")
+#' pred42 <- predict(fit42, n_ahead=10, pi=c(0.95, 0.8))
+#' pred42
 #'
 #' # Non-mixture StMAR model, upper prediction intervals
-#' fit11t <- fitGSMAR(logVIX, 1, 1, model="StMAR", ncores=1, ncalls=1)
-#' predict(fit11t, n_ahead=10, pi_type="upper", pi=0.9)
+#' fit101t <- fitGSMAR(T10Y1Y, 10, 1, model="StMAR", ncores=1, ncalls=1)
+#' predict(fit101t, n_ahead=10, pi_type="upper", pi=0.9)
 #'
 #' # G-StMAR model, no prediction intervals
-#' fit12gs <- fitGSMAR(logVIX, 1, M=c(1, 1), model="G-StMAR")
-#' pred12gs <- predict(fit12gs, n_ahead=10, pred_type="median",
+#' fit42g <- fitGSMAR(T10Y1Y, 4, M=c(1, 1), model="G-StMAR")
+#' pred42gs <- predict(fit42g, n_ahead=2, pred_type="median",
 #'  pi_type="none", plotRes=FALSE)
-#' pred12gs
-#' plot(pred12gs)
+#' pred42gs
+#' plot(pred42gs)
 #'
 #' # Restricted GMAR model, one-step conditional mean prediction
-#' fit12r <- fitGSMAR(logVIX, 1, 2, model="GMAR", restricted=TRUE)
-#' pred12r <- predict(fit12r, pred_type="cond_mean", plotRes=FALSE)
-#' pred12r
+#' fit43gmr <- fitGSMAR(T10Y1Y, 4, 3, model="GMAR", restricted=TRUE)
+#' pred43gmr <- predict(fit43gmr, pred_type="cond_mean", plotRes=FALSE)
+#' pred43gmr
 #'
 #' # Such StMAR(3,2) that the AR coefficients are restricted to be
 #' # the same for both regimes and that the second AR coefficients are
 #' # constrained to zero.
-#' fit32rc <- fitGSMAR(logVIX, 3, 2, model="StMAR", restricted=TRUE,
+#' fit32rc <- fitGSMAR(T10Y1Y, 3, 2, model="StMAR", restricted=TRUE,
 #'  constraints=matrix(c(1, 0, 0, 0, 0, 1), ncol=2))
 #' predict(fit32rc, n_ahead=3, pi_type="lower")
 #' }
@@ -127,7 +127,8 @@ predict.gsmar <- function(object, ..., n_ahead, nsimu=10000, pi=c(0.95, 0.8), pr
     pi_type <- "none"
     q_tocalc <- numeric(0)
     mix_weights <- FALSE
-    mix_pred <- NULL
+    mix_pred <- matrix(mw[nrow(mw),], nrow=1)
+    colnames(mix_pred) <- vapply(1:sum(M), function(m) paste("regime", m), character(1))
     mix_pred_ints <- NULL
   } else { # pred_type != cond_mean: Simulate future values of the process
 
@@ -135,7 +136,7 @@ predict.gsmar <- function(object, ..., n_ahead, nsimu=10000, pi=c(0.95, 0.8), pr
     sim <- simulateGSMAR(gsmar, nsimu=n_ahead, initvalues=data, ntimes=nsimu, drop=FALSE)
     sample <- sim$sample
     alpha_mt <- sim$mixing_weights
-    colnames(alpha_mt) <- vapply(1:gsmar$model$M, function(m) paste("regime", m), character(1))
+    colnames(alpha_mt) <- vapply(1:sum(M), function(m) paste("regime", m), character(1))
 
     # Point forecasts
     myFUN <- ifelse(pred_type == "mean", mean, median)
@@ -162,7 +163,7 @@ predict.gsmar <- function(object, ..., n_ahead, nsimu=10000, pi=c(0.95, 0.8), pr
     if(pi_type != "none") {
       if(length(q_tocalc) == 1) {
         pred_ints <- as.matrix(pred_ints)
-        mix_pred_ints <- array(mix_pred_ints, dim=c(n_ahead, gsmar$model$M, length(q_tocalc)), dimnames=list(NULL, colnames(alpha_mt), q_tocalc))
+        mix_pred_ints <- array(mix_pred_ints, dim=c(n_ahead, sum(M), length(q_tocalc)), dimnames=list(NULL, colnames(alpha_mt), q_tocalc))
         mix_pred_ints <- aperm(mix_pred_ints, perm=c(1, 3, 2))
       } else {
         pred_ints <- t(pred_ints)
