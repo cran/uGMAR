@@ -2,7 +2,7 @@
 % Please edit documentation in R/morePlots.R
 \name{condmomentPlot}
 \alias{condmomentPlot}
-\title{Condinional mean or variance plot for GMAR, StMAR, and G-StMAR models}
+\title{Conditional mean or variance plot for GMAR, StMAR, and G-StMAR models}
 \usage{
 condmomentPlot(gsmar, which_moment = c("mean", "variance"))
 }
@@ -16,10 +16,9 @@ condmomentPlot(gsmar, which_moment = c("mean", "variance"))
  of the conditional means/variances can be extracted from the model with the dollar sign.
 }
 \description{
-\code{condmomentPlot} plots the in-sample conditional means/variances of the model along with
+\code{condmomentPlot} plots the one-step in-sample conditional means/variances of the model along with
  the time series contained in the model (e.g. the time series the model was fitted to). Also plots
- the regimiwise conditional means/variances multiplied with mixing weights - summing to the total conditional
- mean/veriance.
+ the regimewise conditional means/variances multiplied with the mixing weights.
 }
 \details{
 The conditional mean plot works best if the data contains positive values only.

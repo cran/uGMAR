@@ -19,7 +19,7 @@
 #'  quantile residuals start from the p+1:th observation (interpreted as t=1).
 #' @seealso \code{\link{fitGSMAR}}, \code{\link{iterate_more}}, \code{\link{add_data}}, \code{\link{stmar_to_gstmar}},
 #'  \code{\link{swap_parametrization}}, \code{\link{get_gradient}}, \code{\link{simulateGSMAR}},
-#'  \code{\link{predict.gsmar}}, \code{\link{condMoments}}, \code{\link{uncondMoments}}
+#'  \code{\link{predict.gsmar}}, \code{\link{condMoments}}, \code{\link{uncondMoments}}, \code{\link{LR_test}}, \code{\link{Wald_test}}
 #' @inherit isStationary references
 #' @examples
 #' # GMAR model without data
@@ -285,7 +285,8 @@ stmar_to_gstmar <- function(gsmar, maxdf=100, estimate, calc_std_errors, maxit=1
     new_mod <- GSMAR(data=gsmar$data, p=gsmar$model$p, M=new_M, params=new_params$params,
                      model=new_model, restricted=gsmar$model$restricted,
                      constraints=new_constraints, conditional=gsmar$model$conditional,
-                     parametrization=gsmar$model$parametrization, calc_std_errors=calc_std_errors,
+                     parametrization=gsmar$model$parametrization, calc_qresiduals=FALSE,
+                     calc_cond_moments=FALSE, calc_std_errors=calc_std_errors,
                      custom_h=custom_h)
   }
   new_mod

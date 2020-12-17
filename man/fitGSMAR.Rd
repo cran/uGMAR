@@ -169,6 +169,7 @@ Because of complexity and multimodality of the log-likelihood function, it's \st
 fit12 <- fitGSMAR(simudata, p=1, M=2, model="GMAR")
 summary(fit12)
 plot(fit12)
+profile_logliks(fit12)
 
 # StMAR model
 fit42 <- fitGSMAR(data=T10Y1Y, p=4, M=2, model="StMAR")
@@ -247,5 +248,5 @@ fit32rc
 \seealso{
 \code{\link{GSMAR}}, \code{\link{iterate_more}}, , \code{\link{stmar_to_gstmar}}, \code{\link{add_data}},
  \code{\link{profile_logliks}}, \code{\link{swap_parametrization}}, \code{\link{get_gradient}}, \code{\link{simulateGSMAR}}, \code{\link{predict.gsmar}},
-  \code{\link{diagnosticPlot}}, \code{\link{quantileResidualTests}}, \code{\link{condMoments}}, \code{\link{uncondMoments}}
+  \code{\link{diagnosticPlot}}, \code{\link{quantileResidualTests}}, \code{\link{condMoments}}, \code{\link{uncondMoments}}, \code{\link{LR_test}}, \code{\link{Wald_test}}
 }

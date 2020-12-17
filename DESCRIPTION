@@ -1,7 +1,7 @@
 Package: uGMAR
 Title: Estimate Univariate Gaussian or Student's t Mixture
         Autoregressive Model
-Version: 3.2.5
+Version: 3.2.6
 Authors@R: person("Savi", "Virolainen", email = "savi.virolainen@helsinki.fi", role = c("aut", "cre"))
 Description: Maximum likelihood estimation of univariate Gaussian Mixture Autoregressive (GMAR),
     Student's t Mixture Autoregressive (StMAR), and Gaussian and Student's t Mixture Autoregressive (G-StMAR) models, 
@@ -16,11 +16,11 @@ LazyData: true
 Imports: Brobdingnag (>= 1.2-4), parallel, pbapply (>= 1.3-2), stats
         (>= 3.3.2)
 Suggests: gsl (>= 1.9-10.3), testthat, knitr, rmarkdown
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2020-04-04 11:53:36 UTC; savi
+Packaged: 2020-12-17 15:10:01 UTC; savi
 Author: Savi Virolainen [aut, cre]
 Maintainer: Savi Virolainen <savi.virolainen@helsinki.fi>
 Repository: CRAN
-Date/Publication: 2020-04-04 12:50:02 UTC
+Date/Publication: 2020-12-17 16:30:05 UTC

@@ -60,3 +60,11 @@
 * Yet another bug fix: the predict method incurred an error with G-StMAR models. 
 * Corrected degrees of freedom labels for G-StMAR models in the function profile_logliks.
 * Updated the examples.
+
+# uGMAR 3.2.6
+
+* Major speed improvement!
+* New exported function: 'Wald_test' for performing a Wald test.
+* New exported function: 'LR_test' for performing a likelihood ratio test.
+* The default lags in 'quantileResidualsTests' are not 1, 3, 6, and 12.
+* Fixed some typos in documentation.
