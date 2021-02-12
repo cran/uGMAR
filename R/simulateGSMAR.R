@@ -6,8 +6,8 @@
 #'  Can be utilized for forecasting future values of the process.
 #'
 #' @param gsmar object of class \code{'gsmar'} created with the function \code{fitGSMAR} or \code{GSMAR}.
-#' @param nsimu a positive integer specifying how many values (ahead from \code{initvalues}) will be simulated.
-#' @param initvalues a numeric vector with length \code{>=p} specifying the initial values for the simulation. The \strong{last}
+#' @param nsimu a positive integer specifying how many values (ahead from \code{init_values}) will be simulated.
+#' @param init_values a numeric vector with length \code{>=p} specifying the initial values for the simulation. The \strong{last}
 #'  element will be used as the initial value for the first lag, the second last element will be initial value for the second lag, etc.
 #'  If not specified, initial values will be simulated from the process's stationary distribution.
 #' @param ntimes a positive integer specifying how many sets of simulations should be performed.
@@ -27,44 +27,44 @@
 #'      \code{[, , i]} indicates the i:th set of simulations.}
 #'   }
 #' @seealso \code{\link{fitGSMAR}}, \code{\link{GSMAR}}, \code{\link{predict.gsmar}},
-#'  \code{\link{add_data}}, \code{\link{condMoments}}, \code{\link{mixingWeights}}
+#'  \code{\link{add_data}}, \code{\link{cond_moments}}, \code{\link{mixing_weights}}
 #' @inherit loglikelihood references
 #' @examples
-#'  \donttest{
-#'  # GMAR model:
-#'  params12 <- c(0.18, 0.93, 0.01, 0.86, 0.68, 0.02, 0.88)
-#'  gmar12 <- GSMAR(p=1, M=2, params=params12, model="GMAR")
-#'  sim12 <- simulateGSMAR(gmar12, nsimu=500)
-#'  ts.plot(sim12$sample)
-#'  ts.plot(sim12$component)
-#'  ts.plot(sim12$mixing_weights, col=rainbow(2), lty=2)
+#' set.seed(1)
+#'
+#' # GMAR model:
+#' params22 <- c(0.9, 0.4, 0.2, 0.5, 0.7, 0.5, -0.2, 0.7, 0.7)
+#' mod22 <- GSMAR(p=2, M=2, params=params22, model="GMAR")
+#' mysim <- simulateGSMAR(mod22, nsimu=500)
+#' ts.plot(mysim$sample)
+#' ts.plot(mysim$component)
+#' ts.plot(mysim$mixing_weights, col=rainbow(2), lty=2)
 #'
 #'
-#'  # G-StMAR model, with initial values:
-#'  params12gs <- c(1.38, 0.88, 0.27, 3.8, 0.74, 3.15, 0.8, 3.6)
-#'  gstmar12 <- GSMAR(p=1, M=c(1, 1), params=params12gs,
-#'  model="G-StMAR")
-#'  sim12gs <- simulateGSMAR(gstmar12, nsimu=500, initvalues=5:6)
-#'  ts.plot(sim12gs$sample)
-#'  ts.plot(sim12gs$component)
-#'  ts.plot(sim12gs$mixing_weights, col=rainbow(2), lty=2)
+#' # G-StMAR model, with initial values:
+#' params42gs <- c(0.04, 1.34, -0.59, 0.54, -0.36, 0.01, 0.06, 1.28, -0.36,
+#'                 0.2, -0.15, 0.04, 0.19, 9.75)
+#' gstmar42 <- GSMAR(data=M10Y1Y, p=4, M=c(1, 1), params=params42gs,
+#'                   model="G-StMAR")
+#' sim42gs <- simulateGSMAR(gstmar42, nsimu=500, init_values=1:4)
+#' ts.plot(sim42gs$sample)
+#' ts.plot(sim42gs$component)
+#' ts.plot(sim42gs$mixing_weights, col=rainbow(2), lty=2)
 #'
 #'
-#'  # FORECASTING EXAMPLE:
-#'  # Restricted GMAR model, 10000 sets of simulations with initial values 6 and 6.2.
-#'  params22r <- c(1.4, 1.8, 0.8, -0.1, 0.29, 3.18, 0.84)
-#'  gmar22r <- GSMAR(p=2, M=2, params=params22r, model="GMAR",
-#'   restricted=TRUE)
-#'  sim22r <- simulateGSMAR(gmar22r, nsimu=5, initval=c(6, 6.2), ntimes=10000)
-#'  apply(sim22r$sample, 1, median) # Point forecast
-#'  apply(sim22r$sample, 1, quantile, probs=c(0.025, 0.975)) # 95% interval
-#'  apply(sim22r$mixing_weights, MARGIN=1:2, FUN=median) # mix.weight point forecast
-#'  apply(sim22r$mixing_weights, MARGIN=1:2, FUN=quantile,
-#'   probs=c(0.025, 0.975)) # mix.weight 95% intervals
-#' }
+#' # FORECASTING EXAMPLE:
+#' # GMAR model, 1000 sets of simulations with initial values from the data:
+#' params12 <- c(1.70, 0.85, 0.30, 4.12, 0.73, 1.98, 0.63)
+#' gmar12 <- GSMAR(data=simudata, p=1, M=2, params=params12, model="GMAR")
+#' sim12 <- simulateGSMAR(gmar12, nsimu=5, init_val=gmar12$data, ntimes=1000)
+#' apply(sim12$sample, MARGIN=1, FUN=median) # Point prediction
+#' apply(sim12$sample, MARGIN=1, FUN=quantile, probs=c(0.025, 0.975)) # 95% pi
+#' apply(sim12$mixing_weights, MARGIN=1:2, FUN=median) # mix.weight point pred
+#' apply(sim12$mixing_weights, MARGIN=1:2, FUN=quantile,
+#'       probs=c(0.025, 0.975)) # mix.weight 95% prediction intervals
 #' @export
 
-simulateGSMAR <- function(gsmar, nsimu, initvalues, ntimes=1, drop=TRUE) {
+simulateGSMAR <- function(gsmar, nsimu, init_values, ntimes=1, drop=TRUE) {
   epsilon <- round(log(.Machine$double.xmin) + 10)
   check_gsmar(gsmar)
   p <- gsmar$model$p
@@ -81,8 +81,8 @@ simulateGSMAR <- function(gsmar, nsimu, initvalues, ntimes=1, drop=TRUE) {
     M1 <- M
   }
 
-  if(!missing(initvalues)) {
-    if(length(initvalues) < p) {
+  if(!missing(init_values)) {
+    if(length(init_values) < p) {
       stop("The length of initial values vector has to be at least p")
     }
   }
@@ -95,7 +95,7 @@ simulateGSMAR <- function(gsmar, nsimu, initvalues, ntimes=1, drop=TRUE) {
   }
 
   # Reform and collect parameters
-  params <- removeAllConstraints(p=p, M=M_orig, params=gsmar$params, model=model, restricted=gsmar$model$restricted,
+  params <- remove_all_constraints(p=p, M=M_orig, params=gsmar$params, model=model, restricted=gsmar$model$restricted,
                                  constraints=gsmar$model$constraints)
   if(gsmar$model$parametrization == "mean") { # For simplicity switch to use intercept parametrization in all cases
     params <- change_parametrization(p=p, M=M_orig, params=params, model=model, restricted=FALSE, constraints=NULL, change_to="intercept")
@@ -104,7 +104,7 @@ simulateGSMAR <- function(gsmar, nsimu, initvalues, ntimes=1, drop=TRUE) {
   alphas <- pick_alphas(p=p, M=M_orig, params=params, model=model, restricted=FALSE, constraints=NULL)
   dfs <- pick_dfs(p=p, M=M_orig, params=params, model=model)
   sigmas <- pars[p + 2,] # sigma^2
-  parameterChecks(p=p, M=M_orig, params=params, model=model, restricted=FALSE, constraints=NULL)
+  parameter_checks(p=p, M=M_orig, params=params, model=model, restricted=FALSE, constraints=NULL)
 
   # Create a container for the simulated values and initial values.
   # First row for initival values vector, and t+1:th row for (Y_t,Y_[t-1],...,Y_[t-p+1]), t=1,...,nsimu
@@ -137,7 +137,7 @@ simulateGSMAR <- function(gsmar, nsimu, initvalues, ntimes=1, drop=TRUE) {
   mu_mp <- tcrossprod(rep(1, p), mu) # \mu_m*1_p, column for each component
 
   # If initial values are missing simulate them from the processes stationary distribution
-  if(missing(initvalues)) {
+  if(missing(init_values)) {
     mv_samples <- numeric(p)
     m <- sample.int(M, size=1, prob=alphas) # From which mixture component the p-dimensional initial value is drawn from
     if(model == "GMAR" || (model == "G-StMAR" && m <= M1)) { # Draw from GMAR type component
@@ -154,8 +154,8 @@ simulateGSMAR <- function(gsmar, nsimu, initvalues, ntimes=1, drop=TRUE) {
     }
     Y[1,] <- mv_samples # Initial values sampled from the stationary distribution
   } else {
-    initvalues <- initvalues[(length(initvalues) - p + 1):length(initvalues)]
-    Y[1,] <- rev(initvalues) # Take the last value to be in the first column, the second last in the second column, etc.
+    init_values <- init_values[(length(init_values) - p + 1):length(init_values)]
+    Y[1,] <- rev(init_values) # Take the last value to be in the first column, the second last in the second column, etc.
   }
 
   # Initialize data storages

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Savi Virolainen" />
 
-<meta name="date" content="2020-12-17" />
+<meta name="date" content="2021-02-12" />
 
 <title>Introduction to uGMAR</title>
 
@@ -32,6 +32,16 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
 
 
 
@@ -231,7 +241,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Introduction to uGMAR</h1>
 <h4 class="author">Savi Virolainen</h4>
-<h4 class="date">2020-12-17</h4>
+<h4 class="date">2021-02-12</h4>
 
 
 
@@ -311,7 +321,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="model-diagnostics" class="section level3">
 <h3>Model diagnostics</h3>
 <p><strong>uGMAR</strong> considers model diagnostics based on quantile residuals (see Kalliovirta 2012). Quantile residuals are asymptotically standard normal distributed if the model is correctly specified, and they can be hence used for graphical diagnostics and testing.</p>
-<p>The function <code>quantileResidualTests</code> performs the quantile residual tests introduced by <em>Kalliovirta (2012)</em>, testing for normality, autocorrelation and conditional heteroscedasticity. For graphical diagnostics, one may use the functions <code>diagnosticPlot</code> and <code>quantileResidualPlot</code>.</p>
+<p>The function <code>quantile_residual_tests</code> performs the quantile residual tests introduced by <em>Kalliovirta (2012)</em>, testing for normality, autocorrelation and conditional heteroscedasticity. For graphical diagnostics, one may use the functions <code>diagnostic_plot</code> and <code>quantile_residual_plot</code>.</p>
 <p>Consider installing the suggested package <code>gsl</code> for much faster evaluations of quantile residuals in the cases of StMAR and G-StMAR models. If the model and data are both large, performing quantile residuals tests may take significantly long time for StMAR and G-StMAR models without the package <code>gsl</code> because numerical integration is used. It’s not imported because, in our experience, it might not install to some platforms directly when installing <strong>uGMAR</strong>.</p>
 </div>
 <div id="constructing-class-gsmar-model-without-estimation" class="section level3">

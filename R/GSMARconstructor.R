@@ -19,32 +19,31 @@
 #'  quantile residuals start from the p+1:th observation (interpreted as t=1).
 #' @seealso \code{\link{fitGSMAR}}, \code{\link{iterate_more}}, \code{\link{add_data}}, \code{\link{stmar_to_gstmar}},
 #'  \code{\link{swap_parametrization}}, \code{\link{get_gradient}}, \code{\link{simulateGSMAR}},
-#'  \code{\link{predict.gsmar}}, \code{\link{condMoments}}, \code{\link{uncondMoments}}, \code{\link{LR_test}}, \code{\link{Wald_test}}
-#' @inherit isStationary references
+#'  \code{\link{predict.gsmar}}, \code{\link{cond_moments}}, \code{\link{uncond_moments}}, \code{\link{LR_test}}, \code{\link{Wald_test}}
+#' @inherit is_stationary references
 #' @examples
 #' # GMAR model without data
-#' params12 <- c(0.18, 0.93, 0.01, 0.86, 0.68, 0.02, 0.88)
-#' gmar12 <- GSMAR(p=1, M=2, params=params12, model="GMAR")
-#' gmar12
+#' params22 <- c(0.9, 0.4, 0.2, 0.5, 0.7, 0.5, -0.2, 0.7, 0.7)
+#' gmar22 <- GSMAR(p=2, M=2, params=params22, model="GMAR")
+#' gmar22
 #'
 #' # StMAR model, without data
 #' params12t <- c(1.38, 0.88, 0.27, 3.8, 0.74, 3.15, 0.8, 300, 3.6)
 #' stmar12t <- GSMAR(p=1, M=2, params=params12t, model="StMAR")
 #' stmar12t
 #'
-#' # Restricted G-StMAR-model
-#' params42gsr <- c(0.11, 0.03, 1.27, -0.39, 0.24, -0.17, 0.03, 1.01, 0.3, 2.03)
-#' gstmar42r <- GSMAR(data=T10Y1Y, p=4, M=c(1, 1), params=params42gsr,
-#'  model="G-StMAR", restricted=TRUE)
-#' gstmar42r
+#' # G-StMAR model with data
+#' params42gs <- c(0.04, 1.34, -0.59, 0.54, -0.36, 0.01, 0.06, 1.28, -0.36,
+#'                 0.2, -0.15, 0.04, 0.19, 9.75)
+#' gstmar42 <- GSMAR(data=M10Y1Y, p=4, M=c(1, 1), params=params42gs,
+#'                   model="G-StMAR")
+#' gstmar42
 #'
-#' # Two-regime GMAR p=2 model with the second AR coeffiecient of
-#' # of the second regime contrained to zero.
-#' constraints <- list(diag(1, ncol=2, nrow=2), as.matrix(c(1, 0)))
-#' params22c <- c(0.03, 1.27, -0.29, 0.03, -0.01, 0.91, 0.34, 0.88)
-#' gmar22c <- GSMAR(T10Y1Y, p=2, M=2, params=params22c,
-#'  model="GMAR", constraints=constraints)
-#' gmar22c
+#' # Restricted G-StMAR model with data
+#' params42gsr <- c(0.13, 0.03, 1.29, -0.4, 0.25, -0.2, 0.03, 0.05, 0.51, 2.76)
+#' gstmar42r <- GSMAR(data=M10Y1Y, p=4, M=c(1, 1), params=params42gsr,
+#'                    model="G-StMAR", restricted=TRUE)
+#' gstmar42r
 #' @export
 
 GSMAR <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FALSE, constraints=NULL, conditional=TRUE,
@@ -53,9 +52,9 @@ GSMAR <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restr
   parametrization <- match.arg(parametrization)
   check_model(model)
   stopifnot(parametrization %in% c("intercept", "mean"))
-  checkPM(p=p, M=M, model=model)
-  checkConstraintMat(p=p, M=M, restricted=restricted, constraints=constraints)
-  parameterChecks(p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints)
+  check_pM(p=p, M=M, model=model)
+  check_constraint_mat(p=p, M=M, restricted=restricted, constraints=constraints)
+  parameter_checks(p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints)
   npars <- length(params)
   if(!is.null(custom_h)) stopifnot(length(custom_h) == npars)
 
@@ -74,12 +73,12 @@ GSMAR <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restr
     lok_and_mw <- list(loglik=NA, mw=NA)
     IC <- data.frame(AIC=NA, HQIC=NA, BIC=NA)
   } else {
-    data <- checkAndCorrectData(data=data, p=p)
+    data <- check_and_correct_data(data=data, p=p)
     lok_and_mw <- loglikelihood_int(data, p, M, params, model=model, restricted=restricted, constraints=constraints,
                                     conditional=conditional, parametrization=parametrization, boundaries=FALSE,
                                     checks=TRUE, to_return="loglik_and_mw", minval=NA)
     if(calc_qresiduals) {
-      qresiduals <- quantileResiduals_int(data, p, M, params, model=model, restricted=restricted, constraints=constraints,
+      qresiduals <- quantile_residuals_int(data, p, M, params, model=model, restricted=restricted, constraints=constraints,
                                           parametrization=parametrization)
     }
 
@@ -102,8 +101,8 @@ GSMAR <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restr
       warning("Approximate standard errors can't be calculated without data")
       std_errors <- rep(NA, npars)
     } else {
-      warn_dfs(p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints)
-      std_errors <- tryCatch(standardErrors(data=data, p=p, M=M, params=params, model=model, restricted=restricted,
+      warn_dfs(p=p, M=M, params=params, model=model)
+      std_errors <- tryCatch(standard_errors(data=data, p=p, M=M, params=params, model=model, restricted=restricted,
                                             constraints=constraints, parametrization=parametrization, conditional=conditional,
                                             custom_h=custom_h, minval=-(10^(ceiling(log10(length(data))) + 1) - 1)),
                              error=function(e) {
@@ -135,12 +134,11 @@ GSMAR <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restr
                                   class="logLik",
                                   df=npars),
                  IC=IC,
-                 uncond_moments=uncondMoments_int(p=p, M=M, params=params, model=model, restricted=restricted,
+                 uncond_moments=uncond_moments_int(p=p, M=M, params=params, model=model, restricted=restricted,
                                                   constraints=constraints, parametrization=parametrization),
                  all_estimates=NULL,
                  all_logliks=NULL,
-                 which_converged=NULL,
-                 qr_tests=NULL),
+                 which_converged=NULL),
             class="gsmar")
 }
 
@@ -157,22 +155,22 @@ GSMAR <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restr
 #'   If the object already contained data, the data will be updated. Does not modify the 'gsmar' object given as argument!
 #' @seealso \code{\link{fitGSMAR}}, \code{\link{GSMAR}}, \code{\link{iterate_more}}, \code{\link{get_gradient}},
 #'  \code{\link{get_regime_means}}, \code{\link{swap_parametrization}}, \code{\link{stmar_to_gstmar}}
-#' @inherit isStationary references
+#' @inherit is_stationary references
 #' @examples
-#' # Restricted G-StMAR-model without data
-#' params42gsr <- c(0.11, 0.03, 1.27, -0.39, 0.24, -0.17, 0.03, 1.01, 0.3, 2.03)
-#' gstmar42r <- GSMAR(p=4, M=c(1, 1), params=params42gsr,
-#'  model="G-StMAR", restricted=TRUE)
-#' gstmar42r
+#' # G-StMAR model without data
+#' params42gs <- c(0.04, 1.34, -0.59, 0.54, -0.36, 0.01, 0.06, 1.28, -0.36,
+#'                 0.2, -0.15, 0.04, 0.19, 9.75)
+#' gstmar42 <- GSMAR(p=4, M=c(1, 1), params=params42gs, model="G-StMAR")
+#' gstmar42
 #'
 #' # Add data to the model
-#' gstmar42r <- add_data(data=T10Y1Y, gstmar42r)
-#' gstmar42r
+#' gstmar42 <- add_data(data=M10Y1Y, gsmar=gstmar42)
+#' gstmar42
 #' @export
 
 add_data <- function(data, gsmar, calc_qresiduals=TRUE, calc_cond_moments=TRUE, calc_std_errors=FALSE, custom_h=NULL) {
   check_gsmar(gsmar)
-  checkAndCorrectData(data=data, p=gsmar$model$p)
+  check_and_correct_data(data=data, p=gsmar$model$p)
   GSMAR(data=data, p=gsmar$model$p, M=gsmar$model$M, params=gsmar$params,
         model=gsmar$model$model, restricted=gsmar$model$restricted, constraints=gsmar$model$constraints,
         conditional=gsmar$model$conditional, parametrization=gsmar$model$parametrization,
@@ -195,15 +193,16 @@ add_data <- function(data, gsmar, calc_qresiduals=TRUE, calc_cond_moments=TRUE, 
 #' @inherit GSMAR references return
 #' @inherit add_data seealso
 #' @examples
-#' # Restricted G-StMAR-model with intercept paarametrization
-#' params42gsr <- c(0.11, 0.03, 1.27, -0.39, 0.24, -0.17, 0.03, 1.01, 0.3, 2.03)
-#' gstmar42r <- GSMAR(data=T10Y1Y, p=4, M=c(1, 1), params=params42gsr,
-#'  model="G-StMAR", restricted=TRUE)
-#' summary(gstmar42r)
+#' # G-StMAR model with intercept parametrization
+#' params42gs <- c(0.04, 1.34, -0.59, 0.54, -0.36, 0.01, 0.06, 1.28, -0.36,
+#'                 0.2, -0.15, 0.04, 0.19, 9.75)
+#' gstmar42 <- GSMAR(data=M10Y1Y, p=4, M=c(1, 1), params=params42gs,
+#'                   model="G-StMAR")
+#' summary(gstmar42)
 #'
 #' # Swap to mean parametrization
-#' gstmar42r <- swap_parametrization(gstmar42r)
-#' summary(gstmar42r)
+#' gstmar42 <- swap_parametrization(gstmar42)
+#' summary(gstmar42)
 #' @export
 
 swap_parametrization <- function(gsmar, calc_std_errors=TRUE, custom_h=NULL) {
@@ -240,23 +239,25 @@ swap_parametrization <- function(gsmar, calc_std_errors=TRUE, custom_h=NULL) {
 #' @inherit add_data seealso
 #' @examples
 #' \donttest{
-#'  # These are long running examples and use parallel computing
-#'  fit43t <- fitGSMAR(T10Y1Y, 4, 3, model="StMAR", ncalls=2, seeds=1:2)
-#'  fit43t
-#'  fit43gst <- stmar_to_gstmar(fit43t)
-#'  fit43gst
+#'  # These are long running example that take approximately 15 seconds to run.
+#'  fit42t <- fitGSMAR(data=M10Y1Y, p=4, M=2, model="StMAR", ncalls=1, seeds=6)
+#'  fit42t # Overly large degrees of freedom estimate!
+#'
+#'  # Switch to the appropriate G-StMAR model:
+#'  fit42gs <- stmar_to_gstmar(fit42t)
+#'  fit42gs
 #' }
 #' @export
 
 stmar_to_gstmar <- function(gsmar, maxdf=100, estimate, calc_std_errors, maxit=100, custom_h=NULL) {
-  if(gsmar$model$model != "StMAR") stop("Only StMAR models are supported as input")
+  if(!gsmar$model$model %in% c("StMAR", "G-StMAR")) stop("Only StMAR and G-StMAR models are supported")
   if(missing(estimate)) estimate <- ifelse(is.null(gsmar$data), FALSE, TRUE)
   if(missing(calc_std_errors)) calc_std_errors <- ifelse(is.null(gsmar$data), FALSE, TRUE)
   if(estimate & is.null(gsmar$data)) stop("Can't estimate the model without data")
 
   new_params <- stmarpars_to_gstmar(p=gsmar$model$p, M=gsmar$model$M, params=gsmar$params,
-                                    restricted=gsmar$model$restricted, constraints=gsmar$model$constraints,
-                                    maxdf=maxdf)
+                                    model=gsmar$model$model, restricted=gsmar$model$restricted,
+                                    constraints=gsmar$model$constraints, maxdf=maxdf)
   if(is.null(gsmar$model$constraints) || gsmar$model$restricted) {
     new_constraints <- gsmar$model$constraints
   } else {
@@ -309,11 +310,18 @@ stmar_to_gstmar <- function(gsmar, maxdf=100, estimate, calc_std_errors, maxit=1
 #' @inherit add_data seealso
 #' @examples
 #' \donttest{
-#'  # These are long running examples and use parallel computing
-#'  fit43t <- fitGSMAR(T10Y1Y, 4, 3, model="StMAR", ncalls=2, seeds=1:2)
-#'  fit43t
-#'  fit43t2 <- alt_gsmar(fit43t, which_largest=2)
-#'  fit43t2
+#'  # These are long running examples that take approximately ...
+#'  fit42t <- fitGSMAR(data=M10Y1Y, p=4, M=2, model="StMAR", ncalls=2,
+#'                     seeds=c(1, 6))
+#'  fit42t # Bad estimate in the boundary of the stationarity region!
+#'
+#'  # So we build a model based on the next-best local maximum point:
+#'  fit42t_alt <- alt_gsmar(fit42t, which_largest=2)
+#'  fit42t_alt # Overly large degrees of freedom paramter estimate
+#'
+#'  # Switch to the appropriate G-StMAR model:
+#'  fit42gs <- stmar_to_gstmar(fit42t_alt)
+#'  fit42gs
 #' }
 #' @export
 

@@ -66,7 +66,7 @@ GSMAR(
   \item{For \strong{restricted} models:}{
     \describe{
       \item{For \strong{GMAR} model:}{Size \eqn{(3M+p-1x1)} vector \strong{\eqn{\theta}}\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
-        \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1})}, where \strong{\eqn{\phi}}=\eqn{(\phi_{1},...,\phi_{M})}.}
+        \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1})}, where \strong{\eqn{\phi}}=\eqn{(\phi_{1},...,\phi_{p})}.}
       \item{For \strong{StMAR} model:}{Size \eqn{(4M+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
         \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1}, \nu_{1},...,\nu_{M})}.}
       \item{For \strong{G-StMAR} model:}{Size \eqn{(3M+M2+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
@@ -134,8 +134,7 @@ density with regimewise densities? See the details.}
 \item{summary_print}{if set to \code{TRUE} then the print will include approximate
 standard errors for the estimates, log-likelihood, information criteria values,
 modulus of the roots of the characteristic AR polynomias for each regime, and
-several unconditional moments.
-Supported for models that include data only.}
+several unconditional moments.}
 }
 \value{
 Returns an object of class \code{'gsmar'} defining the specified GMAR, StMAR, or G-StMAR model. If data is supplied,
@@ -179,28 +178,27 @@ If \code{include_dens == TRUE}, the kernel density estimate of the data is calcu
 
 \examples{
 # GMAR model without data
-params12 <- c(0.18, 0.93, 0.01, 0.86, 0.68, 0.02, 0.88)
-gmar12 <- GSMAR(p=1, M=2, params=params12, model="GMAR")
-gmar12
+params22 <- c(0.9, 0.4, 0.2, 0.5, 0.7, 0.5, -0.2, 0.7, 0.7)
+gmar22 <- GSMAR(p=2, M=2, params=params22, model="GMAR")
+gmar22
 
 # StMAR model, without data
 params12t <- c(1.38, 0.88, 0.27, 3.8, 0.74, 3.15, 0.8, 300, 3.6)
 stmar12t <- GSMAR(p=1, M=2, params=params12t, model="StMAR")
 stmar12t
 
-# Restricted G-StMAR-model
-params42gsr <- c(0.11, 0.03, 1.27, -0.39, 0.24, -0.17, 0.03, 1.01, 0.3, 2.03)
-gstmar42r <- GSMAR(data=T10Y1Y, p=4, M=c(1, 1), params=params42gsr,
- model="G-StMAR", restricted=TRUE)
-gstmar42r
+# G-StMAR model with data
+params42gs <- c(0.04, 1.34, -0.59, 0.54, -0.36, 0.01, 0.06, 1.28, -0.36,
+                0.2, -0.15, 0.04, 0.19, 9.75)
+gstmar42 <- GSMAR(data=M10Y1Y, p=4, M=c(1, 1), params=params42gs,
+                  model="G-StMAR")
+gstmar42
 
-# Two-regime GMAR p=2 model with the second AR coeffiecient of
-# of the second regime contrained to zero.
-constraints <- list(diag(1, ncol=2, nrow=2), as.matrix(c(1, 0)))
-params22c <- c(0.03, 1.27, -0.29, 0.03, -0.01, 0.91, 0.34, 0.88)
-gmar22c <- GSMAR(T10Y1Y, p=2, M=2, params=params22c,
- model="GMAR", constraints=constraints)
-gmar22c
+# Restricted G-StMAR model with data
+params42gsr <- c(0.13, 0.03, 1.29, -0.4, 0.25, -0.2, 0.03, 0.05, 0.51, 2.76)
+gstmar42r <- GSMAR(data=M10Y1Y, p=4, M=c(1, 1), params=params42gsr,
+                   model="G-StMAR", restricted=TRUE)
+gstmar42r
 }
 \references{
 \itemize{
@@ -214,5 +212,5 @@ gmar22c
 \seealso{
 \code{\link{fitGSMAR}}, \code{\link{iterate_more}}, \code{\link{add_data}}, \code{\link{stmar_to_gstmar}},
  \code{\link{swap_parametrization}}, \code{\link{get_gradient}}, \code{\link{simulateGSMAR}},
- \code{\link{predict.gsmar}}, \code{\link{condMoments}}, \code{\link{uncondMoments}}, \code{\link{LR_test}}, \code{\link{Wald_test}}
+ \code{\link{predict.gsmar}}, \code{\link{cond_moments}}, \code{\link{uncond_moments}}, \code{\link{LR_test}}, \code{\link{Wald_test}}
 }

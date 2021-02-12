@@ -15,7 +15,7 @@
 #'   be one-step-ahead forecast based on the exact conditional mean (\code{"cond_mean"})? prediction
 #'   intervals won't be calculated if the exact conditional mean is used.
 #' @param pi_type should the prediction intervals be "two-sided", "upper", or "lower"?
-#' @param plotRes a logical argument defining whether the forecast should be plotted or not.
+#' @param plot_res a logical argument defining whether the forecast should be plotted or not.
 #' @param mix_weights \code{TRUE} if forecasts for mixing weights should be plotted, \code{FALSE} in not.
 #' @param nt a positive integer specifying the number of observations to be plotted
 #'   along with the prediction. Default is \code{round(length(data)*0.15)}.
@@ -34,42 +34,51 @@
 #'    \item{mix_pred_ints}{Individual prediction intervals for mixing weights, as \code{[, , m]}, m=1,..,M.}
 #'  }
 #' @inherit simulateGSMAR references
-#' @seealso \code{\link{simulateGSMAR}}, \code{\link{condMoments}}, \code{\link{fitGSMAR}}, \code{\link{GSMAR}},
-#'  \code{\link{quantileResidualTests}}, \code{\link{diagnosticPlot}}
+#' @seealso \code{\link{simulateGSMAR}}, \code{\link{cond_moments}}, \code{\link{fitGSMAR}}, \code{\link{GSMAR}},
+#'  \code{\link{quantile_residual_tests}}, \code{\link{diagnostic_plot}}
 #' @examples
 #' \donttest{
-#' # StMAR model
-#' fit42 <- fitGSMAR(data=T10Y1Y, p=4, M=2, model="StMAR", ncores=4)
-#' pred42 <- predict(fit42, n_ahead=10, pi=c(0.95, 0.8))
-#' pred42
+#' ## These examples take approximately 30 seconds to run.
 #'
-#' # Non-mixture StMAR model, upper prediction intervals
-#' fit101t <- fitGSMAR(T10Y1Y, 10, 1, model="StMAR", ncores=1, ncalls=1)
-#' predict(fit101t, n_ahead=10, pi_type="upper", pi=0.9)
+#' # G-StMAR model with one GMAR type and one StMAR type regime
+#' fit42gs <- fitGSMAR(M10Y1Y, p=4, M=c(1, 1), model="G-StMAR",
+#'                     ncalls=1, seeds=4)
 #'
-#' # G-StMAR model, no prediction intervals
-#' fit42g <- fitGSMAR(T10Y1Y, 4, M=c(1, 1), model="G-StMAR")
-#' pred42gs <- predict(fit42g, n_ahead=2, pred_type="median",
-#'  pi_type="none", plotRes=FALSE)
-#' pred42gs
-#' plot(pred42gs)
+#' # Forecast 12 steps ahead based on 10000 simulated sample paths, prediction
+#' # interval confidence levels 0.95 and 0.8, prediction based on sample median,
+#' # and two-sided prediction intevals:
+#' mypred <- predict(fit42gs, n_ahead=12, nsimu=10000, pi=c(0.95, 0.8),
+#'                   pred_type="median", pi_type="two-sided")
+#' mypred
+#' plot(mypred)
 #'
-#' # Restricted GMAR model, one-step conditional mean prediction
-#' fit43gmr <- fitGSMAR(T10Y1Y, 4, 3, model="GMAR", restricted=TRUE)
-#' pred43gmr <- predict(fit43gmr, pred_type="cond_mean", plotRes=FALSE)
-#' pred43gmr
+#' # Forecast 24 steps ahead based on 1000 simulated sample paths, prediction
+#' # interval confidence level 0.99 and 0.9, prediction based on sample mean,
+#' # and upper prediction intevals:
+#' mypred2 <- predict(fit42gs, n_ahead=24, nsimu=1000, pi=c(0.99, 0.9),
+#'                    pred_type="mean", pi_type="upper")
 #'
-#' # Such StMAR(3,2) that the AR coefficients are restricted to be
-#' # the same for both regimes and that the second AR coefficients are
-#' # constrained to zero.
-#' fit32rc <- fitGSMAR(T10Y1Y, 3, 2, model="StMAR", restricted=TRUE,
-#'  constraints=matrix(c(1, 0, 0, 0, 0, 1), ncol=2))
-#' predict(fit32rc, n_ahead=3, pi_type="lower")
+#' # Forecast 24 steps ahead based on 1000 simulated sample paths, prediction
+#' # interval confidence level 0.99, 0.95, 0.9 and 0.8, prediction based on
+#' # sample median, and lower prediction intevals:
+#' mypred3 <- predict(fit42gs, n_ahead=24, nsimu=1000, pi=c(0.99, 0.95, 0.9, 0.8),
+#'                    pred_type="median", pi_type="lower")
+#'
+#' # GMAR model
+#' params12 <- c(1.70, 0.85, 0.30, 4.12, 0.73, 1.98, 0.63)
+#' gmar12 <- GSMAR(data=simudata, p=1, M=2, params=params12, model="GMAR")
+#' pred12 <- predict(gmar12, n_ahead=10, nsimu=1000, pi=c(0.95, 0.9, 0.8),
+#'                   pred_type="median", pi_type="two-sided")
+#' pred12
+#' plot(pred12)
+#'
+#' # One-step prediction based on the exact conditional mean:
+#' predict(gmar12, n_ahead=1, pred_type="cond_mean", plot_res=FALSE)
 #' }
 #' @export
 
 predict.gsmar <- function(object, ..., n_ahead, nsimu=10000, pi=c(0.95, 0.8), pred_type=c("median", "mean", "cond_mean"),
-                         pi_type=c("two-sided", "upper", "lower", "none"), plotRes=TRUE, mix_weights=TRUE, nt) {
+                         pi_type=c("two-sided", "upper", "lower", "none"), plot_res=TRUE, mix_weights=TRUE, nt) {
   gsmar <- object
   pred_type <- match.arg(pred_type)
   pi_type <- match.arg(pi_type)
@@ -106,7 +115,7 @@ predict.gsmar <- function(object, ..., n_ahead, nsimu=10000, pi=c(0.95, 0.8), pr
   }
   if(!all_pos_ints(c(n_ahead, nsimu))) stop("Arguments n_ahead and nsimu must be positive integers")
   if(any(pi >= 1) | any(pi <= 0)) stop("Each confidence level has to be in the open interval (0, 1)")
-  if(!is.null(constraints)) checkConstraintMat(p=p, M=M, restricted=restricted, constraints=constraints)
+  if(!is.null(constraints)) check_constraint_mat(p=p, M=M, restricted=restricted, constraints=constraints)
 
   # Calculate the prediction
   if(pred_type == "cond_mean") { # Exact conditional mean
@@ -116,7 +125,7 @@ predict.gsmar <- function(object, ..., n_ahead, nsimu=10000, pi=c(0.95, 0.8), pr
       params <- change_parametrization(p=p, M=M, params=params, model=model, restricted=restricted,
                                        constraints=constraints, change_to="intercept")
     }
-    mw <- mixingWeights_int(data, p, M, params, model=model, restricted=restricted, constraints=constraints,
+    mw <- mixing_weights_int(data, p, M, params, model=model, restricted=restricted, constraints=constraints,
                             parametrization="intercept", checks=TRUE, to_return="mw_tplus1")
     pars <- pick_pars(p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints)
 
@@ -133,7 +142,7 @@ predict.gsmar <- function(object, ..., n_ahead, nsimu=10000, pi=c(0.95, 0.8), pr
   } else { # pred_type != cond_mean: Simulate future values of the process
 
     # Simulations
-    sim <- simulateGSMAR(gsmar, nsimu=n_ahead, initvalues=data, ntimes=nsimu, drop=FALSE)
+    sim <- simulateGSMAR(gsmar, nsimu=n_ahead, init_values=data, ntimes=nsimu, drop=FALSE)
     sample <- sim$sample
     alpha_mt <- sim$mixing_weights
     colnames(alpha_mt) <- vapply(1:sum(M), function(m) paste("regime", m), character(1))
@@ -186,7 +195,7 @@ predict.gsmar <- function(object, ..., n_ahead, nsimu=10000, pi=c(0.95, 0.8), pr
                         q=q_tocalc,
                         mix_weights=mix_weights),
                    class="gsmarpred")
-  if(plotRes) plot.gsmarpred(x=ret, nt=nt, mix_weights=mix_weights, ...)
+  if(plot_res) plot.gsmarpred(x=ret, nt=nt, mix_weights=mix_weights, ...)
   ret
 }
 

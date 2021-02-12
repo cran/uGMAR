@@ -17,8 +17,7 @@ fitGSMAR(
   ncores = min(2, ncalls, parallel::detectCores()),
   maxit = 300,
   seeds = NULL,
-  printRes = TRUE,
-  runTests = FALSE,
+  print_res = TRUE,
   ...
 )
 }
@@ -68,9 +67,7 @@ and the randomness associated with the genetic algorithm.}
 \item{seeds}{a length \code{ncalls} vector containing the random number generator seed for each call to the genetic algorithm,
 or \code{NULL} for not initializing the seed. Exists for the purpose of creating reproducible results.}
 
-\item{printRes}{should the estimation results be printed?}
-
-\item{runTests}{should quantile residuals tests be performed after the estimation?}
+\item{print_res}{should the estimation results be printed?}
 
 \item{...}{additional settings passed to the function \code{GAfit} employing the genetic algorithm.}
 }
@@ -100,7 +97,7 @@ Returns an object of class \code{'gsmar'} defining the estimated GMAR, StMAR or 
    \item{For \strong{restricted} models:}{
      \describe{
        \item{For \strong{GMAR} model:}{Size \eqn{(3M+p-1x1)} vector \strong{\eqn{\theta}}\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
-         \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1})}, where \strong{\eqn{\phi}}=\eqn{(\phi_{1},...,\phi_{M})}.}
+         \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1})}, where \strong{\eqn{\phi}}=\eqn{(\phi_{1},...,\phi_{p})}.}
        \item{For \strong{StMAR} model:}{Size \eqn{(4M+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
          \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1}, \nu_{1},...,\nu_{M})}.}
        \item{For \strong{G-StMAR} model:}{Size \eqn{(3M+M2+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
@@ -130,7 +127,7 @@ Because of complexity and multimodality of the log-likelihood function, it's \st
  some local maximum point instead, and therefore a number of estimation rounds is required for reliable results. Because
  of the nature of the models, the estimation may fail particularly in the cases where the number of mixture components is
  chosen too large. Note that the genetic algorithm is designed to avoid solutions with mixing weights of some regimes
- too close to zero at almost all times ('redudant regimes') but the settings can, however, be adjusted (see ?GAfit).
+ too close to zero at almost all times ("redundant regimes") but the settings can, however, be adjusted (see ?GAfit).
 
  If the iteration limit for the variable metric algorithm (\code{maxit}) is reached, one can continue the estimation by
  iterating more with the function \code{iterate_more}.
@@ -143,10 +140,19 @@ Because of complexity and multimodality of the log-likelihood function, it's \st
  The variable metric algorithm (or quasi-Newton method, Nash (1990, algorithm 21)) used in the second phase is implemented
  with function the \code{optim} from the package \code{stats}.
 
+ \strong{Addiotional Notes about the estimates:}
+
+ Sometimes the found MLE is very close to the boundary of the stationarity region some regime, the related variance parameter
+ is very small, and the associated mixing weights are "spiky". This kind of estimates often maximize the log-likelihood function
+ for a technical reason that induces by the endogenously determined mixing weights. In such cases, it might be more appropriate
+ to consider the next-best local maximum point of the log-likelihood function that is well inside the parameter space. Models based
+ local-only maximum points can be built with the function \code{alt_gsmar} by adjusting the argument \code{which_largest}
+ accordingly.
+
  Some mixture components of the StMAR model may sometimes get very large estimates for the degrees of freedom parameters. Such parameters
  are weakly identified and induce various numerical problems. However, mixture components with large degree of freedom parameters are
  similar to the mixture components of the GMAR model. It's hence advisable to further estimate a G-StMAR model by allowing the mixture
- components with large degrees of freedom parameter estimates to be GMAR type.
+ components with large degrees of freedom parameter estimates to be GMAR type with the function \code{stmar_to_gstmar}.
 }
 \section{S3 methods}{
 
@@ -154,74 +160,63 @@ Because of complexity and multimodality of the log-likelihood function, it's \st
  \code{logLik}, \code{residuals}.
 }
 
-\section{Suggested packages}{
-
- For faster evaluation of the quantile residuals for StMAR and G-StMAR models, install the suggested package "gsl".
- Note that for large StMAR and G-StMAR models with large data, performing the quantile residual tests may take
- significantly long time without the package "gsl".
-}
-
 \examples{
 \donttest{
-# These are long running examples that use parallel computing
+## These are long running examples that use parallel computing.
+## The below examples take approximately 90 seconds to run.
+
+## Note that the number of estimation rounds (ncalls) is relatively small
+## in the below examples. For reliable results, a large number of estimation
+## rounds is recommended!
 
 # GMAR model
-fit12 <- fitGSMAR(simudata, p=1, M=2, model="GMAR")
+fit12 <- fitGSMAR(data=simudata, p=1, M=2, model="GMAR", ncalls=4, seeds=1:4)
 summary(fit12)
 plot(fit12)
 profile_logliks(fit12)
+diagnostic_plot(fit12)
 
-# StMAR model
-fit42 <- fitGSMAR(data=T10Y1Y, p=4, M=2, model="StMAR")
-fit42
-summary(fit42)
-plot(fit42)
+# StMAR model (boundary estimate + large degrees of freedom)
+fit42t <- fitGSMAR(data=M10Y1Y, p=4, M=2, model="StMAR", ncalls=6, seeds=1:6)
+summary(fit42t, digits=4) # Four almost-unit roots in the 2nd regime!
+plot(fit42t) # Spiky mixing weights!
+fit42t_alt <- alt_gsmar(fit42t, which_largest=2) # Second largest local max
+summary(fit42t_alt) # Overly large 2nd regime degrees of freedom estimate!
+fit42gs <- stmar_to_gstmar(fit42t_alt) # Switch to G-StMAR model
+summary(fit42gs) # Finally, an appropriate model!
+plot(fit42gs)
 
-# Restricted StMAR model: plot also the individual statistics with
-# their approximate critical bounds using the given data
-fit42r <- fitGSMAR(T10Y1Y, 4, 2, model="StMAR", restricted=TRUE)
+# Restricted StMAR model
+fit42r <- fitGSMAR(M10Y1Y, p=4, M=2, model="StMAR", restricted=TRUE,
+                   ncalls=2, seeds=1:2)
 fit42r
-plot(fit42)
-
-# Non-mixture version of StMAR model
-fit101t <- fitGSMAR(T10Y1Y, 10, 1, model="StMAR", ncores=1, ncalls=1)
-diagnosticPlot(fit101t)
 
 # G-StMAR model with one GMAR type and one StMAR type regime
-fit42g <- fitGSMAR(T10Y1Y, 4, M=c(1, 1), model="G-StMAR")
-diagnosticPlot(fit42g)
-
-# GMAR model; seeds for rerpoducibility
-fit43gm <- fitGSMAR(T10Y1Y, 4, M=3, model="GMAR", ncalls=16,
-  seeds=1:16)
-fit43gm
-
-# Restricted GMAR model
-fit43gmr <- fitGSMAR(T10Y1Y, 4, M=3, model="GMAR", ncalls=12,
-  restricted=TRUE, seeds=1:12)
-fit43gmr
-
+fit42gs <- fitGSMAR(M10Y1Y, p=4, M=c(1, 1), model="G-StMAR",
+                    ncalls=1, seeds=4)
+fit42gs
 
 # The following three examples demonstrate how to apply linear constraints
-# to the AR parameters.
+# to the autoregressive (AR) parameters.
 
 # Two-regime GMAR p=2 model with the second AR coeffiecient of
 # of the second regime contrained to zero.
-constraints <- list(diag(1, ncol=2, nrow=2), as.matrix(c(1, 0)))
-fit22c <- fitGSMAR(T10Y1Y, 2, 2, constraints=constraints)
+C22 <- list(diag(1, ncol=2, nrow=2), as.matrix(c(1, 0)))
+fit22c <- fitGSMAR(M10Y1Y, p=2, M=2, constraints=C22, ncalls=1, seeds=6)
 fit22c
 
-# Such constrained StMAR(3, 1) model that the second order AR coefficient
-# is constrained to zero.
-constraints <- list(matrix(c(1, 0, 0, 0, 0, 1), ncol=2))
-fit31tc <- fitGSMAR(T10Y1Y, 3, 1, model="StMAR", constraints=constraints)
+# StMAR(3, 1) model with the second order AR coefficient constrained to zero.
+C31 <- list(matrix(c(1, 0, 0, 0, 0, 1), ncol=2))
+fit31tc <- fitGSMAR(M10Y1Y, p=3, M=1, model="StMAR", constraints=C31,
+                    ncalls=1, seeds=1)
 fit31tc
 
-# Such StMAR(3,2) that the AR coefficients are restricted to be
-# the same for both regimes and that the second AR coefficients are
+# Such StMAR(3, 2) model that the AR coefficients are restricted to be
+# the same for both regimes and the second AR coefficients are
 # constrained to zero.
-fit32rc <- fitGSMAR(T10Y1Y, 3, 2, model="StMAR", restricted=TRUE,
- constraints=matrix(c(1, 0, 0, 0, 0, 1), ncol=2))
+fit32rc <- fitGSMAR(M10Y1Y, p=3, M=2, model="StMAR", restricted=TRUE,
+                    constraints=matrix(c(1, 0, 0, 0, 0, 1), ncol=2),
+                    ncalls=1, seeds=1)
 fit32rc
 }
 }
@@ -248,5 +243,5 @@ fit32rc
 \seealso{
 \code{\link{GSMAR}}, \code{\link{iterate_more}}, , \code{\link{stmar_to_gstmar}}, \code{\link{add_data}},
  \code{\link{profile_logliks}}, \code{\link{swap_parametrization}}, \code{\link{get_gradient}}, \code{\link{simulateGSMAR}}, \code{\link{predict.gsmar}},
-  \code{\link{diagnosticPlot}}, \code{\link{quantileResidualTests}}, \code{\link{condMoments}}, \code{\link{uncondMoments}}, \code{\link{LR_test}}, \code{\link{Wald_test}}
+  \code{\link{diagnostic_plot}}, \code{\link{quantile_residual_tests}}, \code{\link{cond_moments}}, \code{\link{uncond_moments}}, \code{\link{LR_test}}, \code{\link{Wald_test}}
 }

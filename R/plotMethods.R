@@ -9,14 +9,6 @@
 #' @param add_grid should grid a be added to the plots?
 #' @param ... arguments passed to function \code{grid}.
 #' @details This method is intended for plotting forecasts of GSMAR processes.
-#' @examples
-#'  \donttest{
-#'  # GMAR model
-#'  params12 <- c(1.7, 0.85, 0.3, 4.12, 0.73, 1.98, 0.63)
-#'  gmar12 <- GSMAR(simudata, 1, 2, params12)
-#'  pred <- predict(gmar12, n_ahead=10, plotRes=FALSE, pi=c(0.8, 0.9, 0.99), pi_type="two-sided")
-#'  plot(pred, nt=50)
-#'  }
 #' @export
 
 plot.gsmarpred <- function(x, ..., nt, mix_weights=TRUE, add_grid=TRUE) {
@@ -34,7 +26,9 @@ plot.gsmarpred <- function(x, ..., nt, mix_weights=TRUE, add_grid=TRUE) {
   old_par <- par(no.readonly=TRUE) # Save old settings
   on.exit(par(old_par)) # Restore the settings before quitting
   if(mix_weights) {
-    par(mfrow=c(2, 1), mar=c(2.6, 2.6, 2.6, 2.6))
+    par(mfrow=c(2, 1), mar=c(2.1, 2.6, 2.1, 1.1))
+  } else {
+    par(mfrow=c(1, 1), mar=c(2.6, 2.6, 2.1, 1.1))
   }
 
   if(missing(nt)) {
@@ -111,9 +105,10 @@ plot.gsmarpred <- function(x, ..., nt, mix_weights=TRUE, add_grid=TRUE) {
     mix_ts <- ts(mixing_weights[(n_mix - nt + 1):n_mix,], start=time(data)[n_obs - nt + 1],
                  frequency=frequency(data))
     mix_pred_ts <- ts(rbind(mix_ts[nrow(mix_ts),], gsmarpred$mix_pred), start=time(data)[n_obs], frequency=frequency(data))
-    ts.plot(mix_ts, mix_pred_ts, gpars=list(col=c(colpal_mw2, colpal_mw), ylim=c(0, 1), lty=c(rep(1, M), rep(2, M))))
+    ts.plot(mix_ts, mix_pred_ts, gpars=list(col=c(colpal_mw2, colpal_mw), ylim=c(0, 1), lty=c(rep(1, M), rep(2, M))),
+            main="Mixing weights")
     legend("topleft", legend=paste0("regime ", 1:M), bty="n", col=colpal_mw, lty=1, lwd=2,
-           text.font=2, cex=0.65, x.intersp=0.5, y.intersp=1)
+           text.font=2, cex=0.70, x.intersp=0.5, y.intersp=1)
     if(add_grid) grid(...)
 
     # Individual prediction intervals as for the mixing weights
@@ -133,7 +128,7 @@ plot.gsmarpred <- function(x, ..., nt, mix_weights=TRUE, add_grid=TRUE) {
 
 
 #' @import graphics
-#' @describeIn quantileResidualTests Plot p-values of the autocorrelation and conditional
+#' @describeIn quantile_residual_tests Plot p-values of the autocorrelation and conditional
 #'  heteroskedasticity tests.
 #' @inheritParams print.qrtest
 #' @export
@@ -211,7 +206,7 @@ plot.gsmar <- function(x, ..., include_dens=TRUE) {
   ts.plot(data, gpars=list(main="Time series"))
   ts.plot(ts_mw, gpars=list(main="Mixing weights", ylim=c(0, 1), col=colpal_mw, lty=2))
   legend("topleft", legend=paste0("regime ", 1:M), bty="n", col=colpal_mw, lty=1, lwd=2,
-         text.font=2, cex=0.65, x.intersp=0.5, y.intersp=1)
+         text.font=2, cex=0.75, x.intersp=0.5, y.intersp=1)
 
   # Plot kernel density estimate of the data with the model implied density
   if(include_dens) {

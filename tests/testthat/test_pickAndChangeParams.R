@@ -94,8 +94,8 @@ test_that("pick_phi0 works correctly", {
 
 calc_mu <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FALSE, constraints=NULL) {
   model <- match.arg(model)
-  params <- reformConstrainedPars(p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints)
-  pars <- reformParameters(p=p, M=M, params=params, model=model, restricted=restricted)$pars
+  params <- reform_constrained_pars(p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints)
+  pars <- reform_parameters(p=p, M=M, params=params, model=model, restricted=restricted)$pars
   M <- sum(M)
   vapply(1:M, function(m) pars[1, m]/(1 - sum(pars[(2:(nrow(pars) - 1)), m])), numeric(1))
 }
@@ -213,34 +213,110 @@ pars33tc <- c(1, 0.1, 0.1, 0.1, 1, 2, 0.2, 0.2, 0.2, 2, 3, 0.3, -0.3, 3, 0.3, 0.
 pars22tcr <- c(1, 2, 0.8, 1, 2, 0.7, 11, 12) # restricted=TRUE, constraints=R3
 pars21tcr <- c(1, 0.1, 1, 10) # restricted=TRUE, constraints=R3
 
+# G-StMAR
+params13gs2 <- c(1, 0.1, 1, 2, 0.2, 2, 3, 0.3, 3, 0.5, 0.2, 10, 20) # M1=1, M2=2, alpha3=0.3
+params13gs3 <- c(1, 0.1, 1, 2, 0.2, 2, 3, 0.3, 3, 0.5, 0.2, 20, 10) # M1=1, M2=2, alpha3=0.3
+params23gs1 <- c(1, 0.1, 0.1, 1, 2, 0.2, 0.2, 2, 3, 0.3, 0.3, 3, 0.2, 0.3, 10) # M1=2, M2=1, alpha3=0.5
+params23gs2 <- c(1, 0.1, 0.1, 1, 2, 0.2, 0.2, 2, 3, 0.3, 0.3, 3, 0.2, 0.3, 10, 4) # M1=1, M2=2, alpha3=0.5
+params14gs1 <- c(1, 0.1, 1, 2, 0.2, 2, 3, 0.3, 3, 4, 0.4, 4, 0.4, 0.3, 0.2, 11, 13) # M1=2, M2=2, alpha4=0.1
+params14gs2 <- c(1, 0.1, 1, 2, 0.2, 2, 3, 0.3, 3, 4, 0.4, 4, 0.3, 0.4, 0.2, 13, 11, 13) # M1=1, M2=3, alpha4=0.1
+params22gsr1 <- c(1, 2, 0.1, 0.2, 1, 2, 0.1, 10) # M1=1, M2=1, restricted, alpha2=0.9
+params13gsr1 <- c(1, 2, 3, 0.5, 1, 2, 3, 0.2, 0.1, 11, 13) # M1=1, M2=2, restricted, alpha3=0.7
+
+R3 <- matrix(c(0.5, 0.5), ncol=1)
+R4 <- diag(1, ncol=2, nrow=2)
+params23gsc1 <- c(1, 0.1, 1, 2, 0.2, 2, 3, 0.3, 0.3, 3, 0.3, 0.5, 30, 10) # M1=1, M2=2, model="G-StMAR", constraints=list(R3, R3, R4)
+params23gsc2 <- c(1, 0.1, 1, 2, 0.2, 2, 3, 0.3, 0.3, 3, 0.3, 0.5, 10, 30) # M1=1, M2=2, model="G-StMAR", constraints=list(R3, R3, R4)
+params23gscr1 <- c(1, 2, 3, 0.1, 1, 2, 3, 0.3, 0.2, 10, 30) # M1=1, M2=2, model="G-StMAR", restricted=TRUE, constraints=R3
 
 test_that("stmarpars_to_gstmar works correctly", {
-  expect_equal(stmarpars_to_gstmar(1, 1, pars11t, maxdf=4)$M, c(1, 0))
-  expect_equal(stmarpars_to_gstmar(1, 1, pars11t, maxdf=4)$reg_order, 1)
-  expect_equal(stmarpars_to_gstmar(1, 1, pars11t, maxdf=4)$params, c(1, 0.9, 1))
-  expect_equal(stmarpars_to_gstmar(1, 2, pars12t, maxdf=12)$M, c(1, 1))
-  expect_equal(stmarpars_to_gstmar(1, 2, pars12t, maxdf=12)$reg_order, c(2, 1))
-  expect_equal(stmarpars_to_gstmar(1, 2, pars12t, maxdf=12)$params, c(0.8, 0.5, 0.5, 2, 0.9, 0.1, 0.6, 12))
-  expect_equal(stmarpars_to_gstmar(2, 3, pars23t, maxdf=11)$M, c(2, 1))
-  expect_equal(stmarpars_to_gstmar(2, 3, pars23t, maxdf=11)$reg_order, c(3, 2, 1))
-  expect_equal(stmarpars_to_gstmar(2, 3, pars23t, maxdf=11)$params, c(0.3, 0.3, 0.3, 0.3, 0.2, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1, 0.15, 0.05, 11))
-  expect_equal(stmarpars_to_gstmar(1, 2, pars12tr, restricted=TRUE, maxdf=13)$M, c(1, 1))
-  expect_equal(stmarpars_to_gstmar(1, 2, pars12tr, restricted=TRUE, maxdf=13)$reg_order, c(1, 2))
-  expect_equal(stmarpars_to_gstmar(1, 2, pars12tr, restricted=TRUE, maxdf=13)$params, c(0.1, 0.2, 0.9, 0.1, 0.2, 0.6, 12))
-  expect_equal(stmarpars_to_gstmar(2, 3, pars23tr, restricted=TRUE, maxdf=120)$M, c(2, 1))
-  expect_equal(stmarpars_to_gstmar(2, 3, pars23tr, restricted=TRUE, maxdf=120)$reg_order, c(1, 3, 2))
-  expect_equal(stmarpars_to_gstmar(2, 3, pars23tr, restricted=TRUE, maxdf=120)$params, c(0.1, 0.4, 0.3, -0.4, 0.3, 1, 3, 2, 0.5, 0.4, 112))
-  expect_equal(stmarpars_to_gstmar(3, 2, pars32tc, constraints=list(R1, R1), maxdf=11)$M, c(1, 1))
-  expect_equal(stmarpars_to_gstmar(3, 2, pars32tc, constraints=list(R1, R1), maxdf=11)$reg_order, c(2, 1))
-  expect_equal(stmarpars_to_gstmar(3, 2, pars32tc, constraints=list(R1, R1), maxdf=11)$params, c(2, 0.2, -0.2, 2, 1, 0.1, -0.1, 1, 0.4, 11))
-  expect_equal(stmarpars_to_gstmar(3, 3, pars33tc, constraints=list(R2, R2, R1), maxdf=11)$M, c(2, 1))
-  expect_equal(stmarpars_to_gstmar(3, 3, pars33tc, constraints=list(R2, R2, R1), maxdf=11)$reg_order, c(2, 1, 3))
-  expect_equal(stmarpars_to_gstmar(3, 3, pars33tc, constraints=list(R2, R2, R1), maxdf=11)$params,
+  ret23gscr1 <- stmarpars_to_gstmar(p=2, M=c(1, 2), params=params23gscr1, model="G-StMAR", restricted=TRUE, constraints=R3, maxdf=25)
+  expect_equal(ret23gscr1$M, c(2, 1))
+  expect_equal(ret23gscr1$reg_order, c(3, 1, 2))
+  expect_equal(ret23gscr1$params, c(3, 1, 2, 0.1, 3, 1, 2, 0.5, 0.3, 10))
+
+  ret23gsc2 <- stmarpars_to_gstmar(p=2, M=c(1, 2), params=params23gsc2, model="G-StMAR", constraints=list(R3, R3, R4), maxdf=25)
+  expect_equal(ret23gsc2$M, c(2, 1))
+  expect_equal(ret23gsc2$reg_order, c(1, 3, 2))
+  expect_equal(ret23gsc2$params, c(1, 0.1, 1, 3, 0.3, 0.3, 3, 2, 0.2, 2, 0.3, 0.2, 10))
+
+  ret23gsc1 <- stmarpars_to_gstmar(p=2, M=c(1, 2), params=params23gsc1, model="G-StMAR", constraints=list(R3, R3, R4), maxdf=25)
+  expect_equal(ret23gsc1$M, c(2, 1))
+  expect_equal(ret23gsc1$reg_order, c(2, 1, 3))
+  expect_equal(ret23gsc1$params, c(2, 0.2, 2, 1, 0.1, 1, 3, 0.3, 0.3, 3, 0.5, 0.3, 10))
+
+  ret13gsr2 <- suppressWarnings(stmarpars_to_gstmar(p=1, M=c(1, 2), params=params13gsr1, model="G-StMAR", restricted=TRUE, maxdf=100))
+  expect_equal(ret13gsr2$M, c(1, 2))
+  expect_equal(ret13gsr2$reg_order, c(1, 2, 3))
+  expect_equal(ret13gsr2$params, params13gsr1)
+
+  ret13gsr1 <- stmarpars_to_gstmar(p=1, M=c(1, 2), params=params13gsr1, model="G-StMAR", restricted=TRUE, maxdf=12)
+  expect_equal(ret13gsr1$M, c(2, 1))
+  expect_equal(ret13gsr1$reg_order, c(3, 1, 2))
+  expect_equal(ret13gsr1$params, c(3, 1, 2, 0.5, 3, 1, 2, 0.7, 0.2, 11))
+
+  ret22gsr1 <- stmarpars_to_gstmar(p=2, M=c(1, 1), params=params22gsr1, model="G-StMAR", restricted=TRUE, maxdf=5)
+  expect_equal(ret22gsr1$M, c(2, 0))
+  expect_equal(ret22gsr1$reg_order, c(2, 1))
+  expect_equal(ret22gsr1$params, c(2, 1, 0.1, 0.2, 2, 1, 0.9))
+
+  ret14gs2 <- stmarpars_to_gstmar(p=1, M=c(1, 3), params=params14gs2, model="G-StMAR", maxdf=12)
+  expect_equal(ret14gs2$M, c(3, 1))
+  expect_equal(ret14gs2$reg_order, c(2, 1, 4, 3))
+  expect_equal(ret14gs2$params, c(2, 0.2, 2, 1, 0.1, 1, 4, 0.4, 4, 3, 0.3, 3, 0.4, 0.3, 0.1, 11))
+
+  ret14gs1 <- stmarpars_to_gstmar(p=1, M=c(2, 2), params=params14gs1, model="G-StMAR", maxdf=12)
+  expect_equal(ret14gs1$M, c(3, 1))
+  expect_equal(ret14gs1$reg_order, c(1, 2, 4, 3))
+  expect_equal(ret14gs1$params, c(1, 0.1, 1, 2, 0.2, 2, 4, 0.4, 4, 3, 0.3, 3, 0.4, 0.3, 0.1, 11))
+
+  ret23gs2 <- stmarpars_to_gstmar(p=2, M=c(1, 2), params=params23gs2, model="G-StMAR", maxdf=5)
+  expect_equal(ret23gs2$M, c(2, 1))
+  expect_equal(ret23gs2$reg_order, c(2, 1, 3))
+  expect_equal(ret23gs2$params, c(2, 0.2, 0.2, 2, 1, 0.1, 0.1, 1, 3, 0.3, 0.3, 3, 0.3, 0.2, 4))
+
+  ret23gs1 <- stmarpars_to_gstmar(p=2, M=c(2, 1), params=params23gs1, model="G-StMAR", maxdf=5)
+  expect_equal(ret23gs1$M, c(3, 0))
+  expect_equal(ret23gs1$reg_order, c(3, 2, 1))
+  expect_equal(ret23gs1$params, c(3, 0.3, 0.3, 3, 2, 0.2, 0.2, 2, 1, 0.1, 0.1, 1, 0.5, 0.3))
+
+  ret13gs3 <- stmarpars_to_gstmar(p=1, M=c(1, 2), params=params13gs3, model="G-StMAR", maxdf=15)
+  expect_equal(ret13gs3$M, c(2, 1))
+  expect_equal(ret13gs3$reg_order, c(1, 2, 3))
+  expect_equal(ret13gs3$params, c(1, 0.1, 1, 2, 0.2, 2, 3, 0.3, 3, 0.5, 0.2, 10))
+
+  ret13gs2 <- stmarpars_to_gstmar(p=1, M=c(1, 2), params=params13gs2, model="G-StMAR", maxdf=15)
+  expect_equal(ret13gs2$M, c(2, 1))
+  expect_equal(ret13gs2$reg_order, c(1, 3, 2))
+  expect_equal(ret13gs2$params, c(1, 0.1, 1, 3, 0.3, 3, 2, 0.2, 2, 0.5, 0.3, 10))
+
+
+  expect_equal(stmarpars_to_gstmar(p=1, M=1, params=pars11t, model="StMAR", maxdf=4)$M, c(1, 0))
+  expect_equal(stmarpars_to_gstmar(p=1, M=1, params=pars11t, model="StMAR", maxdf=4)$reg_order, 1)
+  expect_equal(stmarpars_to_gstmar(p=1, M=1, params=pars11t, model="StMAR", maxdf=4)$params, c(1, 0.9, 1))
+  expect_equal(stmarpars_to_gstmar(p=1, M=2, params=pars12t, model="StMAR", maxdf=12)$M, c(1, 1))
+  expect_equal(stmarpars_to_gstmar(p=1, M=2, params=pars12t, model="StMAR", maxdf=12)$reg_order, c(2, 1))
+  expect_equal(stmarpars_to_gstmar(p=1, M=2, params=pars12t, model="StMAR", maxdf=12)$params, c(0.8, 0.5, 0.5, 2, 0.9, 0.1, 0.6, 12))
+  expect_equal(stmarpars_to_gstmar(p=2, M=3, params=pars23t, model="StMAR", maxdf=11)$M, c(2, 1))
+  expect_equal(stmarpars_to_gstmar(p=2, M=3, params=pars23t, model="StMAR", maxdf=11)$reg_order, c(3, 2, 1))
+  expect_equal(stmarpars_to_gstmar(p=2, M=3, params=pars23t, model="StMAR", maxdf=11)$params, c(0.3, 0.3, 0.3, 0.3, 0.2, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1, 0.15, 0.05, 11))
+  expect_equal(stmarpars_to_gstmar(p=1, M=2, params=pars12tr, model="StMAR", restricted=TRUE, maxdf=13)$M, c(1, 1))
+  expect_equal(stmarpars_to_gstmar(p=1, M=2, params=pars12tr, model="StMAR", restricted=TRUE, maxdf=13)$reg_order, c(1, 2))
+  expect_equal(stmarpars_to_gstmar(p=1, M=2, params=pars12tr, model="StMAR", restricted=TRUE, maxdf=13)$params, c(0.1, 0.2, 0.9, 0.1, 0.2, 0.6, 12))
+  expect_equal(stmarpars_to_gstmar(p=2, M=3, params=pars23tr, model="StMAR", restricted=TRUE, maxdf=120)$M, c(2, 1))
+  expect_equal(stmarpars_to_gstmar(p=2, M=3, params=pars23tr, model="StMAR", restricted=TRUE, maxdf=120)$reg_order, c(1, 3, 2))
+  expect_equal(stmarpars_to_gstmar(p=2, M=3, params=pars23tr, model="StMAR", restricted=TRUE, maxdf=120)$params, c(0.1, 0.4, 0.3, -0.4, 0.3, 1, 3, 2, 0.5, 0.4, 112))
+  expect_equal(stmarpars_to_gstmar(p=3, M=2, params=pars32tc, model="StMAR", constraints=list(R1, R1), maxdf=11)$M, c(1, 1))
+  expect_equal(stmarpars_to_gstmar(p=3, M=2, params=pars32tc, model="StMAR", constraints=list(R1, R1), maxdf=11)$reg_order, c(2, 1))
+  expect_equal(stmarpars_to_gstmar(p=3, M=2, params=pars32tc, model="StMAR", constraints=list(R1, R1), maxdf=11)$params, c(2, 0.2, -0.2, 2, 1, 0.1, -0.1, 1, 0.4, 11))
+  expect_equal(stmarpars_to_gstmar(p=3, M=3, params=pars33tc, model="StMAR", constraints=list(R2, R2, R1), maxdf=11)$M, c(2, 1))
+  expect_equal(stmarpars_to_gstmar(p=3, M=3, params=pars33tc, model="StMAR", constraints=list(R2, R2, R1), maxdf=11)$reg_order, c(2, 1, 3))
+  expect_equal(stmarpars_to_gstmar(p=3, M=3, params=pars33tc, model="StMAR", constraints=list(R2, R2, R1), maxdf=11)$params,
                c(2, 0.2, 0.2, 0.2, 2, 1, 0.1, 0.1, 0.1, 1, 3, 0.3, -0.3, 3, 0.4, 0.3, 11))
-  expect_equal(stmarpars_to_gstmar(2, 2, pars22tcr, restricted=TRUE, constraints=R3, maxdf=11)$M, c(1, 1))
-  expect_equal(stmarpars_to_gstmar(2, 2, pars22tcr, restricted=TRUE, constraints=R3, maxdf=11)$reg_order, c(2, 1))
-  expect_equal(stmarpars_to_gstmar(2, 2, pars22tcr, restricted=TRUE, constraints=R3, maxdf=11)$params, c(2, 1, 0.8, 2, 1, 0.3, 11))
-  expect_equal(stmarpars_to_gstmar(2, 1, pars21tcr, restricted=TRUE, constraints=R3, maxdf=4)$M, c(1, 0))
-  expect_equal(stmarpars_to_gstmar(2, 1, pars21tcr, restricted=TRUE, constraints=R3, maxdf=4)$reg_order, 1)
-  expect_equal(stmarpars_to_gstmar(2, 1, pars21tcr, restricted=TRUE, constraints=R3, maxdf=4)$params, c(1, 0.1, 1))
+  expect_equal(stmarpars_to_gstmar(p=2, M=2, params=pars22tcr, model="StMAR", restricted=TRUE, constraints=R3, maxdf=11)$M, c(1, 1))
+  expect_equal(stmarpars_to_gstmar(p=2, M=2, params=pars22tcr, model="StMAR", restricted=TRUE, constraints=R3, maxdf=11)$reg_order, c(2, 1))
+  expect_equal(stmarpars_to_gstmar(p=2, M=2, params=pars22tcr, model="StMAR", restricted=TRUE, constraints=R3, maxdf=11)$params, c(2, 1, 0.8, 2, 1, 0.3, 11))
+  expect_equal(stmarpars_to_gstmar(p=2, M=1, params=pars21tcr, model="StMAR", restricted=TRUE, constraints=R3, maxdf=4)$M, c(1, 0))
+  expect_equal(stmarpars_to_gstmar(p=2, M=1, params=pars21tcr, model="StMAR", restricted=TRUE, constraints=R3, maxdf=4)$reg_order, 1)
+  expect_equal(stmarpars_to_gstmar(p=2, M=1, params=pars21tcr, model="StMAR", restricted=TRUE, constraints=R3, maxdf=4)$params, c(1, 0.1, 1))
 })

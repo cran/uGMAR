@@ -14,7 +14,7 @@ loglikelihood(
   constraints = NULL,
   conditional = TRUE,
   parametrization = c("intercept", "mean"),
-  returnTerms = FALSE,
+  return_terms = FALSE,
   minval = NA
 )
 }
@@ -48,7 +48,7 @@ loglikelihood(
   \item{For \strong{restricted} models:}{
     \describe{
       \item{For \strong{GMAR} model:}{Size \eqn{(3M+p-1x1)} vector \strong{\eqn{\theta}}\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
-        \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1})}, where \strong{\eqn{\phi}}=\eqn{(\phi_{1},...,\phi_{M})}.}
+        \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1})}, where \strong{\eqn{\phi}}=\eqn{(\phi_{1},...,\phi_{p})}.}
       \item{For \strong{StMAR} model:}{Size \eqn{(4M+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
         \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1}, \nu_{1},...,\nu_{M})}.}
       \item{For \strong{G-StMAR} model:}{Size \eqn{(3M+M2+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
@@ -90,13 +90,13 @@ Ignore or set to \code{NULL} if applying linear constraints is \strong{not} desi
 \item{parametrization}{is the model parametrized with the "intercepts" \eqn{\phi_{m,0}} or
 "means" \eqn{\mu_m = \phi_{m,0}/(1-\sum\phi_{i,m})}?}
 
-\item{returnTerms}{should the terms \eqn{l_{t}: t=1,..,T} in the log-likelihood function (see \emph{KMS 2015, eq.(13)}
+\item{return_terms}{should the terms \eqn{l_{t}: t=1,..,T} in the log-likelihood function (see \emph{KMS 2015, eq.(13)}
 or MPS 2018, eq.(15)) be returned instead of the log-likelihood value?}
 
 \item{minval}{this will be returned when the parameter vector is outside the parameter space and \code{boundaries==TRUE}.}
 }
 \value{
-Returns the log-likelihood value or the terms described in \code{returnTerms}.
+Returns the log-likelihood value or the terms described in \code{return_terms}.
 }
 \description{
 \code{loglikelihood} computes the log-likelihood of the specified GMAR, StMAR, or G-StMAR model.
@@ -104,23 +104,14 @@ Returns the log-likelihood value or the terms described in \code{returnTerms}.
   Use \code{minval} to control what happens when the parameter vector is outside the parameter space.
 }
 \examples{
-# StMAR model
-params43 <- c(0.09, 1.31, -0.46, 0.33, -0.23, 0.04, 0.01, 1.15,
- -0.3, -0.03, 0.03, 1.54, 0.06, 1.19, -0.3, 0.42, -0.4, 0.01,
-  0.57, 0.22, 8.05, 2.02, 10000)
-loglikelihood(T10Y1Y, p=4, M=3, params=params43, model="StMAR")
+# GMAR model
+params12 <- c(1.70, 0.85, 0.30, 4.12, 0.73, 1.98, 0.63)
+loglikelihood(simudata, p=1, M=2, params=params12, model="GMAR")
 
-# Restricted G-StMAR-model
-params42gsr <- c(0.11, 0.03, 1.27, -0.39, 0.24, -0.17, 0.03, 1.01, 0.3, 2.03)
-loglikelihood(T10Y1Y, p=4, M=c(1, 1), params=params42gsr, model="G-StMAR",
-  restricted=TRUE)
-
-# Two-regime GMAR p=2 model with the second AR coeffiecient of
-# of the second regime contrained to zero.
-constraints <- list(diag(1, ncol=2, nrow=2), as.matrix(c(1, 0)))
-params22c <- c(0.03, 1.27, -0.29, 0.03, -0.01, 0.91, 0.34, 0.88)
-loglikelihood(T10Y1Y, p=2, M=2, params=params22c, model="GMAR",
- constraints=constraints)
+# G-StMAR-model
+params42gs <- c(0.04, 1.34, -0.59, 0.54, -0.36, 0.01, 0.06, 1.28, -0.36,
+                0.2, -0.15, 0.04, 0.19, 9.75)
+loglikelihood(M10Y1Y, p=4, M=c(1, 1), params=params42gs, model="G-StMAR")
 }
 \references{
 \itemize{
@@ -136,6 +127,6 @@ loglikelihood(T10Y1Y, p=2, M=2, params=params22c, model="GMAR",
  }
 }
 \seealso{
-\code{\link{fitGSMAR}}, \code{\link{GSMAR}}, \code{\link{quantileResiduals}},
- \code{\link{mixingWeights}}, \code{\link{calc_gradient}}
+\code{\link{fitGSMAR}}, \code{\link{GSMAR}}, \code{\link{quantile_residuals}},
+ \code{\link{mixing_weights}}, \code{\link{calc_gradient}}
 }

@@ -14,8 +14,7 @@
 #' @param maxit the maximum number of iterations for the variable metric algorithm.
 #' @param seeds a length \code{ncalls} vector containing the random number generator seed for each call to the genetic algorithm,
 #'   or \code{NULL} for not initializing the seed. Exists for the purpose of creating reproducible results.
-#' @param printRes should the estimation results be printed?
-#' @param runTests should quantile residuals tests be performed after the estimation?
+#' @param print_res should the estimation results be printed?
 #' @param ... additional settings passed to the function \code{GAfit} employing the genetic algorithm.
 #' @details
 #'  Because of complexity and multimodality of the log-likelihood function, it's \strong{not guaranteed} that the estimation
@@ -23,7 +22,7 @@
 #'  some local maximum point instead, and therefore a number of estimation rounds is required for reliable results. Because
 #'  of the nature of the models, the estimation may fail particularly in the cases where the number of mixture components is
 #'  chosen too large. Note that the genetic algorithm is designed to avoid solutions with mixing weights of some regimes
-#'  too close to zero at almost all times ('redudant regimes') but the settings can, however, be adjusted (see ?GAfit).
+#'  too close to zero at almost all times ("redundant regimes") but the settings can, however, be adjusted (see ?GAfit).
 #'
 #'  If the iteration limit for the variable metric algorithm (\code{maxit}) is reached, one can continue the estimation by
 #'  iterating more with the function \code{iterate_more}.
@@ -36,10 +35,19 @@
 #'  The variable metric algorithm (or quasi-Newton method, Nash (1990, algorithm 21)) used in the second phase is implemented
 #'  with function the \code{optim} from the package \code{stats}.
 #'
+#'  \strong{Addiotional Notes about the estimates:}
+#'
+#'  Sometimes the found MLE is very close to the boundary of the stationarity region some regime, the related variance parameter
+#'  is very small, and the associated mixing weights are "spiky". This kind of estimates often maximize the log-likelihood function
+#'  for a technical reason that induces by the endogenously determined mixing weights. In such cases, it might be more appropriate
+#'  to consider the next-best local maximum point of the log-likelihood function that is well inside the parameter space. Models based
+#'  local-only maximum points can be built with the function \code{alt_gsmar} by adjusting the argument \code{which_largest}
+#'  accordingly.
+#'
 #'  Some mixture components of the StMAR model may sometimes get very large estimates for the degrees of freedom parameters. Such parameters
 #'  are weakly identified and induce various numerical problems. However, mixture components with large degree of freedom parameters are
 #'  similar to the mixture components of the GMAR model. It's hence advisable to further estimate a G-StMAR model by allowing the mixture
-#'  components with large degrees of freedom parameter estimates to be GMAR type.
+#'  components with large degrees of freedom parameter estimates to be GMAR type with the function \code{stmar_to_gstmar}.
 #' @return Returns an object of class \code{'gsmar'} defining the estimated GMAR, StMAR or G-StMAR model. The returned object contains
 #'   estimated mixing weights, some conditional and unconditional moments, quantile residuals, and quantile residual test results
 #'   if the tests were performed. Note that the first p observations are taken as the initial values so the mixing weights, conditional
@@ -65,7 +73,7 @@
 #'    \item{For \strong{restricted} models:}{
 #'      \describe{
 #'        \item{For \strong{GMAR} model:}{Size \eqn{(3M+p-1x1)} vector \strong{\eqn{\theta}}\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
-#'          \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1})}, where \strong{\eqn{\phi}}=\eqn{(\phi_{1},...,\phi_{M})}.}
+#'          \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1})}, where \strong{\eqn{\phi}}=\eqn{(\phi_{1},...,\phi_{p})}.}
 #'        \item{For \strong{StMAR} model:}{Size \eqn{(4M+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
 #'          \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1}, \nu_{1},...,\nu_{M})}.}
 #'        \item{For \strong{G-StMAR} model:}{Size \eqn{(3M+M2+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
@@ -85,13 +93,9 @@
 #' @section S3 methods:
 #'  The following S3 methods are supported for class \code{'gsmar'} objects: \code{print}, \code{summary}, \code{plot},
 #'  \code{logLik}, \code{residuals}.
-#' @section Suggested packages:
-#'  For faster evaluation of the quantile residuals for StMAR and G-StMAR models, install the suggested package "gsl".
-#'  Note that for large StMAR and G-StMAR models with large data, performing the quantile residual tests may take
-#'  significantly long time without the package "gsl".
 #' @seealso \code{\link{GSMAR}}, \code{\link{iterate_more}}, , \code{\link{stmar_to_gstmar}}, \code{\link{add_data}},
 #'  \code{\link{profile_logliks}}, \code{\link{swap_parametrization}}, \code{\link{get_gradient}}, \code{\link{simulateGSMAR}}, \code{\link{predict.gsmar}},
-#'   \code{\link{diagnosticPlot}}, \code{\link{quantileResidualTests}}, \code{\link{condMoments}}, \code{\link{uncondMoments}}, \code{\link{LR_test}}, \code{\link{Wald_test}}
+#'   \code{\link{diagnostic_plot}}, \code{\link{quantile_residual_tests}}, \code{\link{cond_moments}}, \code{\link{uncond_moments}}, \code{\link{LR_test}}, \code{\link{Wald_test}}
 #' @references
 #'  \itemize{
 #'    \item Dorsey R. E. and Mayer W. J. 1995. Genetic algorithms for estimation problems with multiple optima,
@@ -113,86 +117,88 @@
 #'  }
 #' @examples
 #' \donttest{
-#' # These are long running examples that use parallel computing
+#' ## These are long running examples that use parallel computing.
+#' ## The below examples take approximately 90 seconds to run.
+#'
+#' ## Note that the number of estimation rounds (ncalls) is relatively small
+#' ## in the below examples. For reliable results, a large number of estimation
+#' ## rounds is recommended!
 #'
 #' # GMAR model
-#' fit12 <- fitGSMAR(simudata, p=1, M=2, model="GMAR")
+#' fit12 <- fitGSMAR(data=simudata, p=1, M=2, model="GMAR", ncalls=4, seeds=1:4)
 #' summary(fit12)
 #' plot(fit12)
 #' profile_logliks(fit12)
+#' diagnostic_plot(fit12)
 #'
-#' # StMAR model
-#' fit42 <- fitGSMAR(data=T10Y1Y, p=4, M=2, model="StMAR")
-#' fit42
-#' summary(fit42)
-#' plot(fit42)
+#' # StMAR model (boundary estimate + large degrees of freedom)
+#' fit42t <- fitGSMAR(data=M10Y1Y, p=4, M=2, model="StMAR", ncalls=6, seeds=1:6)
+#' summary(fit42t, digits=4) # Four almost-unit roots in the 2nd regime!
+#' plot(fit42t) # Spiky mixing weights!
+#' fit42t_alt <- alt_gsmar(fit42t, which_largest=2) # Second largest local max
+#' summary(fit42t_alt) # Overly large 2nd regime degrees of freedom estimate!
+#' fit42gs <- stmar_to_gstmar(fit42t_alt) # Switch to G-StMAR model
+#' summary(fit42gs) # Finally, an appropriate model!
+#' plot(fit42gs)
 #'
-#' # Restricted StMAR model: plot also the individual statistics with
-#' # their approximate critical bounds using the given data
-#' fit42r <- fitGSMAR(T10Y1Y, 4, 2, model="StMAR", restricted=TRUE)
+#' # Restricted StMAR model
+#' fit42r <- fitGSMAR(M10Y1Y, p=4, M=2, model="StMAR", restricted=TRUE,
+#'                    ncalls=2, seeds=1:2)
 #' fit42r
-#' plot(fit42)
-#'
-#' # Non-mixture version of StMAR model
-#' fit101t <- fitGSMAR(T10Y1Y, 10, 1, model="StMAR", ncores=1, ncalls=1)
-#' diagnosticPlot(fit101t)
 #'
 #' # G-StMAR model with one GMAR type and one StMAR type regime
-#' fit42g <- fitGSMAR(T10Y1Y, 4, M=c(1, 1), model="G-StMAR")
-#' diagnosticPlot(fit42g)
-#'
-#' # GMAR model; seeds for rerpoducibility
-#' fit43gm <- fitGSMAR(T10Y1Y, 4, M=3, model="GMAR", ncalls=16,
-#'   seeds=1:16)
-#' fit43gm
-#'
-#' # Restricted GMAR model
-#' fit43gmr <- fitGSMAR(T10Y1Y, 4, M=3, model="GMAR", ncalls=12,
-#'   restricted=TRUE, seeds=1:12)
-#' fit43gmr
-#'
+#' fit42gs <- fitGSMAR(M10Y1Y, p=4, M=c(1, 1), model="G-StMAR",
+#'                     ncalls=1, seeds=4)
+#' fit42gs
 #'
 #' # The following three examples demonstrate how to apply linear constraints
-#' # to the AR parameters.
+#' # to the autoregressive (AR) parameters.
 #'
 #' # Two-regime GMAR p=2 model with the second AR coeffiecient of
 #' # of the second regime contrained to zero.
-#' constraints <- list(diag(1, ncol=2, nrow=2), as.matrix(c(1, 0)))
-#' fit22c <- fitGSMAR(T10Y1Y, 2, 2, constraints=constraints)
+#' C22 <- list(diag(1, ncol=2, nrow=2), as.matrix(c(1, 0)))
+#' fit22c <- fitGSMAR(M10Y1Y, p=2, M=2, constraints=C22, ncalls=1, seeds=6)
 #' fit22c
 #'
-#' # Such constrained StMAR(3, 1) model that the second order AR coefficient
-#' # is constrained to zero.
-#' constraints <- list(matrix(c(1, 0, 0, 0, 0, 1), ncol=2))
-#' fit31tc <- fitGSMAR(T10Y1Y, 3, 1, model="StMAR", constraints=constraints)
+#' # StMAR(3, 1) model with the second order AR coefficient constrained to zero.
+#' C31 <- list(matrix(c(1, 0, 0, 0, 0, 1), ncol=2))
+#' fit31tc <- fitGSMAR(M10Y1Y, p=3, M=1, model="StMAR", constraints=C31,
+#'                     ncalls=1, seeds=1)
 #' fit31tc
 #'
-#' # Such StMAR(3,2) that the AR coefficients are restricted to be
-#' # the same for both regimes and that the second AR coefficients are
+#' # Such StMAR(3, 2) model that the AR coefficients are restricted to be
+#' # the same for both regimes and the second AR coefficients are
 #' # constrained to zero.
-#' fit32rc <- fitGSMAR(T10Y1Y, 3, 2, model="StMAR", restricted=TRUE,
-#'  constraints=matrix(c(1, 0, 0, 0, 0, 1), ncol=2))
+#' fit32rc <- fitGSMAR(M10Y1Y, p=3, M=2, model="StMAR", restricted=TRUE,
+#'                     constraints=matrix(c(1, 0, 0, 0, 0, 1), ncol=2),
+#'                     ncalls=1, seeds=1)
 #' fit32rc
 #' }
 #' @export
 
 fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FALSE, constraints=NULL, conditional=TRUE,
                      parametrization=c("intercept", "mean"), ncalls=round(10 + 9*log(sum(M))), ncores=min(2, ncalls, parallel::detectCores()),
-                     maxit=300, seeds=NULL, printRes=TRUE, runTests=FALSE, ...) {
+                     maxit=300, seeds=NULL, print_res=TRUE, ...) {
   on.exit(closeAllConnections())
   if(!all_pos_ints(c(ncalls, ncores, maxit))) stop("Arguments ncalls, ncores and maxit have to be positive integers")
   if(!is.null(seeds) && length(seeds) != ncalls) stop("The argument 'seeds' needs be NULL or a vector of length 'ncalls'")
   model <- match.arg(model)
   check_model(model)
   parametrization <- match.arg(parametrization)
-  checkPM(p, M, model=model)
-  data <- checkAndCorrectData(data, p)
-  checkConstraintMat(p, M, restricted=restricted, constraints=constraints)
-  d <- nParams(p=p, M=M, model=model, restricted=restricted, constraints=constraints)
+  check_pM(p, M, model=model)
+  data <- check_and_correct_data(data, p)
+  check_constraint_mat(p, M, restricted=restricted, constraints=constraints)
+  d <- n_params(p=p, M=M, model=model, restricted=restricted, constraints=constraints)
   dot_params <- list(...)
 
   minval <- ifelse(is.null(dot_params$minval), get_minval(data), dot_params$minval)
   red_criteria <- ifelse(rep(is.null(dot_params$red_criteria), 2), c(0.05, 0.01), dot_params$red_criteria)
+
+  # We check and warn about deprecated arguments found in dot arguments
+  if(!is.null(dot_params$printRes)) {
+    warning("The argument 'printRes' is deprecated! Use 'print_res' instead!")
+    print_res <- dot_params$printRes
+  }
 
   if(ncores > parallel::detectCores()) {
     ncores <- parallel::detectCores()
@@ -221,7 +227,7 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
                                                           parametrization=parametrization, boundaries=TRUE, checks=FALSE,
                                                           minval=minval), numeric(1))
 
-  if(printRes) {
+  if(print_res) {
     printloks <- function() {
         printfun <- function(txt, FUN) cat(paste(txt, round(FUN(loks), 3)), "\n")
         printfun("The lowest loglik: ", min)
@@ -273,7 +279,7 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
   converged <- vapply(1:ncalls, function(i1) NEWTONresults[[i1]]$convergence == 0, logical(1))
 
   if(is.null(constraints)) {
-    newtonEstimates <- lapply(1:ncalls, function(i1) sortComponents(p=p, M=M, params=NEWTONresults[[i1]]$par, model=model, restricted=restricted))
+    newtonEstimates <- lapply(1:ncalls, function(i1) sort_components(p=p, M=M, params=NEWTONresults[[i1]]$par, model=model, restricted=restricted))
   } else {
     newtonEstimates <- lapply(1:ncalls, function(i1) NEWTONresults[[i1]]$par)
   }
@@ -283,7 +289,7 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
     newtonEstimates <- lapply(1:ncalls, function(i1) manipulateDFS(M=M, params=newtonEstimates[[i1]], model=model, FUN=exp))
   }
 
-  if(printRes) {
+  if(print_res) {
     cat("Results from the variable metric algorithm:\n")
     printloks()
   }
@@ -292,7 +298,7 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
   bestind <- which(loks == max(loks))[1]
   bestfit <- NEWTONresults[[bestind]]
   params <- newtonEstimates[[bestind]]
-  mw <- mixingWeights_int(data, p, M, params, model=model, restricted=restricted, constraints=constraints,
+  mw <- mixing_weights_int(data, p, M, params, model=model, restricted=restricted, constraints=constraints,
                           parametrization=parametrization, to_return="mw")
 
   # Warnings and notifications
@@ -301,17 +307,6 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
   }
   if(bestfit$convergence == 1) message("Iteration limit was reached when estimating the best fitting individual! Iterate more with the function 'iterate_more'.")
 
-  # Quantile residual tests
-  if(runTests) {
-    cat("Performing quantile residual tests...\n")
-    tmp_gsmar <- GSMAR(data, p, M, params=params, model=model, restricted=restricted, constraints=constraints,
-                       conditional=conditional, parametrization=parametrization, calc_std_errors=FALSE)
-    qr_tests <- quantileResidualTests(tmp_gsmar, lagsAC=c(1, 2, 5, 10), lagsCH=c(1, 2, 5, 10), nsimu=2000, printRes=printRes)
-    if(printRes) cat("\n")
-  } else {
-    qr_tests <- NULL
-  }
-
   ### Wrap up ###
   ret <- GSMAR(data=data, p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints,
                conditional=conditional, parametrization=parametrization, calc_qresiduals=TRUE,
@@ -319,7 +314,14 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
   ret$all_estimates <- newtonEstimates
   ret$all_logliks <- loks
   ret$which_converged <- converged
-  ret$qrtests <- qr_tests
+  ar_roots <- get_ar_roots(ret)
+  near_nonstat <- vapply(1:sum(M), function(i1) any(abs(ar_roots[[i1]]) < 1.005), logical(1))
+  if(any(near_nonstat)) {
+    my_string <- ifelse(sum(near_nonstat) == 1,
+                        paste("Regime", which(near_nonstat),"is almost nonstationary!"),
+                        paste("Regimes", paste(which(near_nonstat), collapse=" and ") ,"are almost nonstationary!"))
+    warning(paste(my_string, "Consider building a model from the next-best local maximum with the function 'alt_gsmar' by adjusting its argument 'which_largest'."))
+  }
 
   cat("Finished!\n")
   ret
@@ -345,14 +347,13 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
 #' @inherit GSMAR references
 #' @examples
 #' \donttest{
-#' # Estimate GMAR model with only 50 generations of genetic algorithm and
-#' # only 1 iteration in variable metric algorithm
-#' fit13 <- fitGSMAR(T10Y1Y, 1, 3, maxit=1, ngen=50, ncalls=1, seeds=1)
-#' fit13
+#' # Estimate GMAR model with on only 1 iteration in variable metric algorithm
+#' fit12 <- fitGSMAR(simudata, p=1, M=2, maxit=1, ncalls=1, seeds=1)
+#' fit12
 #'
 #' # Iterate more since iteration limit was reached
-#' fit13 <- iterate_more(fit13)
-#' fit13
+#' fit12 <- iterate_more(fit12)
+#' fit12
 #' }
 #' @export
 
