@@ -35,7 +35,7 @@
 #'  The variable metric algorithm (or quasi-Newton method, Nash (1990, algorithm 21)) used in the second phase is implemented
 #'  with function the \code{optim} from the package \code{stats}.
 #'
-#'  \strong{Addiotional Notes about the estimates:}
+#'  \strong{Additional Notes about the estimates:}
 #'
 #'  Sometimes the found MLE is very close to the boundary of the stationarity region some regime, the related variance parameter
 #'  is very small, and the associated mixing weights are "spiky". This kind of estimates often maximize the log-likelihood function
@@ -49,47 +49,10 @@
 #'  similar to the mixture components of the GMAR model. It's hence advisable to further estimate a G-StMAR model by allowing the mixture
 #'  components with large degrees of freedom parameter estimates to be GMAR type with the function \code{stmar_to_gstmar}.
 #' @return Returns an object of class \code{'gsmar'} defining the estimated GMAR, StMAR or G-StMAR model. The returned object contains
-#'   estimated mixing weights, some conditional and unconditional moments, quantile residuals, and quantile residual test results
-#'   if the tests were performed. Note that the first p observations are taken as the initial values so the mixing weights, conditional
-#'   moments, and quantile residuals start from the p+1:th observation (interpreted as t=1).In addition, the returned object contains
-#'   the estimates and log-likelihood values from all of the estimation rounds.
-#'   The estimated parameter vector can be obtained as \code{gsmar$params} (and the corresponding approximate standard errors as
-#'   \code{gsmar$std_errors}) and it's...
-#'  \describe{
-#'    \item{For \strong{non-restricted} models:}{
-#'      \describe{
-#'        \item{For \strong{GMAR} model:}{Size \eqn{(M(p+3)-1x1)} vector \strong{\eqn{\theta}}\eqn{=}(\strong{\eqn{\upsilon_{1}}},...,\strong{\eqn{\upsilon_{M}}},
-#'          \eqn{\alpha_{1},...,\alpha_{M-1}}), where \strong{\eqn{\upsilon_{m}}}\eqn{=(\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,
-#'          \sigma_{m}^2)} and \strong{\eqn{\phi_{m}}}=\eqn{(\phi_{m,1},...,\phi_{m,p}), m=1,...,M}.}
-#'        \item{For \strong{StMAR} model:}{Size \eqn{(M(p+4)-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=}(\strong{\eqn{\upsilon_{1}}},...,\strong{\eqn{\upsilon_{M}}},
-#'          \eqn{\alpha_{1},...,\alpha_{M-1}, \nu_{1},...,\nu_{M}}).}
-#'        \item{For \strong{G-StMAR} model:}{Size \eqn{(M(p+3)+M2-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=}(\strong{\eqn{\upsilon_{1}}},...,\strong{\eqn{\upsilon_{M}}},
-#'          \eqn{\alpha_{1},...,\alpha_{M-1}, \nu_{M1+1},...,\nu_{M}}).}
-#'        \item{With \strong{linear constraints}:}{Replace the vectors \strong{\eqn{\phi_{m}}} with vectors \strong{\eqn{\psi_{m}}} and provide a  list of constraint
-#'          matrices \strong{C} that satisfy \strong{\eqn{\phi_{m}}}\eqn{=}\strong{\eqn{C_{m}\psi_{m}}} for all \eqn{m=1,...,M}, where
-#'          \strong{\eqn{\psi_{m}}}\eqn{=(\psi_{m,1},...,\psi_{m,q_{m}})}.}
-#'      }
-#'    }
-#'    \item{For \strong{restricted} models:}{
-#'      \describe{
-#'        \item{For \strong{GMAR} model:}{Size \eqn{(3M+p-1x1)} vector \strong{\eqn{\theta}}\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
-#'          \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1})}, where \strong{\eqn{\phi}}=\eqn{(\phi_{1},...,\phi_{p})}.}
-#'        \item{For \strong{StMAR} model:}{Size \eqn{(4M+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
-#'          \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1}, \nu_{1},...,\nu_{M})}.}
-#'        \item{For \strong{G-StMAR} model:}{Size \eqn{(3M+M2+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
-#'          \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1}, \nu_{M1+1},...,\nu_{M})}.}
-#'        \item{With \strong{linear constraints}:}{Replace the vector \strong{\eqn{\phi}} with vector \strong{\eqn{\psi}} and provide a constraint matrix
-#'          \strong{\eqn{C}} that satisfies \strong{\eqn{\phi}}\eqn{=}\strong{\eqn{C\psi}}, where
-#'          \strong{\eqn{\psi}}\eqn{=(\psi_{1},...,\psi_{q})}.}
-#'      }
-#'    }
-#'  }
-#'  Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight, and \eqn{\nu} a degrees of
-#'  freedom parameter. If \code{parametrization=="mean"} just replace each intercept term \eqn{\phi_{m,0}} with regimewise mean
-#'  \eqn{\mu_m = \phi_{m,0}/(1-\sum\phi_{i,m})}. In the \strong{G-StMAR} model, the first \code{M1} components are \emph{GMAR type}
-#'  and the rest \code{M2} components are \emph{StMAR type}.
-#'  Note that in the case \strong{M=1} the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model
-#'  the degrees of freedom parameters \eqn{\nu_{m}} have to be larger than \eqn{2}.
+#'   estimated mixing weights, some conditional and unconditional moments, and quantile residuals. Note that the first \code{p}
+#'   observations are taken as the initial values, so the mixing weights, conditional moments, and quantile residuals start from
+#'   the \code{p+1}:th observation (interpreted as t=1). In addition, the returned object contains the estimates and log-likelihoods
+#'   from all of the estimation rounds. See \code{?GSMAR} for the form of the parameter vector, if needed.
 #' @section S3 methods:
 #'  The following S3 methods are supported for class \code{'gsmar'} objects: \code{print}, \code{summary}, \code{plot},
 #'  \code{logLik}, \code{residuals}.
@@ -103,8 +66,8 @@
 #'          \strong{13}, 53-66.
 #'    \item Kalliovirta L., Meitz M. and Saikkonen P. 2015. Gaussian Mixture Autoregressive model for univariate time series.
 #'          \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
-#'    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
-#'          arXiv:1805.04010 \strong{[econ.EM]}.
+#'    \item Meitz M., Preve D., Saikkonen P. forthcoming. A mixture autoregressive model based on Student's t-distribution.
+#'          \emph{Communications in Statistics - Theory and Methods}, doi: 10.1080/03610926.2021.1916531
 #'    \item Monahan J.F. 1984. A Note on Enforcing Stationarity in Autoregressive-Moving Average Models.
 #'          \emph{Biometrica} \strong{71}, 403-404.
 #'    \item Nash J. 1990. Compact Numerical Methods for Computers. Linear algebra and Function Minimization.
@@ -113,7 +76,7 @@
 #'          \emph{Transactions on Systems, Man and Cybernetics} \strong{24}, 656-667.
 #'    \item Smith R.E., Dike B.A., Stegmann S.A. 1995. Fitness inheritance in genetic algorithms.
 #'          \emph{Proceedings of the 1995 ACM Symposium on Applied Computing}, 345-350.
-#'    \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
+#'    \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distributions. arXiv:2003.05221 [econ.EM].
 #'  }
 #' @examples
 #' \donttest{
@@ -134,8 +97,8 @@
 #' # StMAR model (boundary estimate + large degrees of freedom)
 #' fit42t <- fitGSMAR(data=M10Y1Y, p=4, M=2, model="StMAR", ncalls=6, seeds=1:6)
 #' summary(fit42t, digits=4) # Four almost-unit roots in the 2nd regime!
-#' plot(fit42t) # Spiky mixing weights!
-#' fit42t_alt <- alt_gsmar(fit42t, which_largest=2) # Second largest local max
+#' plot(fit42t) # Spiking mixing weights!
+#' fit42t_alt <- alt_gsmar(fit42t, which_largest=2) # The second largest local max
 #' summary(fit42t_alt) # Overly large 2nd regime degrees of freedom estimate!
 #' fit42gs <- stmar_to_gstmar(fit42t_alt) # Switch to G-StMAR model
 #' summary(fit42gs) # Finally, an appropriate model!
@@ -177,9 +140,8 @@
 #' @export
 
 fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FALSE, constraints=NULL, conditional=TRUE,
-                     parametrization=c("intercept", "mean"), ncalls=round(10 + 9*log(sum(M))), ncores=min(2, ncalls, parallel::detectCores()),
-                     maxit=300, seeds=NULL, print_res=TRUE, ...) {
-  on.exit(closeAllConnections())
+                     parametrization=c("intercept", "mean"), ncalls=round(10 + 9*log(sum(M))), ncores=2, maxit=300,
+                     seeds=NULL, print_res=TRUE, ...) {
   if(!all_pos_ints(c(ncalls, ncores, maxit))) stop("Arguments ncalls, ncores and maxit have to be positive integers")
   if(!is.null(seeds) && length(seeds) != ncalls) stop("The argument 'seeds' needs be NULL or a vector of length 'ncalls'")
   model <- match.arg(model)
@@ -213,7 +175,9 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
 
   ### Optimization with the genetic algorithm ###
 
+
   cl <- parallel::makeCluster(ncores)
+  on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
   parallel::clusterExport(cl, ls(environment(fitGSMAR)), envir=environment(fitGSMAR)) # assign all variables from package:uGMAR
   parallel::clusterEvalQ(cl, c(library(Brobdingnag), library(pbapply)))
 
@@ -240,9 +204,10 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
 
   ### Optimization with the variable metric algorithm ###
 
-  # Logarithmize dfs to get overly large dfs values to the same range as other parameters.
-  # This adjusts the difference 'h' larger for larger dfs parameters in non-log scale to
-  # avoid numerical problems associated with overly large degrees of freedom values.
+  # Logarithmize dfs to get overly large degrees of freedom parameters to the same range
+  # as other parameters. This adjusts the difference 'h' larger for larger df parameters
+  # in non-log scale to avoid numerical problems associated with overly large degrees of
+  # freedom parameters.
   manipulateDFS <- function(M, params, model, FUN) {
     FUN <- match.fun(FUN)
     M2 <- ifelse(model == "StMAR", M, M[2])
@@ -299,7 +264,7 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
   bestfit <- NEWTONresults[[bestind]]
   params <- newtonEstimates[[bestind]]
   mw <- mixing_weights_int(data, p, M, params, model=model, restricted=restricted, constraints=constraints,
-                          parametrization=parametrization, to_return="mw")
+                           parametrization=parametrization, to_return="mw")
 
   # Warnings and notifications
   if(any(vapply(1:sum(M), function(i1) sum(mw[,i1] > red_criteria[1]) < red_criteria[2]*length(data), logical(1)))) {
@@ -314,15 +279,8 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
   ret$all_estimates <- newtonEstimates
   ret$all_logliks <- loks
   ret$which_converged <- converged
-  ar_roots <- get_ar_roots(ret)
-  near_nonstat <- vapply(1:sum(M), function(i1) any(abs(ar_roots[[i1]]) < 1.005), logical(1))
-  if(any(near_nonstat)) {
-    my_string <- ifelse(sum(near_nonstat) == 1,
-                        paste("Regime", which(near_nonstat),"is almost nonstationary!"),
-                        paste("Regimes", paste(which(near_nonstat), collapse=" and ") ,"are almost nonstationary!"))
-    warning(paste(my_string, "Consider building a model from the next-best local maximum with the function 'alt_gsmar' by adjusting its argument 'which_largest'."))
-  }
-
+  ret$which_round <- bestind # Which estimation round induced the largest log-likelihood?
+  warn_ar_roots(ret)
   cat("Finished!\n")
   ret
 }
@@ -381,10 +339,22 @@ iterate_more <- function(gsmar, maxit=100, custom_h=NULL, calc_std_errors=TRUE) 
   res <- optim(par=gsmar$params, fn=fn, gr=gr, method=c("BFGS"), control=list(fnscale=-1, maxit=maxit))
   if(res$convergence == 1) message("The maximum number of iterations was reached! Consider iterating more.")
 
-  GSMAR(data=gsmar$data, p=gsmar$model$p, M=gsmar$model$M, params=res$par, model=gsmar$model$model,
-        restricted=gsmar$model$restricted, constraints=gsmar$model$constraints,
-        conditional=gsmar$model$conditional, parametrization=gsmar$model$parametrization,
-        calc_qresiduals=TRUE, calc_cond_moments=TRUE, calc_std_errors=calc_std_errors, custom_h=custom_h)
+  ret <- GSMAR(data=gsmar$data, p=gsmar$model$p, M=gsmar$model$M, params=res$par, model=gsmar$model$model,
+               restricted=gsmar$model$restricted, constraints=gsmar$model$constraints,
+               conditional=gsmar$model$conditional, parametrization=gsmar$model$parametrization,
+               calc_qresiduals=TRUE, calc_cond_moments=TRUE, calc_std_errors=calc_std_errors, custom_h=custom_h)
+
+  ret$all_estimates <- gsmar$all_estimates
+  ret$all_logliks <- gsmar$all_logliks
+  ret$which_converged <- gsmar$which_converged
+  if(!is.null(gsmar$which_round)) {
+    ret$which_round <- gsmar$which_round
+    ret$all_estimates[[gsmar$which_round]] <- ret$params
+    ret$all_logliks[gsmar$which_round] <- ret$loglik
+    ret$which_converged[gsmar$which_round] <- res$convergence == 0
+  }
+  warn_ar_roots(ret)
+  ret
 }
 
 
@@ -394,7 +364,7 @@ iterate_more <- function(gsmar, maxit=100, custom_h=NULL, calc_std_errors=TRUE) 
 #' @description \code{get_minval} returns the default smallest allowed log-likelihood for given data.
 #'
 #' @inheritParams GAfit
-#' @details This function exists simply to avoid dublication inside the package.
+#' @details This function exists simply to avoid duplication inside the package.
 #' @return Returns \code{-(10^(ceiling(log10(length(data))) + 1) - 1)}
 #' @seealso \code{\link{fitGSMAR}}, \code{\link{GAfit}}
 

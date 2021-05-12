@@ -4,42 +4,13 @@
 #'  of the specified GMAR, StMAR, or G-StMAR model.
 #'
 #' @inheritParams loglikelihood_int
-#' @param params a real valued parameter vector specifying the model.
-#'  \describe{
-#'    \item{For \strong{non-restricted} models:}{
-#'      \describe{
-#'        \item{For \strong{GMAR} model:}{Size \eqn{(M(p+3)-1x1)} vector \strong{\eqn{\theta}}\eqn{=}(\strong{\eqn{\upsilon_{1}}},...,\strong{\eqn{\upsilon_{M}}},
-#'          \eqn{\alpha_{1},...,\alpha_{M-1}}), where \strong{\eqn{\upsilon_{m}}}\eqn{=(\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,
-#'          \sigma_{m}^2)} and \strong{\eqn{\phi_{m}}}=\eqn{(\phi_{m,1},...,\phi_{m,p}), m=1,...,M}.}
-#'        \item{For \strong{StMAR} model:}{Size \eqn{(M(p+4)-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=}(\strong{\eqn{\upsilon_{1}}},...,\strong{\eqn{\upsilon_{M}}},
-#'          \eqn{\alpha_{1},...,\alpha_{M-1}, \nu_{1},...,\nu_{M}}).}
-#'        \item{For \strong{G-StMAR} model:}{Size \eqn{(M(p+3)+M2-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=}(\strong{\eqn{\upsilon_{1}}},...,\strong{\eqn{\upsilon_{M}}},
-#'          \eqn{\alpha_{1},...,\alpha_{M-1}, \nu_{M1+1},...,\nu_{M}}).}
-#'      }
-#'    }
-#'    \item{For \strong{restricted} models:}{
-#'      \describe{
-#'        \item{For \strong{GMAR} model:}{Size \eqn{(3M+p-1x1)} vector \strong{\eqn{\theta}}\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
-#'          \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1})}, where \strong{\eqn{\phi}}=\eqn{(\phi_{1},...,\phi_{p})}.}
-#'        \item{For \strong{StMAR} model:}{Size \eqn{(4M+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
-#'          \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1}, \nu_{1},...,\nu_{M})}.}
-#'        \item{For \strong{G-StMAR} model:}{Size \eqn{(3M+M2+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
-#'          \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1}, \nu_{M1+1},...,\nu_{M})}.}
-#'      }
-#'    }
-#'  }
-#'  Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight, and \eqn{\nu} a degrees of
-#'  freedom parameter. In the \strong{G-StMAR} model, the first \code{M1} components are \emph{GMAR type} and the rest \code{M2} components
-#'  are \emph{StMAR type}.
-#'  Note that in the case \strong{M=1}, the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model,
-#'  the degrees of freedom parameters \eqn{\nu_{m}} have to be larger than \eqn{2}.
 #' @details \code{is_stationary_int} does not support models imposing linear constraints. In order to use it for a model imposing linear
-#'  constraints, one needs to expand the constraints first to obtain a nonconstrained parameters vector.
+#'  constraints, one needs to expand the constraints first to obtain an unconstrained parameter vector.
 #'
 #'  Note that \code{is_stationary_int} returns \code{FALSE} for stationary parameter vectors if they are extremely close to the boundary
 #'  of the stationarity region.
 #'
-#'  \code{is_identifiable} checks that the regimes are sorted according to the mixing weight parameters and that there are no dublicate
+#'  \code{is_identifiable} checks that the regimes are sorted according to the mixing weight parameters and that there are no duplicate
 #'  regimes.
 #' @return Returns \code{TRUE} or \code{FALSE} accordingly.
 #' @section Warning:
@@ -48,9 +19,9 @@
 #'  \itemize{
 #'    \item Kalliovirta L., Meitz M. and Saikkonen P. 2015. Gaussian Mixture Autoregressive model for univariate time series.
 #'            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
-#'    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
-#'            arXiv:1805.04010 \strong{[econ.EM]}.
-#'    \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
+#'    \item Meitz M., Preve D., Saikkonen P. forthcoming. A mixture autoregressive model based on Student's t-distribution.
+#'            \emph{Communications in Statistics - Theory and Methods}, doi: 10.1080/03610926.2021.1916531
+#'    \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distributions. arXiv:2003.05221 [econ.EM].
 #'  }
 
 is_stationary_int <- function(p, M, params, restricted=FALSE) {
@@ -211,16 +182,6 @@ check_and_correct_data <- function(data, p) {
 #'   condition!
 #'
 #' @inheritParams loglikelihood_int
-#' @param params a real valued parameter vector specifying the model.
-#'      \describe{
-#'        \item{For \strong{GMAR} model:}{Size \eqn{(M(p+3)-1x1)} vector \strong{\eqn{\theta}}\eqn{=}(\strong{\eqn{\upsilon_{1}}},...,\strong{\eqn{\upsilon_{M}}},
-#'          \eqn{\alpha_{1},...,\alpha_{M-1}}), where \strong{\eqn{\upsilon_{m}}}\eqn{=(\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,
-#'          \sigma_{m}^2)} and \strong{\eqn{\phi_{m}}}=\eqn{(\phi_{m,1},...,\phi_{m,p}), m=1,...,M}.}
-#'        \item{For \strong{StMAR} model:}{Size \eqn{(M(p+4)-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=}(\strong{\eqn{\upsilon_{1}}},...,\strong{\eqn{\upsilon_{M}}},
-#'          \eqn{\alpha_{1},...,\alpha_{M-1}, \nu_{1},...,\nu_{M}}).}
-#'        \item{For \strong{G-StMAR} model:}{Size \eqn{(M(p+3)+M2-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=}(\strong{\eqn{\upsilon_{1}}},...,\strong{\eqn{\upsilon_{M}}},
-#'          \eqn{\alpha_{1},...,\alpha_{M-1}, \nu_{M1+1},...,\nu_{M}}).}
-#'      }
 #' @return Throws an informative error if any check fails. Does not return anything.
 
 parameter_checks <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FALSE, constraints=NULL) {
@@ -377,7 +338,7 @@ n_params <- function(p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FALSE
 
 
 
-#' @title Check whether all arguments are stricly positive natural numbers
+#' @title Check whether all arguments are strictly positive natural numbers
 #'
 #' @description \code{all_pos_ints} tells whether all the elements in a vector
 #'   are strictly positive natural numbers.
@@ -467,5 +428,26 @@ warn_dfs <- function(object, p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), 
     if(any(dfs > 100)) {
       warning("The model contains overly large degrees of freedom parameter values. Consider switching to a G-StMAR model by setting the corresponding regimes to be GMAR type with the function 'stmar_to_gstmar'.")
     }
+  }
+}
+
+
+#' @title Warn about near-unit-roots in some regimes
+#'
+#' @description \code{warn_ar_roots} warns if the model contains near-unit-roots in some regimes
+#'
+#' @inheritParams simulateGSMAR
+#' @param tol if some root is smaller that \code{1 + tol}, a warning is thrown
+#' @details Warns if some moduli of the autoregressive polynomial's roots are close to one.
+#' @return Doesn't return anything.
+
+warn_ar_roots <- function(gsmar, tol=0.005) {
+  ar_roots <- get_ar_roots(gsmar)
+  near_nonstat <- vapply(1:sum(gsmar$model$M), function(i1) any(abs(ar_roots[[i1]]) < 1 + tol), logical(1))
+  if(any(near_nonstat)) {
+    my_string <- ifelse(sum(near_nonstat) == 1,
+                        paste("Regime", which(near_nonstat),"has near-unit-roots!"),
+                        paste("Regimes", paste(which(near_nonstat), collapse=" and ") ,"have near-unit-roots!"))
+    warning(paste(my_string, "Consider building a model from the next-largest local maximum with the function 'alt_gsmar' by adjusting its argument 'which_largest'."))
   }
 }

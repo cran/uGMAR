@@ -32,9 +32,8 @@ get_alpha_mt(
 
 \item{to_return}{should the returned object be the log-likelihood value, mixing weights, mixing weights including
 value for \eqn{alpha_{m,T+1}}, a list containing log-likelihood value and mixing weights, the terms \eqn{l_{t}: t=1,..,T}
-in the log-likelihood function (see \emph{KMS 2015, eq.(13)}), regimewise conditional means, regimewise conditional variances,
-total conditional means, total conditional variances, or quantile residuals?
-Default is the log-likelihood value (\code{"loglik"}).}
+in the log-likelihood function (see \emph{KMS 2015, eq.(13)}), the densities in the terms, regimewise conditional means,
+regimewise conditional variances, total conditional means, total conditional variances, or quantile residuals?}
 
 \item{also_l_0}{return also l_0 (the first term in the exact log-likelihood function)?}
 }
@@ -58,9 +57,9 @@ Note that we index the time series as \eqn{-p+1,...,0,1,...,T} as in Kalliovirta
            \emph{The Econometrics Journal}, \strong{15}, 358-393.
    \item Kalliovirta L., Meitz M. and Saikkonen P. 2015. Gaussian Mixture Autoregressive model for univariate time series.
            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
-   \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
-           arXiv:1805.04010 \strong{[econ.EM]}.
-   \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
+   \item Meitz M., Preve D., Saikkonen P. forthcoming. A mixture autoregressive model based on Student's t-distribution.
+           \emph{Communications in Statistics - Theory and Methods}, doi: 10.1080/03610926.2021.1916531
+   \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distributions. arXiv:2003.05221 [econ.EM].
  }
 }
 \seealso{

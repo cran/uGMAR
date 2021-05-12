@@ -37,18 +37,18 @@
 * Tidier code for some parts.
 * Improved comments and documentation.
 * Bug fix: the function 'add_data' did not identify the model type correctly. 
-* Bug fix: simulateGSMAR simulated some initial values from slighly wrong distribution; did not have affect on forecasts.
+* Bug fix: simulateGSMAR simulated some initial values from sligthly wrong distribution; did not have affect on forecasts.
 * Minor update on the summary print for the models
 
 # uGMAR 3.2.3
 
 * Updated the plot method for class 'gsmar' objects: now includes a density plot by default (can be removed).
 * Updated the predict method for class 'gsmar' objects: now includes predictions for the mixing weights (can be removed from the plot).
-* Fixed 'profile_logliks' to show correct headlines with mean parametrization + improved the default method for choosing the number of rows and colums in the plot-matrix.
+* Fixed 'profile_logliks' to show correct headlines with mean parametrization + improved the default method for choosing the number of rows and columns in the plot-matrix.
 * Now standard errors are printed correctly for models imposing all kinds of constraints. In the earlier versions, constrained AR parameter standard errors were printed incorrectly if the constraints involved multiplications or summations. 
 * Removed redundant reinitialization of a PSOCK cluster in the function 'fitGSMAR'. 
 * In the function quantile_residual_tests the default argument for 'nsimu' is now 1 so that the tests are based on the given data only (and not on simulation).
-* Added interest rate spead (10-Year minus 1-Year treasury) data.
+* Added interest rate spread (10-Year minus 1-Year treasury) data.
 
 # uGMAR 3.2.4
 
@@ -73,12 +73,22 @@
 
 * This update (finally) renames functions and arguments so that they are consistent throughout uGMAR and in line with the package "gmvarkit". Namely, some functions were renamed from camelCase to lower_bar convention for consistency. Old functions are for now retained as deprecated. Also, some arguments were renamed from camelCase to lower_bar: print_res in fitGSMAR; print_res, lags_ac, and lags_ch in quantile_residual_tests; smart_mu, mean_scale, and sigma_scale in GAfit; plot_res in predict.gsmar; init_values in simulateGSMAR; and others.
 * The package 'gsl' is now imported, and not a suggested package anymore, to ensure fast calculation of quantile residual tests for StMAR and G-StMAR models.
-* The function random_ind does not sort components anymore when constraints are employed (unless only "restricted" argument is used). Consequently, estimation results (with a specific seed) might differ from previous versions for the models employing constraints.
+* The function random_ind does not sort components anymore when constraints are employed (unless only the argument "restricted" is used). Consequently, estimation results (with a specific seed) might differ from previous versions for the models employing constraints.
 * Removed to possibility to run quantile residual tests directly with the estimation function after the estimation, because it is a good practice to check first whether the estimates are appropriate. The tests can be ran afterwards with the function "quantile_residual_tests".
 * fitGSMAR now warns if some regime is almost nonstationary.
-* The function stmar_to_gstmar now supports also G-StMAR models with large degrees of freedom estimates.
+* The function "stmar_to_gstmar"" now supports also G-StMAR models with large degrees of freedom estimates.
 * The summary method for class 'gsmar' objects now supports models without data.
 * Fixed a bug in the one-step conditional variance of the process: it was incorrect in the previous versions.
 * Updated the examples.
 * Adjusted the plot methods.
 * Added new data: M10Y1Y
+
+# uGMAR 3.3.1
+
+* New, improved vignette.
+* Now the functions "iterate_more" and "alt_gsmar" also warn about near-unit-roots and return results from all the estimation rounds.
+* Summary and print methods now display the number of parameters and observations.
+* Updated the reference to the StMAR model
+* Updated some of the documentation
+* fitGSMAR does not call closeAllConnections() on exit anymore; instead, it only closes the connections it opened.
+* Fixed the argument "precission" in profile_logliks to "precision".

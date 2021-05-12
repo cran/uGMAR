@@ -23,43 +23,42 @@
 #'   The parameter vectors should be of form...
 #'  \describe{
 #'    \item{For \strong{non-restricted} models:}{
-#'      \describe{
-#'        \item{For \strong{GMAR} model:}{Size \eqn{(M(p+3)-1x1)} vector \strong{\eqn{\theta}}\eqn{=}(\strong{\eqn{\upsilon_{1}}},...,\strong{\eqn{\upsilon_{M}}},
-#'          \eqn{\alpha_{1},...,\alpha_{M-1}}), where \strong{\eqn{\upsilon_{m}}}\eqn{=(\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,
-#'          \sigma_{m}^2)} and \strong{\eqn{\phi_{m}}}=\eqn{(\phi_{m,1},...,\phi_{m,p}), m=1,...,M}.}
-#'        \item{For \strong{StMAR} model:}{Size \eqn{(M(p+4)-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=}(\strong{\eqn{\upsilon_{1}}},...,\strong{\eqn{\upsilon_{M}}},
-#'          \eqn{\alpha_{1},...,\alpha_{M-1}, \nu_{1},...,\nu_{M}}).}
-#'        \item{For \strong{G-StMAR} model:}{Size \eqn{(M(p+3)+M2-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=}(\strong{\eqn{\upsilon_{1}}},...,\strong{\eqn{\upsilon_{M}}},
-#'          \eqn{\alpha_{1},...,\alpha_{M-1}, \nu_{M1+1},...,\nu_{M}}).}
-#'        \item{With \strong{linear constraints}:}{Replace the vectors \strong{\eqn{\phi_{m}}} with vectors \strong{\eqn{\psi_{m}}} and provide a  list of constraint
-#'          matrices \strong{C} that satisfy \strong{\eqn{\phi_{m}}}\eqn{=}\strong{\eqn{C_{m}\psi_{m}}} for all \eqn{m=1,...,M}, where
-#'          \strong{\eqn{\psi_{m}}}\eqn{=(\psi_{m,1},...,\psi_{m,q_{m}})}.}
+#'      Size \eqn{(M(p+3)+M-M1-1x1)} vector \strong{\eqn{\theta}}\eqn{=}(\strong{\eqn{\upsilon_{1}}}\eqn{,...,}\strong{\eqn{\upsilon_{M}}},
+#'      \eqn{\alpha_{1},...,\alpha_{M-1},}\strong{\eqn{\nu}}) where
+#'      \itemize{
+#'        \item \strong{\eqn{\upsilon_{m}}}\eqn{=(\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,}\eqn{\sigma_{m}^2)}
+#'        \item \strong{\eqn{\phi_{m}}}\eqn{=(\phi_{m,1},...,\phi_{m,p}), m=1,...,M}
+#'        \item \strong{\eqn{\nu}}\eqn{=(\nu_{M1+1},...,\nu_{M})}
+#'        \item \eqn{M1} is the number of GMAR type regimes.
 #'      }
-#'    }
+#'      In the \strong{GMAR} model, \eqn{M1=M} and the parameter \strong{\eqn{\nu}} dropped. In the \strong{StMAR} model, \eqn{M1=0}.
+#'
+#'      If the model imposes \strong{linear constraints} on the autoregressive parameters:
+#'      Replace the vectors \strong{\eqn{\phi_{m}}} with the vectors \strong{\eqn{\psi_{m}}} that satisfy
+#'       \strong{\eqn{\phi_{m}}}\eqn{=}\strong{\eqn{C_{m}\psi_{m}}} (see the argument \code{constraints}).
+#'      }
 #'    \item{For \strong{restricted} models:}{
-#'      \describe{
-#'        \item{For \strong{GMAR} model:}{Size \eqn{(3M+p-1x1)} vector \strong{\eqn{\theta}}\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
-#'          \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1})}, where \strong{\eqn{\phi}}=\eqn{(\phi_{1},...,\phi_{p})}.}
-#'        \item{For \strong{StMAR} model:}{Size \eqn{(4M+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
-#'          \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1}, \nu_{1},...,\nu_{M})}.}
-#'        \item{For \strong{G-StMAR} model:}{Size \eqn{(3M+M2+p-1x1)} vector (\strong{\eqn{\theta, \nu}})\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,
-#'          \sigma_{1}^2,...,\sigma_{M}^2,\alpha_{1},...,\alpha_{M-1}, \nu_{M1+1},...,\nu_{M})}.}
-#'        \item{With \strong{linear constraints}:}{Replace the vector \strong{\eqn{\phi}} with vector \strong{\eqn{\psi}} and provide a constraint matrix
-#'          \strong{\eqn{C}} that satisfies \strong{\eqn{\phi}}\eqn{=}\strong{\eqn{C\psi}}, where
-#'          \strong{\eqn{\psi}}\eqn{=(\psi_{1},...,\psi_{q})}.}
-#'      }
+#'      Size \eqn{(3M+M-M1+p-1x1)} vector \strong{\eqn{\theta}}\eqn{=(\phi_{1,0},...,\phi_{M,0},}\strong{\eqn{\phi}}\eqn{,}
+#'      \eqn{\sigma_{1}^2,...,\sigma_{M}^2,}\eqn{\alpha_{1},...,\alpha_{M-1},}\strong{\eqn{\nu}}), where \strong{\eqn{\phi}}=\eqn{(\phi_{1},...,\phi_{p})}
+#'      contains the AR coefficients, which are common for all regimes.
+#'
+#'      If the model imposes \strong{linear constraints} on the autoregressive parameters:
+#'      Replace the vector \strong{\eqn{\phi}} with the vector \strong{\eqn{\psi}} that satisfies
+#'       \strong{\eqn{\phi}}\eqn{=}\strong{\eqn{C\psi}} (see the argument \code{constraints}).
 #'    }
 #'  }
-#'  Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight, and \eqn{v} a degrees of
-#'  freedom parameter.
-#'  Note that in the case \strong{M=1}, the parameter \eqn{\alpha} is dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model,
-#'  the degrees of freedom parameters \eqn{\nu_{m}} have to be larger than \eqn{2}.
-#'  If not specified (or \code{FALSE} as is default), the initial population will be drawn randomly.
-#' @param regime_force_scale a non-negative real number specifying how much should natural selection favour individuals
+#'  Symbol \eqn{\phi} denotes an AR coefficient, \eqn{\sigma^2} a variance, \eqn{\alpha} a mixing weight, and \eqn{\nu} a degrees of
+#'  freedom parameter. If \code{parametrization=="mean"}, just replace each intercept term \eqn{\phi_{m,0}} with the regimewise mean
+#'  \eqn{\mu_m = \phi_{m,0}/(1-\sum\phi_{i,m})}. In the \strong{G-StMAR} model, the first \code{M1} components are \emph{GMAR type}
+#'  and the rest \code{M2} components are \emph{StMAR type}.
+#'  Note that in the case \strong{M=1}, the mixing weight parameters \eqn{\alpha} are dropped, and in the case of \strong{StMAR} or \strong{G-StMAR} model,
+#'  the degrees of freedom parameters \eqn{\nu} have to be larger than \eqn{2}.
+#'  If not specified (or \code{NULL} as is default), the initial population will be drawn randomly.
+#' @param regime_force_scale a non-negative real number specifying how much should natural selection favor individuals
 #'   with less regimes that have almost all mixing weights (practically) at zero (see \code{red_criteria}), i.e., with
 #'   less "redundant regimes".
-#'   Set to zero for no favouring or large number for heavy favouring. Without any favouring the genetic algorithm gets more often stuck
-#'   in an area of the parameter space where some regimes are wasted, but with too much favouring the best genes might never mix into the
+#'   Set to zero for no favoring or large number for heavy favoring. Without any favoring the genetic algorithm gets more often stuck
+#'   in an area of the parameter space where some regimes are wasted, but with too much favoring the best genes might never mix into the
 #'   population and the algorithm might converge poorly. Default is \code{1} and it gives \eqn{2x} larger surviving probability weights for
 #'   individuals with no wasted regimes compared to individuals with one wasted regime. Number \code{2} would give \eqn{3x} larger probabilities etc.
 #' @param red_criteria a length 2 numeric vector specifying the criteria that is used to determine whether a regime is redundant or not.
@@ -90,15 +89,15 @@
 #'          \strong{13}, 53-66.
 #'    \item Kalliovirta L., Meitz M. and Saikkonen P. 2015. Gaussian Mixture Autoregressive model for univariate time series.
 #'          \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
-#'    \item Meitz M., Preve D., Saikkonen P. 2018. A mixture autoregressive model based on Student's t-distribution.
-#'          arXiv:1805.04010 \strong{[econ.EM]}.
+#'    \item Meitz M., Preve D., Saikkonen P. forthcoming. A mixture autoregressive model based on Student's t-distribution.
+#'            \emph{Communications in Statistics - Theory and Methods}, doi: 10.1080/03610926.2021.1916531
 #'    \item Monahan J.F. 1984. A Note on Enforcing Stationarity in Autoregressive-Moving Average Models.
 #'          \emph{Biometrica} \strong{71}, 403-404.
 #'    \item Patnaik L.M. and Srinivas M. 1994. Adaptive Probabilities of Crossover and Mutation in Genetic Algorithms.
 #'          \emph{Transactions on Systems, Man and Cybernetics} \strong{24}, 656-667.
 #'    \item Smith R.E., Dike B.A., Stegmann S.A. 1995. Fitness inheritance in genetic algorithms.
 #'          \emph{Proceedings of the 1995 ACM Symposium on Applied Computing}, 345-350.
-#'    \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distribution.	arXiv:2003.05221 [econ.EM].
+#'    \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distributions. arXiv:2003.05221 [econ.EM].
 #'  }
 #' @export
 
@@ -302,7 +301,7 @@ GAfit <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FA
       surviveProbs <- rep(1, popsize)
     } else {
       T_values <- logliks[i1,] + abs(min(logliks[i1,])) # Function T giving surviving weights, as described by Dorsey R. E. and Mayer W. J., 1995
-      T_values <- T_values/(1 + regime_force_scale*redundants[i1,]) # Favour individuals with less redundant regimes
+      T_values <- T_values/(1 + regime_force_scale*redundants[i1,]) # favor individuals with less redundant regimes
       surviveProbs <- T_values/sum(T_values) # The surviving probability weights
     }
     survivors <- sample(1:popsize, size=popsize, replace=TRUE, prob=surviveProbs)
@@ -917,7 +916,7 @@ smart_ind <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restric
 #'      \describe{
 #'        \item{For \strong{GMAR} model:}{Size \eqn{(p+2x1)} vector \eqn{(\phi_{m,0},\phi_{m,1},...,\phi_{m,p}, \sigma_{m}^2)}.}
 #'        \item{For \strong{StMAR} model:}{Size \eqn{(p+3x1)} vector \eqn{(\phi_{m,0},\phi_{m,1},...,\phi_{m,p}, \sigma_{m}^2, \nu_{m})}.}
-#'        \item{For \strong{G-StMAR} model:}{Same as GMAR for GMAR-components and same as StMAR for StMAR-components.}
+#'        \item{For \strong{G-StMAR} model:}{Same as GMAR for GMAR type regimes and same as StMAR for StMAR type regimes.}
 #'        \item{With \strong{linear constraints}:}{Parameter vector as described above, but vector \strong{\eqn{\phi_{m}}} replaced with
 #'         vector \strong{\eqn{\psi_{m}}} that satisfies \strong{\eqn{\phi_{m}}}\eqn{=}\strong{\eqn{R_{m}\psi_{m}}}.}
 #'      }
@@ -926,7 +925,7 @@ smart_ind <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restric
 #'      \describe{
 #'        \item{For \strong{GMAR} model:}{Size \eqn{(2x1)} vector \eqn{(\phi_{m,0}, \sigma_{m}^2)}.}
 #'        \item{For \strong{StMAR} model:}{Size \eqn{(3x1)} vector \eqn{(\phi_{m,0}, \sigma_{m}^2, \nu_{m})}.}
-#'        \item{For \strong{G-StMAR} model:}{Same as GMAR for GMAR-components and same as StMAR for StMAR-components.}
+#'        \item{For \strong{G-StMAR} model:}{Same as GMAR for GMAR type regimes and same as StMAR for StMAR type regimes.}
 #'        \item{With \strong{linear constraints}:}{Parameter vector as described above.}
 #'      }
 #'    }
@@ -993,7 +992,7 @@ extract_regime <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), re
 #'      \describe{
 #'        \item{For \strong{GMAR} model:}{Size \eqn{(p+2x1)} vector \eqn{(\phi_{m,0},\phi_{m,1},...,\phi_{m,p}, \sigma_{m}^2)}.}
 #'        \item{For \strong{StMAR} model:}{Size \eqn{(p+3x1)} vector \eqn{(\phi_{m,0},\phi_{m,1},...,\phi_{m,p}, \sigma_{m}^2, \nu_{m})}.}
-#'        \item{For \strong{G-StMAR} model:}{Same as GMAR for GMAR-components and same as StMAR for StMAR-components.}
+#'        \item{For \strong{G-StMAR} model:}{Same as GMAR for GMAR type regimes and same as StMAR for StMAR type regimes.}
 #'        \item{With \strong{linear constraints}:}{Parameter vector as described above, but vector \strong{\eqn{\phi_{m}}} replaced with
 #'         vector \strong{\eqn{\psi_{m}}} that satisfies \strong{\eqn{\phi_{m}}}\eqn{=}\strong{\eqn{R_{m}\psi_{m}}}.}
 #'      }
@@ -1002,7 +1001,7 @@ extract_regime <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), re
 #'      \describe{
 #'        \item{For \strong{GMAR} model:}{Size \eqn{(2x1)} vector \eqn{(\phi_{m,0}, \sigma_{m}^2)}.}
 #'        \item{For \strong{StMAR} model:}{Size \eqn{(3x1)} vector \eqn{(\phi_{m,0}, \sigma_{m}^2, \nu_{m})}.}
-#'        \item{For \strong{G-StMAR} model:}{Same as GMAR for GMAR-components and same as StMAR for StMAR-components.}
+#'        \item{For \strong{G-StMAR} model:}{Same as GMAR for GMAR type regimes and same as StMAR for StMAR type regimes.}
 #'        \item{With \strong{linear constraints}:}{Parameter vector as described above.}
 #'      }
 #'    }
