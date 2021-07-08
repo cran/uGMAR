@@ -56,9 +56,10 @@ get_regime_means <- function(gsmar) {
 #'  \itemize{
 #'    \item Kalliovirta L., Meitz M. and Saikkonen P. 2015. Gaussian Mixture Autoregressive model for univariate time series.
 #'            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
-#'    \item Meitz M., Preve D., Saikkonen P. forthcoming. A mixture autoregressive model based on Student's t-distribution.
+#'    \item Meitz M., Preve D., Saikkonen P. 2021. A mixture autoregressive model based on Student's t-distribution.
 #'          \emph{Communications in Statistics - Theory and Methods}, doi: 10.1080/03610926.2021.1916531
-#'    \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distributions. arXiv:2003.05221 [econ.EM].
+#'    \item Virolainen S. forthcoming. A mixture autoregressive model based on Gaussian and Student's t-distributions.
+#'          Studies in Nonlinear Dynamics & Econometrics, (preprint available as arXiv:2003.05221).
 #'    \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis. \emph{Springer}.
 #'  }
 #' @examples
@@ -77,13 +78,17 @@ get_regime_means <- function(gsmar) {
 #' gstmar12 <- GSMAR(p=1, M=c(1, 1), params=params12gs, model="G-StMAR")
 #' get_regime_autocovs(gstmar12)
 #' @export
+
 get_regime_autocovs <- function(gsmar) {
+  # Pick the relevant statistics
   check_gsmar(gsmar)
   p <- gsmar$model$p
   M <- gsmar$model$M
   pars <- pick_pars(p=p, M=M, params=gsmar$params, model=gsmar$model$model,
                     restricted=gsmar$model$restricted, constraints=gsmar$model$constraints)
   ret <- matrix(nrow=p, ncol=sum(M))
+
+  # Go through the regimes
   for(i1 in 1:sum(M)) { # Formula from Lütkepohl (2005) eq. (2.1.39)
     phi <- pars[2:(p + 1), i1]
     if(p == 1) {
@@ -130,11 +135,14 @@ get_regime_autocovs <- function(gsmar) {
 #' @export
 
 get_regime_vars <- function(gsmar) {
+  # Collect the relecant statistics
   reg_autocovs <- get_regime_autocovs(gsmar)
   p <- gsmar$model$p
   pars <- pick_pars(p=p, M=gsmar$model$M, params=gsmar$params, model=gsmar$model$model,
                     restricted=gsmar$model$restricted, constraints=gsmar$model$constraints)
-  colSums(pars[-c(1, p + 2),]*reg_autocovs) + pars[p + 2,] # MPS 2018, eq.(4) and Theorem 1
+
+  # Calculate the regime variances
+  colSums(pars[-c(1, p + 2),]*reg_autocovs) + pars[p + 2,] # MPS forthcoming, eq.(4) and Theorem 1 (it is the same for GMAR and G-StMAR models also; see Virolainen 2020, Section 2.1)
 }
 
 
@@ -154,6 +162,7 @@ get_regime_vars <- function(gsmar) {
 
 uncond_moments_int <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FALSE,
                               constraints=NULL, parametrization=c("intercept", "mean")) {
+  # Checks and pick the relevant statistics etc
   model <- match.arg(model)
   parametrization <- match.arg(parametrization)
   stopifnot(length(params) == n_params(p=p, M=M, model=model, restricted=restricted, constraints=constraints))
@@ -167,9 +176,9 @@ uncond_moments_int <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR")
                      class="gsmar")
   alphas <- pick_alphas(p=gsmar$model$p, M=gsmar$model$M, params=gsmar$params, model=gsmar$model$model,
                         restricted=gsmar$model$restricted, constraints=gsmar$model$constraints)
-  reg_means <- get_regime_means(gsmar)
+  reg_means <- get_regime_means(gsmar) # Regimewise unconditional means
 
-  # Calculate the unconditional moments: KMS 2015, p.251, MPS 2018, p.6.
+  # Calculate the unconditional moments: KMS 2015, p.251, MPS forthcoming, p.6., Virolainen 2020 p.8.
   uncond_mean <- sum(alphas*reg_means)
   tmp <- sum(alphas*(reg_means - uncond_mean)^2)
   uncond_var <- sum(alphas*get_regime_vars(gsmar)) + tmp
@@ -210,6 +219,6 @@ uncond_moments_int <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR")
 uncond_moments <- function(gsmar) {
   check_gsmar(gsmar)
   uncond_moments_int(p=gsmar$model$p, M=gsmar$model$M, params=gsmar$params, model=gsmar$model$model,
-                    restricted=gsmar$model$restricted, constraints=gsmar$model$constraints,
-                    parametrization=gsmar$model$parametrization)
+                     restricted=gsmar$model$restricted, constraints=gsmar$model$constraints,
+                     parametrization=gsmar$model$parametrization)
 }

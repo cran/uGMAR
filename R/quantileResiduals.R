@@ -17,13 +17,15 @@
 #'            \emph{The Econometrics Journal}, \strong{15}, 358-393.
 #'    \item Kalliovirta L., Meitz M. and Saikkonen P. 2015. Gaussian Mixture Autoregressive model for univariate time series.
 #'            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
-#'    \item Meitz M., Preve D., Saikkonen P. forthcoming. A mixture autoregressive model based on Student's t-distribution.
+#'    \item Meitz M., Preve D., Saikkonen P. 2021. A mixture autoregressive model based on Student's t-distribution.
 #'          \emph{Communications in Statistics - Theory and Methods}, doi: 10.1080/03610926.2021.1916531
-#'    \item Virolainen S. 2020. A mixture autoregressive model based on Gaussian and Student's t-distributions. arXiv:2003.05221 [econ.EM].
+#'    \item Virolainen S. forthcoming. A mixture autoregressive model based on Gaussian and Student's t-distributions.
+#'          Studies in Nonlinear Dynamics & Econometrics, (preprint available as arXiv:2003.05221).
 #'  }
 
 quantile_residuals_int <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FALSE,
                                   constraints=NULL, parametrization=c("intercept", "mean")) {
+  # Quantile residuals are calculate with the same function as the log-likelihood
   loglikelihood_int(data=data, p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints,
                     parametrization=parametrization, checks=TRUE, boundaries=FALSE, to_return="qresiduals", minval=NA)
 }
@@ -50,11 +52,14 @@ quantile_residuals_int <- function(data, p, M, params, model=c("GMAR", "StMAR", 
 
 quantile_residuals <- function(data, p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FALSE,
                               constraints=NULL, parametrization=c("intercept", "mean")) {
+  # Checks
   model <- match.arg(model)
   check_model(model)
   parametrization <- match.arg(parametrization)
   check_pM(p, M, model=model)
   check_params_length(p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints)
+
+  # Quantile residuals are calculate with the same function as the log-likelihood
   loglikelihood_int(data=data, p=p, M=M, params=params, model=model, restricted=restricted, constraints=constraints,
                     parametrization=parametrization, checks=TRUE, boundaries=TRUE, to_return="qresiduals", minval=NA)
 }
