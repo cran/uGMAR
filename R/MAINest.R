@@ -55,9 +55,9 @@
 #'   from all of the estimation rounds. See \code{?GSMAR} for the form of the parameter vector, if needed.
 #' @section S3 methods:
 #'  The following S3 methods are supported for class \code{'gsmar'} objects: \code{print}, \code{summary}, \code{plot},
-#'  \code{logLik}, \code{residuals}.
+#'  \code{predict}, \code{simulate}, \code{logLik}, \code{residuals}.
 #' @seealso \code{\link{GSMAR}}, \code{\link{iterate_more}}, , \code{\link{stmar_to_gstmar}}, \code{\link{add_data}},
-#'  \code{\link{profile_logliks}}, \code{\link{swap_parametrization}}, \code{\link{get_gradient}}, \code{\link{simulateGSMAR}}, \code{\link{predict.gsmar}},
+#'  \code{\link{profile_logliks}}, \code{\link{swap_parametrization}}, \code{\link{get_gradient}}, \code{\link{simulate.gsmar}}, \code{\link{predict.gsmar}},
 #'   \code{\link{diagnostic_plot}}, \code{\link{quantile_residual_tests}}, \code{\link{cond_moments}}, \code{\link{uncond_moments}}, \code{\link{LR_test}}, \code{\link{Wald_test}}
 #' @references
 #'  \itemize{
@@ -76,8 +76,8 @@
 #'          \emph{Transactions on Systems, Man and Cybernetics} \strong{24}, 656-667.
 #'    \item Smith R.E., Dike B.A., Stegmann S.A. 1995. Fitness inheritance in genetic algorithms.
 #'          \emph{Proceedings of the 1995 ACM Symposium on Applied Computing}, 345-350.
-#'    \item Virolainen S. forthcoming. A mixture autoregressive model based on Gaussian and Student's t-distributions.
-#'          Studies in Nonlinear Dynamics & Econometrics, (preprint available as arXiv:2003.05221).
+#'    \item Virolainen S. 2021. A mixture autoregressive model based on Gaussian and Student's t-distributions.
+#'          Studies in Nonlinear Dynamics & Econometrics, doi: 10.1515/snde-2020-0060
 #'  }
 #' @examples
 #' \donttest{
@@ -303,7 +303,7 @@ fitGSMAR <- function(data, p, M, model=c("GMAR", "StMAR", "G-StMAR"), restricted
 #'  estimation of a GMAR, StMAR or G-StMAR model (object of class \code{'gsmar'}) which already has
 #'  preliminary estimates.
 #'
-#' @inheritParams simulateGSMAR
+#' @inheritParams add_data
 #' @inheritParams fitGSMAR
 #' @inheritParams GSMAR
 #' @details The main purpose of \code{iterate_more} is to provide a simple and convenient tool to finalize
@@ -384,6 +384,7 @@ iterate_more <- function(gsmar, maxit=100, custom_h=NULL, calc_std_errors=TRUE) 
 #' @details This function exists simply to avoid duplication inside the package.
 #' @return Returns \code{-(10^(ceiling(log10(length(data))) + 1) - 1)}
 #' @seealso \code{\link{fitGSMAR}}, \code{\link{GAfit}}
+#' @keywords internal
 
 get_minval <- function(data) {
   -(10^(ceiling(log10(length(data))) + 1) - 1)

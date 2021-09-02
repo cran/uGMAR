@@ -3,7 +3,7 @@
 #' @description \code{get_regime_means} calculates the regime means \eqn{\mu_{m} = \phi_{m,0}/(1-\sum\phi_{i,m})}
 #'   for the given GMAR, StMAR, or G-StMAR model
 #'
-#' @inheritParams simulateGSMAR
+#' @inheritParams add_data
 #' @return Returns a length \code{M} vector containing the regime mean \eqn{\mu_{m}} in the m:th element.
 #' @inherit is_stationary references
 #' @family moment functions
@@ -48,7 +48,7 @@ get_regime_means <- function(gsmar) {
 #' @description \code{get_regime_autocovs} calculates the first p regime specific autocovariances \strong{\eqn{\gamma}}\eqn{_{m,p}}
 #'   for the given GMAR, StMAR, or G-StMAR model.
 #'
-#' @inheritParams simulateGSMAR
+#' @inheritParams add_data
 #' @return Returns a size \eqn{(pxM)} matrix containing the first p autocovariances of the components processes:
 #'  i:th autocovariance in the i:th row and m:th component process in the m:th column.
 #' @family moment functions
@@ -58,8 +58,8 @@ get_regime_means <- function(gsmar) {
 #'            \emph{Journal of Time Series Analysis}, \strong{36}, 247-266.
 #'    \item Meitz M., Preve D., Saikkonen P. 2021. A mixture autoregressive model based on Student's t-distribution.
 #'          \emph{Communications in Statistics - Theory and Methods}, doi: 10.1080/03610926.2021.1916531
-#'    \item Virolainen S. forthcoming. A mixture autoregressive model based on Gaussian and Student's t-distributions.
-#'          Studies in Nonlinear Dynamics & Econometrics, (preprint available as arXiv:2003.05221).
+#'    \item Virolainen S. 2021. A mixture autoregressive model based on Gaussian and Student's t-distributions.
+#'          Studies in Nonlinear Dynamics & Econometrics, doi: 10.1515/snde-2020-0060
 #'    \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis. \emph{Springer}.
 #'  }
 #' @examples
@@ -112,7 +112,7 @@ get_regime_autocovs <- function(gsmar) {
 #' @description \code{get_regime_vars} calculates the unconditional regime specific variances \eqn{\gamma_{m,0}}
 #'   for the given GMAR, StMAR, or G-StMAR model.
 #'
-#' @inheritParams simulateGSMAR
+#' @inheritParams add_data
 #' @return Returns a length M vector containing the unconditional variances of the components processes:
 #'   m:th element for the m:th regime.
 #' @inherit get_regime_autocovs references
@@ -142,7 +142,7 @@ get_regime_vars <- function(gsmar) {
                     restricted=gsmar$model$restricted, constraints=gsmar$model$constraints)
 
   # Calculate the regime variances
-  colSums(pars[-c(1, p + 2),]*reg_autocovs) + pars[p + 2,] # MPS forthcoming, eq.(4) and Theorem 1 (it is the same for GMAR and G-StMAR models also; see Virolainen 2020, Section 2.1)
+  colSums(pars[-c(1, p + 2),]*reg_autocovs) + pars[p + 2,] # MPS 2021, eq.(4) and Theorem 1 (it is the same for GMAR and G-StMAR models also; see Virolainen 2020, Section 2.1)
 }
 
 
@@ -159,6 +159,7 @@ get_regime_vars <- function(gsmar) {
 #'  autocorrelations. Note that the lag-zero autocovariance/correlation is not included in the "first p"
 #'  but is given in the \code{uncond_variance} component separately.
 #' @inherit get_regime_autocovs references
+#' @keywords internal
 
 uncond_moments_int <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR"), restricted=FALSE,
                               constraints=NULL, parametrization=c("intercept", "mean")) {
@@ -178,7 +179,7 @@ uncond_moments_int <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR")
                         restricted=gsmar$model$restricted, constraints=gsmar$model$constraints)
   reg_means <- get_regime_means(gsmar) # Regimewise unconditional means
 
-  # Calculate the unconditional moments: KMS 2015, p.251, MPS forthcoming, p.6., Virolainen 2020 p.8.
+  # Calculate the unconditional moments: KMS 2015, p.251, MPS 2021, p.6., Virolainen 2021 p.8.
   uncond_mean <- sum(alphas*reg_means)
   tmp <- sum(alphas*(reg_means - uncond_mean)^2)
   uncond_var <- sum(alphas*get_regime_vars(gsmar)) + tmp
@@ -196,7 +197,7 @@ uncond_moments_int <- function(p, M, params, model=c("GMAR", "StMAR", "G-StMAR")
 #' @description \code{uncond_moments} calculates the unconditional mean, variance, and the first p autocovariances
 #'  and autocorrelations of the GSMAR process.
 #'
-#' @inheritParams simulateGSMAR
+#' @inheritParams add_data
 #' @inherit uncond_moments_int return references
 #' @family moment functions
 #' @examples

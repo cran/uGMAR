@@ -71,7 +71,7 @@
 
 # uGMAR 3.3.0
 
-* This update (finally) renames functions and arguments so that they are consistent throughout uGMAR and in line with the package "gmvarkit". Namely, some functions were renamed from camelCase to lower_bar convention for consistency. Old functions are for now retained as deprecated. Also, some arguments were renamed from camelCase to lower_bar: print_res in fitGSMAR; print_res, lags_ac, and lags_ch in quantile_residual_tests; smart_mu, mean_scale, and sigma_scale in GAfit; plot_res in predict.gsmar; init_values in simulateGSMAR; and others.
+* This update (finally) renames functions and arguments so that they are consistent throughout uGMAR and in line with the package "gmvarkit". Namely, some functions were renamed from camelCase to lower_bar convention for consistency. Old functions are (for now) retained as deprecated. Also, some arguments were renamed from camelCase to lower_bar: print_res in fitGSMAR; print_res, lags_ac, and lags_ch in quantile_residual_tests; smart_mu, mean_scale, and sigma_scale in GAfit; plot_res in predict.gsmar; init_values in simulateGSMAR; and others.
 * The package 'gsl' is now imported, and not a suggested package anymore, to ensure fast calculation of quantile residual tests for StMAR and G-StMAR models.
 * The function random_ind does not sort components anymore when constraints are employed (unless only the argument "restricted" is used). Consequently, estimation results (with a specific seed) might differ from previous versions for the models employing constraints.
 * Removed to possibility to run quantile residual tests directly with the estimation function after the estimation, because it is a good practice to check first whether the estimates are appropriate. The tests can be ran afterwards with the function "quantile_residual_tests".
@@ -97,6 +97,18 @@
 
 * Added a new appendix to the vignette.
 * Added more comments to the source code.
-* Added new data "TBFF": the interest rate spread between the 3-month Treasury bill rate and the effective federal funds rate that was studied in the empirical application of Virolainen (forthcoming) introducing the G-StMAR model.
+* Added new data "TBFF": the interest rate spread between the 3-month Treasury bill rate and the effective federal funds rate that was studied in the empirical application of Virolainen (2021) introducing the G-StMAR model.
 * Adjusted graphics in the function diagnostic_plot
 * Updated the reference information of the G-StMAR model.
+
+# uGMAR 3.4.0
+
+* Implemented the S3 method 'simulate' for class 'gsmar' objects. Consequently, the function 'simulateGSMAR' is now deprecated.
+* Re-used the class 'htest' for the objects returned by the functions Wald_test and LR_test.
+* In the printout of GMAR type regimes, the variance parameter is now reported separately from the AR-equation. Also changed the "cond_sd" in front of eps in the StMAR regimes to sigma_mt.
+* Removed the documentation of internal functions from the manual.
+* Added legend to the density plot in the plot method for class 'gsmar' objects. Also adjusted the legend of the mixing weights plot.
+* Adjusted the legend in the mixing weights plot in the plot method for class 'gsmarpred' objects.
+* Updated doi in the reference to the G-StMAR model (Virolainen, 2021).
+* Updated the vignette.
+

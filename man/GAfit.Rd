@@ -157,6 +157,16 @@ The core of the genetic algorithm is mostly based on the description by \emph{Do
    The model with redundant regimes would have approximately the same log-likelihood value without the redundant regimes
    and there is no purpose to have redundant regimes in the model.
 }
+\examples{
+\donttest{
+## These are long running examples
+
+# Preliminary estimation of GMAR p=1, M=2, model with the genetic algorithm
+# using only 100 generations (200 is recommended):
+pars12_ga <- GAfit(data=simudata, p=1, M=2, model="GMAR", ngen=100, seed=1)
+pars12_ga # Returns a parameter vector, not a class 'gsmar' object.
+}
+}
 \references{
 \itemize{
    \item Dorsey R. E. and Mayer W. J. 1995. Genetic algorithms for estimation problems with multiple optima,
@@ -172,7 +182,7 @@ The core of the genetic algorithm is mostly based on the description by \emph{Do
          \emph{Transactions on Systems, Man and Cybernetics} \strong{24}, 656-667.
    \item Smith R.E., Dike B.A., Stegmann S.A. 1995. Fitness inheritance in genetic algorithms.
          \emph{Proceedings of the 1995 ACM Symposium on Applied Computing}, 345-350.
-   \item Virolainen S. forthcoming. A mixture autoregressive model based on Gaussian and Student's t-distributions.
-         Studies in Nonlinear Dynamics & Econometrics, (preprint available as arXiv:2003.05221).
+   \item Virolainen S. 2021. A mixture autoregressive model based on Gaussian and Student's t-distributions.
+         Studies in Nonlinear Dynamics & Econometrics, doi: 10.1515/snde-2020-0060
  }
 }

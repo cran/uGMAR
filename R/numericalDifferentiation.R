@@ -6,7 +6,7 @@
 #'  log-likelihood function at the parameter values of a class \code{'gsmar'} object.
 #'  \code{get_soc} returns eigenvalues of the Hessian matrix.
 #'
-#' @inheritParams simulateGSMAR
+#' @inheritParams add_data
 #' @param x a numeric vector specifying the point at which the gradient or Hessian should be evaluated.
 #' @param fn a function that takes in the argument \code{x} as the \strong{first} argument.
 #' @param h the difference used to approximate the derivatives.
@@ -159,6 +159,7 @@ get_soc <- function(gsmar, custom_h=NULL) {
 #' @return Returns a vector with the same length as \code{params}. For other parameters than degrees
 #'   of freedom parameters larger than 100, the differences will be \code{6e-6}. For the large degrees of
 #'   freedom parameters, the difference will be \code{signif(df/1000, digits=2)}.
+#' @keywords internal
 
 get_varying_h <- function(p, M, params, model) {
   if(model != "GMAR") {

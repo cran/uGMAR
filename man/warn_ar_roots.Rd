@@ -7,8 +7,6 @@
 warn_ar_roots(gsmar, tol = 0.005)
 }
 \arguments{
-\item{gsmar}{object of class \code{'gsmar'} created with the function \code{fitGSMAR} or \code{GSMAR}.}
-
 \item{tol}{if some root is smaller that \code{1 + tol}, a warning is thrown}
 }
 \value{
@@ -20,3 +18,4 @@ Doesn't return anything.
 \details{
 Warns if some moduli of the autoregressive polynomial's roots are close to one.
 }
+\keyword{internal}
