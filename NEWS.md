@@ -112,3 +112,7 @@
 * Updated doi in the reference to the G-StMAR model (Virolainen, 2021).
 * Updated the vignette.
 
+# uGMAR 3.4.1
+
+* Added URL for bug reports.
+* Updated the vignette.
