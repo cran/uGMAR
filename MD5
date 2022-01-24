@@ -1,6 +1,6 @@
-879c1c519e035b9bb2b132ac8d523354 *DESCRIPTION
+7a32d9b14e877e94523ccea18acd030c *DESCRIPTION
 5da2b0a9e5f8f78ca3476ed28fa83b65 *NAMESPACE
-01acd9aef1a5ebdc06c76b7064e91f9d *NEWS.md
+5a2f34ed2cd3526f31c6dfe6d0e1ea1a *NEWS.md
 4b9c90caf4516dab1eceda0703cd607b *R/GSMARconstructor.R
 357b3d908652ea1efc419b5fa25eb82e *R/MAINest.R
 6ebc943d79f5ed4b1ed35949fa421c92 *R/WaldAndLR.R
@@ -8,7 +8,7 @@
 2ed6e57967ad2fdfbc89b547e080722d *R/data.R
 4fcc4f15728eb258de4324676d692de3 *R/deprecatedFunctions.R
 4add52d21a653f5cfcdfb972e6021929 *R/diagnosticPlot.R
-a00355b3ab0295200a9064e5f2206dbb *R/geneticAlgorithm.R
+32be75fc556f1fe5a8526fea7b498f84 *R/geneticAlgorithm.R
 01750480e8e5700ce35ff53f8476ba9c *R/getOmega.R
 18cabec15c9757718987133ade8a5f5b *R/loglikelihood.R
 b5d8efb8fbb74e3a252965a7fa01ff4f *R/misc3methods.R
@@ -32,8 +32,8 @@ d29b8ef4a03b746827c6bb042afee430 *data/T10Y1Y.rda
 43a1ed579fc43d5dc362af26cf3b123a *data/TBFF.rda
 7b8d7470bb430cd23354da7acdc0eea9 *data/simudata.rda
 0a724489971696ce4505a365398944e8 *inst/doc/uGMARpaper.R
-c7810eafb80e2cd4b2cb158614ed4b3a *inst/doc/uGMARpaper.Rnw
-9f9e3f2105507d990b039a30b0286568 *inst/doc/uGMARpaper.pdf
+e72d227aa8210f49fb67606f98e908c5 *inst/doc/uGMARpaper.Rnw
+c171beecfd6f98d32a0db13696b3d5e4 *inst/doc/uGMARpaper.pdf
 c5733e3ada29620ba6f004a44a4f336d *man/GAfit.Rd
 6b7f96aca246a4f0283229238e26459d *man/GSMAR.Rd
 96358274c46ab8260b1f70901881a53b *man/LR_test.Rd
@@ -150,4 +150,4 @@ a9b9445724753b836a027012a46c4492 *vignettes/figures/diagplotfit42gsr.png
 60d53f944f2dcd5740d0b46c65d7717f *vignettes/figures/predictfit42gs.png
 cc2d7ec5778c6f84cb0b0b1c376382f5 *vignettes/figures/proflogfit42gs.png
 acad5c3747c6e58273b87e4f615e78af *vignettes/refs.bib
-c7810eafb80e2cd4b2cb158614ed4b3a *vignettes/uGMARpaper.Rnw
+e72d227aa8210f49fb67606f98e908c5 *vignettes/uGMARpaper.Rnw

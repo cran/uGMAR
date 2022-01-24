@@ -116,3 +116,8 @@
 
 * Added URL for bug reports.
 * Updated the vignette.
+
+# uGMAR 3.4.2
+
+* Fixed a CRAN issue.
+* Updated the vignette.
