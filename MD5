@@ -1,6 +1,6 @@
-7a32d9b14e877e94523ccea18acd030c *DESCRIPTION
+bd3bf7cac019a58015200c822725a68d *DESCRIPTION
 5da2b0a9e5f8f78ca3476ed28fa83b65 *NAMESPACE
-5a2f34ed2cd3526f31c6dfe6d0e1ea1a *NEWS.md
+a2148156e537fd2875697468a2e8f37d *NEWS.md
 4b9c90caf4516dab1eceda0703cd607b *R/GSMARconstructor.R
 357b3d908652ea1efc419b5fa25eb82e *R/MAINest.R
 6ebc943d79f5ed4b1ed35949fa421c92 *R/WaldAndLR.R
@@ -26,14 +26,14 @@ fd47f081762f0b237e1d234f7e9accd1 *R/simulateGSMAR.R
 87e3cba9e047a652e8f08e70de9db04e *R/uGMAR.R
 b9da8091d3c2d54d3d01dc5a0f2b9365 *R/uncondMoments.R
 20d51c1b2d6702f6d67dc19ac2e551d5 *README.md
-1a7457766036e1888ad4f0ce712bda1e *build/vignette.rds
+7ceb0e568a1e0a53f0b9985b0c8b45d1 *build/vignette.rds
 5dc564fb757cb69b5fe3bf22dd31d9a7 *data/M10Y1Y.rda
 d29b8ef4a03b746827c6bb042afee430 *data/T10Y1Y.rda
 43a1ed579fc43d5dc362af26cf3b123a *data/TBFF.rda
 7b8d7470bb430cd23354da7acdc0eea9 *data/simudata.rda
 0a724489971696ce4505a365398944e8 *inst/doc/uGMARpaper.R
-e72d227aa8210f49fb67606f98e908c5 *inst/doc/uGMARpaper.Rnw
-c171beecfd6f98d32a0db13696b3d5e4 *inst/doc/uGMARpaper.pdf
+174be2116680b83249db9089ff3a69b1 *inst/doc/uGMARpaper.Rnw
+b61a7ef201a375d3af4bb3eee6fc2720 *inst/doc/uGMARpaper.pdf
 c5733e3ada29620ba6f004a44a4f336d *man/GAfit.Rd
 6b7f96aca246a4f0283229238e26459d *man/GSMAR.Rd
 96358274c46ab8260b1f70901881a53b *man/LR_test.Rd
@@ -150,4 +150,4 @@ a9b9445724753b836a027012a46c4492 *vignettes/figures/diagplotfit42gsr.png
 60d53f944f2dcd5740d0b46c65d7717f *vignettes/figures/predictfit42gs.png
 cc2d7ec5778c6f84cb0b0b1c376382f5 *vignettes/figures/proflogfit42gs.png
 acad5c3747c6e58273b87e4f615e78af *vignettes/refs.bib
-e72d227aa8210f49fb67606f98e908c5 *vignettes/uGMARpaper.Rnw
+174be2116680b83249db9089ff3a69b1 *vignettes/uGMARpaper.Rnw
