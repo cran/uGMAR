@@ -1,8 +1,8 @@
-0e0e64b42c423635b16166139054c010 *DESCRIPTION
+7f952d439e0929b0365816b12319d686 *DESCRIPTION
 5da2b0a9e5f8f78ca3476ed28fa83b65 *NAMESPACE
-7cb3622f5d6be73f3660eece0094a2ef *NEWS.md
-4b9c90caf4516dab1eceda0703cd607b *R/GSMARconstructor.R
-22992cc1378fb247cc3c46e1a4b73930 *R/MAINest.R
+39e49608565b2fbf1c72515f2b53554e *NEWS.md
+e56c871b2caef45f1465836317f8e4f6 *R/GSMARconstructor.R
+2075014d77702523d6a314ea3923aedf *R/MAINest.R
 6ebc943d79f5ed4b1ed35949fa421c92 *R/WaldAndLR.R
 29a589b40aa790937c7976d84a1431e8 *R/argumentChecks.R
 2ed6e57967ad2fdfbc89b547e080722d *R/data.R
@@ -32,8 +32,8 @@ d29b8ef4a03b746827c6bb042afee430 *data/T10Y1Y.rda
 43a1ed579fc43d5dc362af26cf3b123a *data/TBFF.rda
 7b8d7470bb430cd23354da7acdc0eea9 *data/simudata.rda
 0a724489971696ce4505a365398944e8 *inst/doc/uGMARpaper.R
-174be2116680b83249db9089ff3a69b1 *inst/doc/uGMARpaper.Rnw
-2a6b3ff549dd042707e18e4544cfa1cd *inst/doc/uGMARpaper.pdf
+2e24b058f2ce6226ac268b1f2f9dfcd8 *inst/doc/uGMARpaper.Rnw
+cd0362cabf26659df3236f15fc2333d3 *inst/doc/uGMARpaper.pdf
 e11b62422a10049df06a84133f530f07 *man/GAfit.Rd
 f2c2941959065ef3b6b23b806e489c73 *man/GSMAR.Rd
 2fd1364f3cf3174ad4fbd7f9680a6fa7 *man/LR_test.Rd
@@ -44,7 +44,7 @@ f5b67940b07c253199c5c21937558794 *man/Wald_test.Rd
 5886a15fd8add3e735296afd169ae49b *man/add_data.Rd
 29cf3dbf3090f2fd444d921483dda124 *man/add_dfs.Rd
 7038b40b8f623072ef1c7ae813df1ecd *man/all_pos_ints.Rd
-d63a4a60609222c1c51b0d2927675c2b *man/alt_gsmar.Rd
+5c350a127a08f0622ea5ce838bd1b986 *man/alt_gsmar.Rd
 013cdf74fdda17a8195758b059105caf *man/calc_gradient.Rd
 9cae75226072031e0fdd723ea7666f5a *man/change_parametrization.Rd
 27e465c08b52eab40d932f283c6201aa *man/change_regime.Rd
@@ -63,7 +63,7 @@ fe5d872fc2541057797e469c009e5b0a *man/diagnosticPlot.Rd
 5cb6d540a703c91ac54bdfea109f6c8b *man/diagnostic_plot.Rd
 abf41890e91d66e313e59c7ac4b72ac8 *man/extract_regime.Rd
 502a5f8dd6ba90060101596366cb7d58 *man/figures/README-pressure-1.png
-093b1c526c7f91c3e83a41135d7d0e31 *man/fitGSMAR.Rd
+bfdc16c12f71c24c6400aada4becdc8f *man/fitGSMAR.Rd
 e85139fdfc0dca86ead07c07eacc8281 *man/format_valuef.Rd
 e758dc6ed71edbce315b2e812acd8d89 *man/get_IC.Rd
 4f114207030bbdad93e3ccc019270c28 *man/get_alpha_mt.Rd
@@ -150,4 +150,4 @@ a9b9445724753b836a027012a46c4492 *vignettes/figures/diagplotfit42gsr.png
 60d53f944f2dcd5740d0b46c65d7717f *vignettes/figures/predictfit42gs.png
 cc2d7ec5778c6f84cb0b0b1c376382f5 *vignettes/figures/proflogfit42gs.png
 f1d6c8287c88de32bf3aa9e5d5f3f87a *vignettes/refs.bib
-174be2116680b83249db9089ff3a69b1 *vignettes/uGMARpaper.Rnw
+2e24b058f2ce6226ac268b1f2f9dfcd8 *vignettes/uGMARpaper.Rnw
