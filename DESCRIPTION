@@ -1,7 +1,7 @@
 Package: uGMAR
 Title: Estimate Univariate Gaussian and Student's t Mixture
         Autoregressive Models
-Version: 3.5.1
+Version: 3.5.2
 Authors@R: person("Savi", "Virolainen", email = "savi.virolainen@helsinki.fi",
                   role = c("aut", "cre"), comment = c(ORCID = "0000-0002-5075-6821"))
 Maintainer: Savi Virolainen <savi.virolainen@helsinki.fi>
@@ -22,7 +22,7 @@ Suggests: testthat, knitr, rmarkdown
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2024-12-04 13:50:46 UTC; savi
+Packaged: 2025-04-07 12:20:26 UTC; savi
 Repository: CRAN
-Date/Publication: 2024-12-04 14:30:01 UTC
+Date/Publication: 2025-04-07 12:40:02 UTC
 Author: Savi Virolainen [aut, cre] (<https://orcid.org/0000-0002-5075-6821>)
